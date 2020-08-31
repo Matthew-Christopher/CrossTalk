@@ -10,7 +10,7 @@ const path = require('path');
 
 // CUSTOM MODULES
 const account = require('./custom-modules/account');
-
+const cryptography = require('./custom-modules/cryptography');
 const log = require('./custom-modules/logging');
 // END CUSTOM MODULES
 
@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/authenticate-login', (req, res) => {
-  account.LogIn(req.body.email, req.body.password);
+  account.LogIn(req.body.email, cryptography.Hash(req.body.password));
 });
 
 app.use(express.static('../client', {
