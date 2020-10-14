@@ -57,11 +57,23 @@ body {
   -webkit-animation: blink 1.2s linear infinite;
 }
 
-#info-container #info-text {
+#info-container #info-bar {
   position: relative;
   text-align: center;
   top: 50%;
+  height: 6vw;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#info-container #info-bar .logo {
+  height: 6vw;
+  width: auto;
+  /* position: relative;
+  top: 50%;
+  transform: translateY(-50%); */
 }
 
 #login-container {
