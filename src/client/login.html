@@ -21,19 +21,40 @@
 </head>
 <body>
   <div id="landing-container">
+    <div id="login-section">
+      <div id="login-container">
+        <h1>Welcome Back</h1>
+        <form action="authenticate-login" method="POST">
+
+          <div class="input-field-container">
+            <input class="effect-20" type="email" name="email" placeholder="" required>
+            <label>Email</label>
+            <span class="focus-border">
+            	<i></i>
+            </span>
+          </div>
+
+          <div class="input-field-container">
+            <input class="effect-20" type="password" name="password" placeholder="" required>
+            <label>Password</label>
+            <span class="focus-border">
+            	<i></i>
+            </span>
+          </div>
+
+          <div class="input-submit-container">
+            <input type="submit" name="log-in" value="Log In" style="cursor: pointer;" required>
+            <a href="#">Register</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
     <div id="info-container">
       <div id="info-bar">
         <img class="logo" src="img/Logo.png" alt="Logo">
         <h1 id="title">Crosstalk</h1>
       </div>
-    </div>
-    <div id="login-container">
-      <h1>Login</h1>
-      <form action="authenticate-login" method="POST">
-        <input type="email" name="email" placeholder="Email Address" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <input type="submit" name="log-in" value="Log In" style="cursor: pointer;" required>
-      </form>
     </div>
   </div>
 
