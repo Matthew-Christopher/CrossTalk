@@ -138,14 +138,14 @@ input {
 .effect-20 ~ .focus-border i:after{left: auto; right: 0; top: auto; bottom: 0;}
 .effect-20:focus ~ .focus-border:before,
 .effect-20:focus ~ .focus-border:after,
-.has-content.effect-20 ~ .focus-border:before,
-.has-content.effect-20 ~ .focus-border:after{width: 100%; transition: 0.3s;}
+.non-empty.effect-20 ~ .focus-border:before,
+.non-empty.effect-20 ~ .focus-border:after{width: 100%; transition: 0.3s;}
 .effect-20:focus ~ .focus-border i:before,
 .effect-20:focus ~ .focus-border i:after,
-.has-content.effect-20 ~ .focus-border i:before,
-.has-content.effect-20 ~ .focus-border i:after{height: 100%; transition: 0.4s;}
+.non-empty.effect-20 ~ .focus-border i:before,
+.non-empty.effect-20 ~ .focus-border i:after{height: 100%; transition: 0.4s;}
 .effect-20 ~ label{transform: translateY(-50%); text-align: left; position: absolute; left: 20px; width: 100%; top: 50%; color: #aaa; transition: 0.3s; z-index: -1; letter-spacing: 0.5px;}
-.effect-20:focus ~ label, .has-content.effect-20 ~ label{top: -18px; left: 0; font-size: 12px; color: #3399FF; transition: 0.3s;}
+.effect-20:focus ~ label, .non-empty.effect-20 ~ label{top: -18px; left: 0; font-size: 12px; color: #3399FF; transition: 0.3s;}
 /* END SOURCE */
 
 #login-container input:not([type="submit"]):focus + label {

@@ -1,0 +1,29 @@
+{
+  "name": "crosstalk",
+  "version": "1.0.0",
+  "description": "A secure instant messaging platform.",
+  "main": "index.js",
+  "dependencies": {
+    "argon2": "^0.27.0",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "fs": "0.0.1-security",
+    "http": "0.0.1-security",
+    "log4js": "^6.3.0",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Matthew-Christopher/Crosstalk.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Matthew-Christopher/Crosstalk/issues"
+  },
+  "homepage": "https://github.com/Matthew-Christopher/Crosstalk#readme"
+}

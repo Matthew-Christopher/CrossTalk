@@ -21,8 +21,9 @@ app.get('/', (req, res) => {
 	res.sendFile(path.join(__dirname + '/../client/login.html'));
 });
 
-app.post('/authenticate-login', (req, res) => {
-  account.LogIn(req.body.email, cryptography.Hash(req.body.password));
+app.post('/authenticate-login', async (req, res) => {
+	const hash = await cryptography.Hash(req.body.password);
+	account.LogIn(req.body.email, hash);
 });
 
 app.use(express.static('../client', {
