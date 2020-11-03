@@ -22,8 +22,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/authenticate-login', async (req, res) => {
-	const hash = await cryptography.Hash(req.body.password);
-	account.LogIn(req.body.email, hash);
+	account.LogIn(req.body.email, await cryptography.Hash(req.body.password));
 });
 
 app.use(express.static('../client', {
