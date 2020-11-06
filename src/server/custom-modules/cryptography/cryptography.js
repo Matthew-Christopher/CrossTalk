@@ -8,3 +8,7 @@ module.exports.Hash = async (password) => {
 
   }
 };
+
+module.exports.CompareHashes = async (hash, password) => {
+  return argon2.verify(hash, password);
+}

@@ -17,18 +17,34 @@
 
   <link rel="stylesheet" type="text/css" href="css/main.css" media="screen"/>
 
-  <title>Crosstalk</title>
+  <title>Register - Crosstalk</title>
 </head>
 <body>
   <div id="landing-container">
     <div id="login-section">
       <div id="login-container">
-        <h1>Welcome Back</h1>
-        <form action="authenticate-login" method="POST">
+        <h1>Register</h1>
+        <form action="register-account" method="POST">
+
+          <div class="input-field-container">
+            <input class="effect-20" type="text" name="display-name" placeholder="" required>
+            <label>Display Name</label>
+            <span class="focus-border">
+              <i></i>
+            </span>
+          </div>
 
           <div class="input-field-container">
             <input class="effect-20" type="email" name="email" placeholder="" required>
             <label>Email</label>
+            <span class="focus-border">
+            	<i></i>
+            </span>
+          </div>
+
+          <div class="input-field-container">
+            <input class="effect-20" type="email" name="confirm-email" placeholder="" required>
+            <label>Confirm Email</label>
             <span class="focus-border">
             	<i></i>
             </span>
@@ -42,9 +58,17 @@
             </span>
           </div>
 
+          <div class="input-field-container">
+            <input class="effect-20" type="password" name="confirm-password" placeholder="" required>
+            <label>Confirm Password</label>
+            <span class="focus-border">
+            	<i></i>
+            </span>
+          </div>
+
           <div class="input-submit-container">
-            <input type="submit" name="log-in" value="Log In" style="cursor: pointer;" required>
-            <a href="/register.html">Register</a>
+            <input type="submit" name="register" value="Register" style="cursor: pointer;" required>
+            <a href="/">Already have an account? Log in.</a>
           </div>
 
         </form>
