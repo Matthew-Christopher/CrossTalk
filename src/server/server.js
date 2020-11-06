@@ -26,6 +26,7 @@ const path = require('path');
 const account = require('./custom-modules/account');
 const cryptography = require('./custom-modules/cryptography');
 const log = require('./custom-modules/logging');
+const mailer = require('./custom-modules/mailer');
 // END CUSTOM MODULES
 
 app.use(bodyParser.urlencoded({extended : true}));
@@ -56,9 +57,13 @@ app.post('/register-account', async (req, res) => {
 					connection.release();
 
 					if (error) throw error; // Handle post-release error.
+
+					mailer.SendVerification(req.body.email, userId[1]);
 				});
 			});
 		});
+
+		res.status(201).send("<p>A link has been sent to the provided email address. Please click it to verify your account, <u>checking also in your spam folder.</u></p><b>IMPORTANT NOTE: This project is part of my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create an account if you have stumbled upon this website without being given permission to use or test it. Thank you.</b>");
 	}
 });
 
