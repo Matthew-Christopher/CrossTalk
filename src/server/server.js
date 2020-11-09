@@ -10,20 +10,20 @@ const mysql = require('mysql');
 require('dotenv').config();
 
 const pool = mysql.createPool({
-	connectLimit: process.env.DB_CONNECTIONLIMIT,
+  connectionLimit: process.env.DB_CONNECTIONLIMIT,
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
-	database: process.env.DB_DATABASE
+  database: process.env.DB_DATABASE
 });
 
 const http = require('http');
-//const https = require('https');
+//const https = require('https'); // Running on localhost, we could implement SSL later.
 
 const path = require('path');
 
 // CUSTOM MODULES
-const account = require('./custom-modules/account');
+const account = require('./custom-modules/account'); // Currently empty.
 const cryptography = require('./custom-modules/cryptography');
 const log = require('./custom-modules/logging');
 const mailer = require('./custom-modules/mailer');

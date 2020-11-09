@@ -4,15 +4,14 @@ const express = require('express');
 const app = express();
 const defaultPort = process.env.PORT || 80
 
-const http = require('http');
-const httpServer = http.createServer(app); // Running as localhost, we could implement SSL later.
+const http = require('http').createServer(app); // Running as localhost, we could implement SSL later.
 //const https = require('https');
 
 const path = require('path');
 
 // CUSTOM MODULES
 const log = require('./custom-modules/logging');
-const chat = require('./custom-modules/chat').initialise(http);
+const chat = require('./custom-modules/chat');
 // END CUSTOM MODULES
 
 app.get('/', (req, res) => {
@@ -23,6 +22,7 @@ app.use(express.static('../client', {
   extensions: ['html', 'htm']
 }));
 
-httpServer.listen(defaultPort, () => {
-  log.info('node.js HTTP web server started on port ' + httpServer.address().port);
+const httpServer = app.listen(defaultPort, () => {
+	  log.info('node.js HTTP web server started on port ' + httpServer.address().port);
+		chat.initialise(httpServer);
 });
