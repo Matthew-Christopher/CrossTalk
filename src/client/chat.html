@@ -15,17 +15,35 @@
   <!-- Work Sans Font -->
   <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@200;400;500&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" type="text/css" href="css/chat-prototype.css" media="screen"/>
+  <link rel="stylesheet" type="text/css" href="css/chat.css" media="screen"/>
 
   <title>Chat - Crosstalk</title>
 </head>
 <body>
-  <ul id="chatbox"></ul>
-  <form id="message-form" action="">
-    <input type="text" id="message" autocomplete="off" autofocus>
-  </form>
+  <div id="server-selector"></div>
+
+  <div id="info-container">
+    <h1 id="server-name-display" class="title"></h1>
+  </div>
+
+  <div id="chat-container">
+    <ul id="chatbox"></ul>
+    <form id="message-form" action="">
+      <div class="input-field-container">
+        <input type="text" id="message" class="effect-20" autocomplete="off" placeholder="Type a message..." autofocus>
+        <button id="message-send-tick" type="submit" form="message-form" value="Submit"><img src="img/Tick.png" alt="Send"></button>
+        <span class="focus-border">
+          <i></i>
+        </span>
+      </div>
+    </form>
+  </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+  <script src="particles/ParticleLoader.js"></script>
+  <script src="js/group-manager.js"></script>
 
   <script src="/socket.io/socket.io.js"></script> <!-- Automatically served by the API, if we are listening correctly. -->
   <script src="js/chat-client.js"></script>

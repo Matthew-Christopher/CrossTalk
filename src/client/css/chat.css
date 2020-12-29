@@ -1,0 +1,179 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-size: 100%;
+  font-family: 'Work Sans', sans-serif;
+}
+
+input, button {
+  font-size: 100%;
+  font-family: 'Work Sans', sans-serif;
+}
+
+#server-selector {
+  position: absolute;
+  height: 100%;
+  left: 0;
+  width: 15%;
+  border-right: solid 1px black;
+  box-shadow: inset -2px 0 5px -2px black;
+}
+
+#server-selector .server-button {
+  transition: background 0.1s linear;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  height: 100px;
+  position: relative;
+  left: 0;
+  border: 0;
+  border-bottom: solid 1px #555;
+  cursor: pointer;
+  text-align: left;
+}
+
+#server-selector .server-button.active-chat {
+  background: #6dd5ed;
+}
+
+#server-selector .server-button .server-info-container * {
+  margin: auto;
+  margin-left: 10px;
+}
+
+#server-selector .server-button .server-info-container h1 {
+  color: #555;
+  font-size: 1.5em;
+}
+
+#server-selector .server-button .server-info-container i {
+  color: #888;
+  font-size: 1em;
+}
+
+#server-selector .server-button .server-info-container i::before {
+    content: open-quote;
+}
+
+#server-selector .server-button .server-info-container i::after {
+    content: close-quote;
+}
+
+#chat-container {
+  position: absolute;
+  right: 0;
+  top: 50px;
+  height: calc(100% - 50px);
+  width: 85%;
+  overflow-wrap: break-word;
+}
+
+#chat-container ul {
+  padding: 15px;
+  list-style-type: none;
+}
+
+#chat-container li {
+   margin-bottom: 12px; /* Space long, wrapped message lines differently to brand new messages */
+}
+
+#chat-container #message {
+  box-sizing: border-box;
+  outline: none;
+  border: solid 1px black;
+  height: 100%;
+  width: 100%;
+  padding: 5px 65px 5px 15px;
+}
+
+#message-form .input-field-container {
+  width: 100%;
+  height: 50px;
+  position: absolute;
+  bottom: 0;
+}
+
+#message-form #message-send-tick * {
+  box-sizing: border-box;
+}
+
+#message-form #message-send-tick {
+  opacity: 0.9;
+  position: absolute;
+  right: 0;
+  height: 50px;
+  padding: 7px;
+  background: none;
+  outline: none;
+  cursor: pointer;
+  border: none;
+  -webkit-transition: all 0.2s;
+  -o-transition: all 0.2s;
+  transition: all 0.2s;
+}
+
+#message-form #message-send-tick :hover {
+  opacity: 1;
+}
+
+#message-form #message-send-tick img {
+  opacity: 0.5;
+  height: 100%;
+}
+
+/* SOURCE: https://codepen.io/Takumari85/pen/RaYwpJ [Accessed 27/10/2020] */
+.effect-20 ~ .focus-border:before,
+.effect-20 ~ .focus-border:after{content: ""; position: absolute; top: 0; left: 0; width: 0; height: 2px; background-color: #3399FF; transition: 0.3s;}
+.effect-20 ~ .focus-border:after{top: auto; bottom: 0; left: auto; right: 0;}
+.effect-20 ~ .focus-border i:before,
+.effect-20 ~ .focus-border i:after{content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 0; background-color: #3399FF; transition: 0.4s;}
+.effect-20 ~ .focus-border i:after{left: auto; right: 0; top: auto; bottom: 0;}
+.effect-20:focus ~ .focus-border:before,
+.effect-20:focus ~ .focus-border:after,
+.non-empty.effect-20 ~ .focus-border:before,
+.non-empty.effect-20 ~ .focus-border:after{width: 100%; transition: 0.3s;}
+.effect-20:focus ~ .focus-border i:before,
+.effect-20:focus ~ .focus-border i:after,
+.non-empty.effect-20 ~ .focus-border i:before,
+.non-empty.effect-20 ~ .focus-border i:after{height: 100%; transition: 0.4s;}
+.effect-20 ~ label{transform: translateY(-50%); text-align: left; position: absolute; left: 20px; width: 100%; top: 50%; color: #aaa; transition: 0.3s; z-index: -1; letter-spacing: 0.5px;}
+.effect-20:focus ~ label, .non-empty.effect-20 ~ label{top: -18px; left: 0; font-size: 12px; color: #3399FF; transition: 0.3s;}
+/* END SOURCE */
+
+#chat-container #message :focus {
+  box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+}
+
+#info-container {
+  box-sizing: border-box;
+  height: 50px;
+  width: 85%;
+  position: absolute;
+  top: 0;
+  left: 15%;
+  border-left: solid 1px black;
+  border-bottom: solid 1px black;
+  background: #2193b0;  /* fallback for old browsers */  /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-linear-gradient(to right, #6dd5ed, #2193b0);
+  background: linear-gradient(to right, #6dd5ed, #2193b0); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+/* Correct particles.js Canvas Positioning */
+#info-container canvas {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#info-container .title {
+  height: 100%;
+  display: flex;
+  -ms-align-items: center;
+  align-items: center;
+  margin-left: 10px;
+}
