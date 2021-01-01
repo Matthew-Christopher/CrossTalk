@@ -1,13 +1,12 @@
 "use strict";
 
 const express = require('express');
-const app = express();
+const app = module.exports = express();
 const defaultPort = process.env.PORT || 80;
-const bodyParser = require('body-parser')
-
-const mysql = require('mysql');
+const bodyParser = require('body-parser');
 
 require('dotenv').config();
+const mysql = require('mysql');
 
 const pool = mysql.createPool({
   connectionLimit: process.env.DB_CONNECTIONLIMIT,
@@ -17,16 +16,47 @@ const pool = mysql.createPool({
   database: process.env.DB_DATABASE
 });
 
+const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session); // Persist user sessions between restartsif the cookie hasn't expired.
+
+const sessionStore = new MySQLStore({
+	clearExpired: true,
+	createDatabaseTable: true,
+	expiration: 86400000, // 24 hours.
+	endConnectionOnClose: true,
+	schema: {
+		tableName: 'UserSession',
+		columnNames: {
+			session_id: 'SessionID',
+			expires: 'Expires',
+			data: 'Data'
+		}
+	}
+}, pool);
+
+app.use(session({
+	name: 'crosstalk.user.sid',
+	secret: process.env.SESSION_SECRET,
+	store: sessionStore,
+	resave: false,
+	saveUninitialized: false,
+	cookie: {
+		maxAge: 86400000 // 24 hours.
+	}
+}));
+
 const http = require('http');
 //const https = require('https'); // Running on localhost, we could implement SSL later.
 
 const path = require('path');
 
 // CUSTOM MODULES
-const account = require('./custom-modules/account'); // Currently empty.
+const account = require('./custom-modules/account');
 const cryptography = require('./custom-modules/cryptography');
 const log = require('./custom-modules/logging');
 const mailer = require('./custom-modules/mailer');
+const chat = require('./custom-modules/chat');
+const AvailableGroup = require('./custom-modules/AvailableGroup.js');
 // END CUSTOM MODULES
 
 app.use(bodyParser.urlencoded({extended : true}));
@@ -36,8 +66,26 @@ app.get('/', (req, res) => {
 	res.sendFile(path.join(__dirname + '/../client/login.html'));
 });
 
+app.get('/verify', (req, res) => {
+  log.info(req.query.verificationKey);
+
+  pool.getConnection(async (err, connection) => {
+    if (err) throw err;
+
+    var sql = "UPDATE USER SET Verified = 1, VerificationKey = NULL WHERE VerificationKey = ?";
+
+    connection.query(mysql.format(sql, req.query.verificationKey), (error, res, fields) => {
+      connection.release();
+
+      if (error) throw error; // Handle post-release error.
+    });
+  });
+
+  res.status(201).send("Verified. You may now log in.");
+});
+
 app.post('/authenticate-login', async (req, res) => {
-	account.LogIn(req.body.email, await cryptography.Hash(req.body.password));
+	account.LogIn(req, res);
 });
 
 app.post('/register-account', async (req, res) => {
@@ -67,12 +115,45 @@ app.post('/register-account', async (req, res) => {
 	}
 });
 
+app.get('/chat', (req, res) => {
+	if (req.session.LoggedIn) { // Only allow access to the chat page for logged-in users.
+		res.sendFile(path.join(__dirname + '/../client/chat.html'));
+	} else {
+		res.redirect('/');
+	}
+});
+
+app.get('/api/GetMyGroups', (req, res) => {
+	let servers = [];
+
+	pool.getConnection(async (err, connection) => {
+		var sql = `SELECT \`Group\`.GroupID, \`Group\`.GroupName FROM \`Group\`
+		 JOIN GroupMembership ON \`Group\`.GroupID = GroupMembership.GroupID
+		 WHERE GroupMembership.UserID = ?;`;
+
+		connection.query(mysql.format(sql, req.session.UserID), (err, result, fields) => {
+			res.json(JSON.stringify(result));
+		});
+	});
+});
+
+app.get('/api/GetMyDisplayName', (req, res) => {
+	pool.getConnection(async (err, connection) => {
+		var sql = "SELECT DisplayName FROM User WHERE UserID = ?;";
+
+		connection.query(mysql.format(sql, req.session.UserID), (err, result, fields) => {
+			res.json(JSON.stringify(result));
+		});
+	});
+})
+
 app.use(express.static('../client', {
   extensions: ['html', 'htm']
 }));
 
 const httpServer = http.createServer(app).listen(defaultPort, () => {
   log.info('node.js HTTP web server started on port ' + httpServer.address().port);
+	chat.initialise(httpServer);
 });
 
 function GetUserId(connection, req, callback) {

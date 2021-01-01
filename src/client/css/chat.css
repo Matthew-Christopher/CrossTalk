@@ -19,7 +19,8 @@ input, button {
   left: 0;
   width: 15%;
   border-right: solid 1px black;
-  box-shadow: inset -2px 0 5px -2px black;
+  box-shadow: 2px 0 5px -2px black;
+  overflow-y: auto; /* Only show the scroll bar when necessary */
 }
 
 #server-selector .server-button {
@@ -34,6 +35,10 @@ input, button {
   border-bottom: solid 1px #555;
   cursor: pointer;
   text-align: left;
+}
+
+#server-selector .server-button:not(.active-chat):hover {
+  background: #eee;
 }
 
 #server-selector .server-button.active-chat {
@@ -72,9 +77,13 @@ input, button {
   overflow-wrap: break-word;
 }
 
-#chat-container ul {
+#chat-container #chatbox {
+  box-sizing: border-box;
+  height: 100%;
   padding: 15px;
+  overflow-y: auto; /* Only show the scroll bar when necessary */
   list-style-type: none;
+  padding-bottom: 50px; /* Larger bottom padding to prevent overflow into the message box field */
 }
 
 #chat-container li {
@@ -88,6 +97,18 @@ input, button {
   height: 100%;
   width: 100%;
   padding: 5px 65px 5px 15px;
+}
+
+#chat-container #select-group-reminder {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  /* Manually adjust to fit in the center of the visible window, some of which is blocked by the message input field. */
+  transform: translate(-50%, calc(-50% - 25px));
+
+  font-size: 2.3em;
+  font-weight: lighter;
 }
 
 #message-form .input-field-container {
@@ -166,6 +187,7 @@ input, button {
 #info-container canvas {
   position: absolute;
   top: 0;
+  left: 0;
   height: 100%;
   width: 100%;
 }
@@ -176,4 +198,12 @@ input, button {
   -ms-align-items: center;
   align-items: center;
   margin-left: 10px;
+  float: left;
+}
+
+#info-container #name-display {
+  position: absolute;
+  right: 0;
+  margin-right: 10px;
+  font-size: 1.5em;
 }

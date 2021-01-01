@@ -18,7 +18,18 @@ const AvailableGroup = require('./custom-modules/AvailableGroup.js');
 var demoServers = [
 	new AvailableGroup("d58366", "Physics Group", "Hi guys."),
 	new AvailableGroup("1b233c", "Maths Gang", "Cya later."),
-	new AvailableGroup("0b51e7", "Computer Science Chat", "Here is my NEA chat app!")
+	new AvailableGroup("0b51e7", "Computer Science Chat", "Here is my NEA chat app!"),
+	new AvailableGroup("TEST0", "Test Chat 0", "This is to check the overflow behaviour of the container."),
+	new AvailableGroup("TEST1", "Test Chat 1", "This is to check the overflow behaviour of the container."),
+	new AvailableGroup("TEST2", "Test Chat 2", "This is to check the overflow behaviour of the container."),
+	new AvailableGroup("TEST3", "Test Chat 3", "This is to check the overflow behaviour of the container."),
+	new AvailableGroup("TEST4", "Test Chat 4", "This is to check the overflow behaviour of the container."),
+	new AvailableGroup("TEST5", "Test Chat 5", "This is to check the overflow behaviour of the container."),
+	new AvailableGroup("TEST6", "Test Chat 6", "This is to check the overflow behaviour of the container."),
+	new AvailableGroup("TEST7", "Test Chat 7", "This is to check the overflow behaviour of the container."),
+	new AvailableGroup("TEST8", "Test Chat 8", "This is to check the overflow behaviour of the container."),
+	new AvailableGroup("TEST9", "Test Chat 9", "This is to check the overflow behaviour of the container."),
+	new AvailableGroup("TEST10", "Test Chat 10", "This is to check the overflow behaviour of the container.")
 ];
 
 app.get('/', (req, res) => {
@@ -28,8 +39,6 @@ app.get('/', (req, res) => {
 app.get('/api/GetMyGroups', (req, res) => {
 	res.json(JSON.stringify(demoServers));
 })
-
-app.get('/')
 
 app.use(express.static('../client', {
   extensions: ['html', 'htm']

@@ -11,7 +11,8 @@ module.exports.initialise = (http) => {
 
     socket.on('chat', (message) => {
       io.emit('message return', message);
-      log.info(`Chat: ${message}`);
+
+      log.info(`Chat message in group ${message.groupID} from user ${message.authorID} at time ${message.timestamp}: "${message.messageString}"`);
     });
   });
 };
