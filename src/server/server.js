@@ -92,6 +92,10 @@ app.post('/authenticate-login', async (req, res) => {
 	account.LogIn(req, res);
 });
 
+app.get('/logout', async (req, res) => {
+  account.LogOut(req, res);
+});
+
 app.post('/register-account', async (req, res) => {
 	var hash = await cryptography.Hash(req.body.password);
 

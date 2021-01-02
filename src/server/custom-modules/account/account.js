@@ -46,3 +46,9 @@ module.exports.LogIn = async (request, response) => {
     });
   });
 }
+
+module.exports.LogOut = async (request, response) => {
+  request.session.destroy((err) => {
+    response.redirect('/');
+  });
+}
