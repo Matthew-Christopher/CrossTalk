@@ -45,6 +45,6 @@ app.use(express.static('../client', {
 }));
 
 const httpServer = app.listen(defaultPort, () => {
-	  log.info('node.js HTTP web server started on port ' + httpServer.address().port);
+	  log.info('Node.js HTTP web server started on port ' + httpServer.address().port);
 		chat.initialise(httpServer);
 });
