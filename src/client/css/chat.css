@@ -229,7 +229,7 @@ input, button {
   z-index: 1; /* Ensure cursor displays correctly */
 }
 
-#info-container #info-buttons-container #profile-options-button, #info-container #info-buttons-container #chat-options-button {
+#info-container #info-buttons-container button {
   opacity: 0.7;
   position: relative;
   right: 0;
@@ -244,7 +244,11 @@ input, button {
   transition: all 0.2s;
 }
 
-#info-container #info-buttons-container #profile-options-button:hover, #info-container #info-buttons-container #chat-options-button:hover {
+#info-container #info-buttons-container button:last-child {
+  padding-left: 0 !important;
+}
+
+#info-container #info-buttons-container #profile-options-button:hover, #info-container #info-buttons-container #options-button:hover {
   opacity: 1;
 }
 
@@ -254,14 +258,13 @@ input, button {
 }
 
 .options-box {
+  text-align: center;
   border: 1px solid black;
   position: absolute;
   display: inline-block;
-  float: right;
   margin-top: 63px;
   right: 0;
   width: auto;
-  padding: 5px;
   border-radius: 10px;
   margin-right: 10px;
   z-index: 2;
@@ -271,17 +274,24 @@ input, button {
 .options-box .arrow-up {
   position: absolute;
   top: -14px; /* Such as to position the arrow atop the box with no gap. */
-  right: 6px;
   width: 0;
   border-width: 0 8px 14px 8px;
   border-style: solid;
   border-color: transparent transparent black transparent;
 }
 
+#profile-options-nav-container .arrow-up {
+  right: 6px;
+}
+
+#options-nav-container .arrow-up {
+  right: 54px;
+}
+
 #profile-options li {
   list-style-type: none;
   box-sizing: content-box;
-  padding: 5px;
+  padding: 10px;
 }
 
 #profile-options li:not(:last-child) {
