@@ -5,6 +5,8 @@ function SetActiveServerID(id) {
 
   // Hide the server selection reminder once one has been picked.
   $("#select-group-reminder").hide();
+
+  $(".requires-group-selection").show();
 }
 
 $(window).on("load", () => {

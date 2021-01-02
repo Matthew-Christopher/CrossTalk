@@ -172,6 +172,10 @@ input, button {
   box-shadow: 0 0 5px rgba(81, 203, 238, 1);
 }
 
+.requires-group-selection {
+  display: none; /* These elements will only be shown when the user has selected a group. */
+}
+
 #info-container {
   box-sizing: border-box;
   height: 50px;
