@@ -123,7 +123,6 @@ input, button {
 }
 
 #message-form #message-send-tick {
-  opacity: 0.9;
   position: absolute;
   right: 0;
   height: 50px;
@@ -132,12 +131,16 @@ input, button {
   outline: none;
   cursor: pointer;
   border: none;
-  -webkit-transition: all 0.2s;
-  -o-transition: all 0.2s;
-  transition: all 0.2s;
 }
 
-#message-form #message-send-tick :hover {
+#message-form #message-send-tick img {
+  opacity: 0.9;
+  -webkit-transition: all 0.1s;
+  -o-transition: all 0.1s;
+  transition: all 0.1s;
+}
+
+#message-form #message-send-tick img:hover {
   opacity: 1;
 }
 
@@ -202,8 +205,92 @@ input, button {
 }
 
 #info-container #name-display {
-  position: absolute;
-  right: 0;
+  float: right;
   margin-right: 10px;
   font-size: 1.5em;
+}
+
+#info-container #name-display:before {
+  content: 'Welcome, ';
+  white-space: pre;
+}
+
+#info-container #name-display:after {
+  content: '.';
+}
+
+#info-container #info-buttons-container {
+  float: right;
+  height: 50px;
+}
+
+#info-container #info-buttons-container * {
+  box-sizing: border-box;
+  z-index: 1; /* Ensure cursor displays correctly */
+}
+
+#info-container #info-buttons-container #profile-options-button, #info-container #info-buttons-container #chat-options-button {
+  opacity: 0.7;
+  position: relative;
+  right: 0;
+  height: 50px;
+  padding: 7px;
+  background: none;
+  outline: none;
+  cursor: pointer;
+  border: none;
+  -webkit-transition: all 0.2s;
+  -o-transition: all 0.2s;
+  transition: all 0.2s;
+}
+
+#info-container #info-buttons-container #profile-options-button:hover, #info-container #info-buttons-container #chat-options-button:hover {
+  opacity: 1;
+}
+
+#info-container #info-buttons-container img {
+  height: 100%;
+  width: auto;
+}
+
+.options-box {
+  border: 1px solid black;
+  position: absolute;
+  display: inline-block;
+  float: right;
+  margin-top: 63px;
+  right: 0;
+  width: auto;
+  padding: 5px;
+  border-radius: 10px;
+  margin-right: 10px;
+  z-index: 2;
+  visibility: hidden; /* Hidden by default and visible when the user clicks on the corresponding button. */
+}
+
+.options-box .arrow-up {
+  position: absolute;
+  top: -14px; /* Such as to position the arrow atop the box with no gap. */
+  right: 6px;
+  width: 0;
+  border-width: 0 8px 14px 8px;
+  border-style: solid;
+  border-color: transparent transparent black transparent;
+}
+
+#profile-options li {
+  list-style-type: none;
+  box-sizing: content-box;
+  padding: 5px;
+}
+
+#profile-options li:not(:last-child) {
+    border-bottom: 1px solid #888;
+}
+
+#profile-options li a {
+  text-decoration: none;
+  color: black;
+  cursor: pointer;
+  z-index: 5;
 }

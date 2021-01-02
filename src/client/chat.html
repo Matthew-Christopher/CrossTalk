@@ -24,7 +24,19 @@
 
   <div id="info-container">
     <h1 id="server-name-display" class="title">Crosstalk - Chat</h1>
-    <p id="name-display" class="title"></p>
+    <div id="info-buttons-container">
+      <button id="profile-options-button" type="button" value="Profile"><img src="img/Person.png" alt="Profile"></button>
+    </div>
+    <p id="name-display" class="title">User</p>
+  </div>
+
+  <div id="profile-options-container" class="options-box">
+    <div class="arrow-up"></div>
+    <ul id="profile-options">
+
+      <li><a href="#under-development">Profile Settings</a></li>
+      <li><a href="/logout">Log Out</a></li>
+    </ul>
   </div>
 
   <div id="chat-container">
@@ -43,7 +55,9 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-  <script src="particles/ParticleLoader.js"></script>
+  <script src="particles/ChatBarParticlesLoader.js"></script>
+
+  <script src="js/options-buttons.js"></script>
 
   <script src="/socket.io/socket.io.js"></script> <!-- Automatically served by the API, if we are listening correctly. -->
   <script src="js/Message.js"></script>

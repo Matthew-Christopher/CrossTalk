@@ -16,7 +16,7 @@ $(window).on("load", () => {
     success: (data) => {
       JSONData = $.parseJSON(data);
 
-      $('#name-display').text("Welcome, " + JSONData[0].DisplayName);
+      $('#name-display').text(JSONData[0].DisplayName);
     },
     failure: () => {
       console.log("Could not retreive display name. Try again later.");
