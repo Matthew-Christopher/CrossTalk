@@ -135,7 +135,11 @@ app.get('/api/GetMyGroups', (req, res) => {
 		 JOIN GroupMembership ON \`Group\`.GroupID = GroupMembership.GroupID
 		 WHERE GroupMembership.UserID = ?;`;
 
-		connection.query(mysql.format(sql, req.session.UserID), (err, result, fields) => {
+		connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
+      connection.release();
+
+      if (error) throw error; // Handle post-release error.
+
 			res.json(JSON.stringify(result));
 		});
 	});
@@ -145,7 +149,11 @@ app.get('/api/GetMyDisplayName', (req, res) => {
 	pool.getConnection(async (err, connection) => {
 		var sql = "SELECT DisplayName FROM User WHERE UserID = ?;";
 
-		connection.query(mysql.format(sql, req.session.UserID), (err, result, fields) => {
+		connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
+      connection.release();
+
+      if (error) throw error; // Handle post-release error.
+
 			res.json(JSON.stringify(result));
 		});
 	});
