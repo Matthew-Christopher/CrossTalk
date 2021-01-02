@@ -17,10 +17,12 @@ function ToggleVisiblity (name) {
   if (($(name).css('visibility') == 'visible')) {
     $(name).css('visibility', 'hidden');
   } else {
-    if ($((name == '#profile-options-nav-container') ? '#options-nav-container' : '#profile-options-nav-container').css('visibility', 'visible')) {
-      $((name == '#profile-options-nav-container') ? '#options-nav-container' : '#profile-options-nav-container').css('visibility', 'hidden');
+    let otherContainer = (name == '#profile-options-nav-container') ? '#options-nav-container' : '#profile-options-nav-container';
+
+    if ($(otherContainer).css('visibility') == 'visible') {
+      $(otherContainer).css('visibility', 'hidden');
     }
-    
+
     $(name).css('visibility', 'visible');
   }
 }
