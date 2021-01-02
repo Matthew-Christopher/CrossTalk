@@ -29,20 +29,33 @@ $(window).on("load", () => {
   $("#message-form").submit((event) => {
     event.preventDefault(); // Don't refresh, we want a smooth experience.
 
+    let userID;
     if (activeServerID) {
-      // We trim whitespace from the start and end of the message before sending it.
-      let messageString = $('#message').val().trim();
+      $.ajax({
+        type: "GET",
+        url: "/api/GetMyUserID",
+        success: (data) => {
+          JSONData = $.parseJSON(data);
 
-      // Message object format: (groupID, authorID, messageID, messageString, timestamp)
-      let message = new Message(activeServerID, "NOT IMPLEMENTED YET", "NOT IMPLEMENTED YET", messageString, Date.now());
+          userID = JSONData[0].UserID;
 
-      // Don't send the message if it's blank.
-      if (message) {
-        socket.emit('chat', message); // Send the message data from the input field.
-      }
+          // We trim whitespace from the start and end of the message before sending it.
+          let messageString = $('#message').val().trim();
 
-      $('#message').val(''); // Clear the message input so we can type again immediately.
-      return;
+          // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
+          let message = new Message("NOT IMPLEMENTED YET", activeServerID, userID, messageString, Date.now());
+
+          // Don't send the message if it's blank.
+          if (message) {
+            socket.emit('chat', message); // Send the message data from the input field.
+          }
+
+          $('#message').val(''); // Clear the message input so we can type again immediately.
+        },
+        failure: () => {
+          console.log("Could not retreive display name. Try again later.");
+        }
+      });
     }
   });
 
@@ -53,8 +66,8 @@ $(window).on("load", () => {
 
   socket.on('message return', (message) => {
     // Only render the message if we are on its group.
-    if (message.groupID === activeServerID) {
-      $('#chatbox').append($('<li>').text(message.messageString));
+    if (message.GroupID === activeServerID) {
+      $('#chatbox').append($('<li>').text(message.MessageString));
     }
   });
 });

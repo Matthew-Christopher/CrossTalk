@@ -161,7 +161,11 @@ app.get('/api/GetMyDisplayName', (req, res) => {
 			res.json(JSON.stringify(result));
 		});
 	});
-})
+});
+
+app.get('/api/GetMyUserID', (req, res) => {
+	res.json(JSON.stringify([{'UserID': req.session.UserID}]));
+});
 
 app.use(express.static('../client', {
   extensions: ['html', 'htm']
