@@ -63,7 +63,11 @@ app.use(bodyParser.urlencoded({extended : true}));
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-	res.sendFile(path.join(__dirname + '/../client/login.html'));
+	if (req.session.LoggedIn){
+		res.redirect('/chat')
+	} else {
+		res.sendFile(path.join(__dirname + '/../client/login.html'));
+	}
 });
 
 app.get('/verify', (req, res) => {
