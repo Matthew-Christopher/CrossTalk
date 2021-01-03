@@ -35,11 +35,11 @@ $(window).on("load", () => {
     // Match by just the GroupID property.
     let targetIndex = JSONData.map(x => x.GroupID).indexOf($(event.target).closest('button').attr('id'));
 
-    $('#' + JSONData[targetIndex].GroupID).addClass('active-chat');
+    $('#' + JSONData[targetIndex].GroupID).addClass('active-button');
 
     JSONData.forEach((item, i) => {
       if (i != targetIndex) {
-        $('#' + item.GroupID).removeClass('active-chat');
+        $('#' + item.GroupID).removeClass('active-button');
       }
     });
 

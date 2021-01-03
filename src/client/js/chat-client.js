@@ -4,9 +4,31 @@ function SetActiveServerID(id) {
   activeServerID = id;
 
   // Hide the server selection reminder once one has been picked.
-  $("#select-group-reminder").hide();
+  $('#select-group-reminder').hide();
 
-  $(".requires-group-selection").show();
+  $('.requires-group-selection').show();
+
+  $('#message').focus();
+
+  $('#chatbox').empty();
+
+  $.ajax({
+    type: "GET",
+    url: "/api/GetMessages",
+    data:  {
+      GroupID: activeServerID
+    },
+    success: (data) => {
+      JSONData = $.parseJSON(data);
+
+      JSONData.forEach((item, i) => {
+        $('#chatbox').append($('<li>').text(item.MessageString));
+      });
+    },
+    failure: () => {
+      console.log("Could not retreive messages. Try again later.");
+    }
+  });
 }
 
 $(window).on("load", () => {
@@ -43,7 +65,7 @@ $(window).on("load", () => {
           let messageString = $('#message').val().trim();
 
           // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
-          let message = new Message("NOT IMPLEMENTED YET", activeServerID, userID, messageString, Date.now());
+          let message = new Message(null, activeServerID, userID, messageString, Date.now());
 
           // Don't send the message if it's blank.
           if (message) {
@@ -59,10 +81,38 @@ $(window).on("load", () => {
     }
   });
 
-  $("#message-send-tick").click((event) => {
+  $('#message-send-tick').click(() => {
     // Refocus on the message box to enable rapid sending.
-    $("#message").focus();
-  })
+    $('#message').focus();
+  });
+
+  $('#group-join').click(() => {
+    let isActive = $('#group-join').hasClass('active-button');
+
+    if (isActive) {
+      $('#group-join').removeClass('active-button');
+    } else {
+      $('#group-join').addClass('active-button');
+    }
+
+    $('#server-container #group-join-form').css('display', $('#server-container #group-join-form').css('display') == 'block' ? 'none' : 'block');
+  });
+
+  $('#group-join-form').submit((e) => {
+    e.preventDefault();
+
+    $.ajax({
+      type: "POST",
+      url: "/api/JoinGroup",
+      data: $('#group-join-form').serialize(),
+      success: () => {
+        alert("Added to group.");
+      },
+      failure: () => {
+        alert("Could not recognise the invite code. Check it and try again.");
+      }
+    });
+  });
 
   socket.on('message return', (message) => {
     // Only render the message if we are on its group.

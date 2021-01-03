@@ -96,6 +96,10 @@ app.get('/logout', async (req, res) => {
   account.LogOut(req, res);
 });
 
+app.post('/api/JoinGroup', (req, res) => {
+  log.info(req.body.code);
+});
+
 app.post('/register-account', async (req, res) => {
 	var hash = await cryptography.Hash(req.body.password);
 
@@ -105,7 +109,7 @@ app.post('/register-account', async (req, res) => {
 		pool.getConnection(async (err, connection) => {
 			if (err) throw err; // Connection failed.
 
-			GetUserId(connection, req, (userId) => {
+			GetUserID(connection, (userId) => {
 				var sql = "INSERT INTO User VALUES (?, ?, ?, ?, False, ?);";
 				var inserts = [userId[0], req.body['display-name'], req.body.email, hash, userId[1]];
 
@@ -167,6 +171,21 @@ app.get('/api/GetMyUserID', (req, res) => {
 	res.json(JSON.stringify([{'UserID': req.session.UserID}]));
 });
 
+app.get('/api/GetMessages', (req, res) => {
+
+  pool.getConnection(async (err, connection) => {
+		var sql = 'SELECT Message.MessageID, Message.AuthorID, Message.MessageString, Message.Timestamp FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ?;';
+
+		connection.query(mysql.format(sql, [req.session.UserID, req.query.GroupID]), (error, result, fields) => {
+      connection.release();
+
+      if (error) throw error; // Handle post-release error.
+
+			res.json(JSON.stringify(result));
+		});
+	});
+});
+
 app.use(express.static('../client', {
   extensions: ['html', 'htm']
 }));
@@ -176,22 +195,27 @@ const httpServer = http.createServer(app).listen(defaultPort, () => {
 	chat.initialise(httpServer);
 });
 
-function GetUserId(connection, req, callback) {
+function GetUserID(connection, callback) {
 	var idArray = [];
 	do {
+
 		var numOfDuplicates = 0;
-		connection.query("SELECT UUID() AS UserId, LEFT(MD5(RAND()), 32) AS VerificationKey;", (error, firstResult, fields) => {
+		connection.query("SELECT UUID() AS UserID, LEFT(MD5(RAND()), 32) AS VerificationKey;", (error, firstResult, fields) => {
 			if (error) throw error;
 
-			idArray = [firstResult[0].UserId, firstResult[0].VerificationKey];
+			idArray = [firstResult[0].UserID, firstResult[0].VerificationKey];
 
-			connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE UserId = ? OR VerificationKey = ?;", [idArray[0], idArray[1]]), (error, secondResult, fields) => {
-				numOfDuplicates = secondResult[0].NumberOfDuplicates;
+			connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE UserID = ? OR VerificationKey = ?;", [idArray[0], idArray[1]]), (error, secondResult, fields) => {
+
+        if (error) throw error;
+
+        numOfDuplicates = secondResult[0].NumberOfDuplicates;
 
 				if (numOfDuplicates == 0) {
 					return callback(idArray); // Ensure callback is called after the async activity terminates, to prevent null errors.
 				}
 			});
 		});
+
 	} while (numOfDuplicates != 0);
 }

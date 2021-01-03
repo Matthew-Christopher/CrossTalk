@@ -20,10 +20,31 @@
   <title>Chat - Crosstalk</title>
 </head>
 <body>
-  <div id="server-selector"></div>
+  <div id="server-container">
+    <div id="server-buttons-container">
+      <button id="group-join" class="group-action-button" type="button" value="Join">Join</button>
+
+      <button id="group-create" class="group-action-button" type="button" value="Create">Create</button>
+
+      <form id="group-join-form" class="input-fadein" action="">
+        <div class="slide-back">
+          <div class="input-field-container">
+            <input id="group-join-code" class="effect-20" type="text" name="code" autocomplete="off" placeholder="Invite Code">
+            <span class="focus-border">
+              <i></i>
+            </span>
+          </div>
+
+          <button id="group-join-button" type="submit" form="group-join-form" value="Go">Go</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="server-selector"></div>
+  </div>
 
   <div id="info-container">
-    <h1 id="server-name-display" class="title">Crosstalk - Chat</h1>
+    <h1 id="server-name-display" class="title">Crosstalk</h1>
     <div id="info-buttons-container">
       <button class="requires-group-selection" id="options-button" type="button" value="Options"><img src="img/Cog.png" alt="Options"></button>
       <button id="profile-options-button" type="button" value="Profile"><img src="img/Person.png" alt="Profile"></button>
@@ -48,11 +69,11 @@
   </div>
 
   <div id="chat-container">
-    <p id="select-group-reminder">Select a group first!</p>
+    <p id="select-group-reminder">Select or join a group first!</p>
     <ul id="chatbox"></ul>
     <form id="message-form" action="">
       <div class="input-field-container">
-        <input type="text" id="message" class="effect-20" autocomplete="off" placeholder="Type a message..." autofocus>
+        <input type="text" id="message" class="effect-20" autocomplete="off" placeholder="Type a message...">
         <button id="message-send-tick" type="submit" form="message-form" value="Submit"><img src="img/Tick.png" alt="Send"></button>
         <span class="focus-border">
           <i></i>

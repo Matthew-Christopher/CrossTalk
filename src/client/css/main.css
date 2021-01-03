@@ -171,7 +171,7 @@ input {
 }
 
 #login-container input[type="submit"]:hover {
-  background: #8FFD9F;
+  background: #8ffd9f;
 }
 
 @-webkit-keyframes blink {

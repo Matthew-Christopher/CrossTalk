@@ -1,10 +1,16 @@
 $(window).on("load", () => {
-  $('#profile-options-button').click(() => {
-    ToggleVisiblity('#profile-options-nav-container');
-  });
+  $(document).click((event) => {
+    // Handle click events. We should hide the nav container if it's visible and we click outside of it.
 
-  $('#options-button').click(() => {
-    ToggleVisiblity('#options-nav-container');
+    if ($('#profile-options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#profile-options-nav-container') && !$(event.target).is('#profile-options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#options-button'))) {
+      $('#profile-options-nav-container').css('visibility', 'hidden');
+    } else if ($('#options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#options-nav-container') && !$(event.target).is('#options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#options-button'))) {
+      $('#options-nav-container').css('visibility', 'hidden');
+    } else if ($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *')) {
+      ToggleVisiblity('#profile-options-nav-container');
+    } else if ($(event.target).is('#options-button') || $(event.target).is('#options-button *')) {
+      ToggleVisiblity('#options-nav-container');
+    }
   });
 });
 
