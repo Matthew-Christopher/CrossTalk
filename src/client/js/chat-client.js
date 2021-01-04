@@ -95,8 +95,34 @@ $(window).on("load", () => {
       $('#group-join').addClass('active-button');
     }
 
+    // This line looks messy, reuse isActive?
     $('#server-container #group-join-form').css('display', $('#server-container #group-join-form').css('display') == 'block' ? 'none' : 'block');
   });
+
+  $('#group-create').click(() => {
+    $('#group-create').addClass('active-button');
+
+    $('#group-create-container').fadeIn(200); // Take 200ms to fade.
+    $('body *:not(.blur-exclude)').css('-webkit-filter', 'blur(3px)');
+
+    // This line looks messy, reuse isActive?
+    if($('#group-join').hasClass('active-button')) {
+      $('#group-join').removeClass('active-button');
+      $('#server-container #group-join-form').css('display', 'none');
+    }
+  });
+
+  $(document).click((event) => {
+    // Handle click events. We should hide the nav container if it's visible and we click outside of it.
+
+    if ($('#group-create-container').css('display') == 'block' && $('#group-create-container').css('opacity') == 1 && !$(event.target).is('#group-create-form-container') && !$(event.target).is('#group-create-form-container *') && !$(event.target).is('#group-create-close-button') ) {
+      CloseCreateForm();
+    }
+  });
+
+  $('#group-create-close-button').click(() => {
+    CloseCreateForm();
+  })
 
   $('#group-join-form').submit((e) => {
     e.preventDefault();
@@ -121,3 +147,10 @@ $(window).on("load", () => {
     }
   });
 });
+
+function CloseCreateForm() {
+  $('#group-create').removeClass('active-button');
+
+  $('#group-create-container').fadeOut(200); // Take 200ms to fade.
+  $('body *:not(.blur-exclude)').css('-webkit-filter', '');
+}
