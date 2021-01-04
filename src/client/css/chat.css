@@ -8,7 +8,7 @@ body {
   font-family: 'Work Sans', sans-serif;
 }
 
-body *:not(.blur-exclude) {
+body *:not(.blur-exclude):not(.blur-exclude *) {
   transition: 0.1s -webkit-filter linear;
 }
 

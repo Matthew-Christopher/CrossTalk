@@ -103,7 +103,7 @@ $(window).on("load", () => {
     $('#group-create').addClass('active-button');
 
     $('#group-create-container').fadeIn(200); // Take 200ms to fade.
-    $('body *:not(.blur-exclude)').css('-webkit-filter', 'blur(3px)');
+    $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)');
 
     // This line looks messy, reuse isActive?
     if($('#group-join').hasClass('active-button')) {
