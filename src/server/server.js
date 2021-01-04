@@ -186,6 +186,20 @@ app.get('/api/GetMessages', (req, res) => {
 	});
 });
 
+app.get('/api/GetInviteCode', (req, res) => {
+	pool.getConnection(async (err, connection) => {
+		var sql = "SELECT InviteCode FROM `Group` WHERE GroupID = ?;";
+
+		connection.query(mysql.format(sql, req.query.GroupID), (error, result, fields) => {
+      connection.release();
+
+      if (error) throw error; // Handle post-release error.
+
+			res.json(JSON.stringify(result));
+		});
+	});
+});
+
 app.use(express.static('../client', {
   extensions: ['html', 'htm']
 }));

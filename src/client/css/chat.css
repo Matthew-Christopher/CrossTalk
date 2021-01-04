@@ -182,7 +182,7 @@ input, button {
   cursor: pointer;
 }
 
-#server-container #group-join-form #group-join-button:hover {
+#server-container #group-join-form #group-join-button:hover, #options-nav-container #invite-code-display #invite-code-copy:hover {
   background: #8ffd9f;
 }
 
@@ -431,7 +431,6 @@ input, button {
   display: inline-block;
   margin-top: 63px;
   right: 0;
-  width: auto;
   border-radius: 10px;
   margin-right: 10px;
   z-index: 2;
@@ -452,6 +451,26 @@ input, button {
 }
 #options-nav-container .arrow-up {
   right: 54px;
+}
+
+#options-nav-container #invite-code-display {
+  box-shadow: inset 0 0 5px #888;
+  display: none;
+  align-items: center;
+  background:
+}
+
+#options-nav-container #invite-code-display #invite-code-copy {
+  height: 30px;
+  margin-left: 10px;
+  padding: 2px;
+  font-weight: bolder;
+  border: 1px solid black;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.1s linear;
 }
 
 #profile-options li {

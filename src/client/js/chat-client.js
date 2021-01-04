@@ -105,7 +105,6 @@ $(window).on("load", () => {
     $('#group-create-container').fadeIn(200); // Take 200ms to fade.
     $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)');
 
-    // This line looks messy, reuse isActive?
     if($('#group-join').hasClass('active-button')) {
       $('#group-join').removeClass('active-button');
       $('#server-container #group-join-form').css('display', 'none');
