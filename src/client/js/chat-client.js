@@ -91,12 +91,12 @@ $(window).on("load", () => {
 
     if (isActive) {
       $('#group-join').removeClass('active-button');
+      $('#server-container #group-join-form').css('display', 'none');
     } else {
       $('#group-join').addClass('active-button');
+      $('#server-container #group-join-form').css('display', 'block');
+      $('#group-join-code').focus();
     }
-
-    // This line looks messy, reuse isActive?
-    $('#server-container #group-join-form').css('display', $('#server-container #group-join-form').css('display') == 'block' ? 'none' : 'block');
   });
 
   $('#group-create').click(() => {
