@@ -9,7 +9,7 @@ body {
 }
 
 body *:not(.blur-exclude) {
-  transition: 0.1s all linear;
+  transition: 0.1s -webkit-filter linear;
 }
 
 input, button {
@@ -36,7 +36,7 @@ input, button {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 50%;
+  width: 35%;
   height: 80%;
   background: white;
   border-radius: 15px;
