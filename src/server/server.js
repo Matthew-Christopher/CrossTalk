@@ -96,8 +96,29 @@ app.get('/logout', async (req, res) => {
   account.LogOut(req, res);
 });
 
-app.post('/api/JoinGroup', (req, res) => {
-  log.info(req.body.code);
+app.get('/api/JoinGroup', (req, res) => {
+  pool.getConnection(async (err, connection) => {
+    var checkValid = `SELECT GroupID AS JoinID FROM \`Group\` WHERE InviteCode = ?;`;
+
+    connection.query(mysql.format(checkValid, req.query.code), (error, firstResult, fields) => {
+
+      if (error) throw error;
+
+      if (firstResult.length > 0) {
+        var checkValid = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
+
+        connection.query(mysql.format(checkValid, [req.session.UserID, firstResult[0].JoinID]), (error, secondResult, fields) => {
+          connection.release();
+
+          if (error) throw error; // Handle post-release error.
+
+          res.json(JSON.stringify("success"));
+        });
+      } else {
+        res.json(JSON.stringify("Invalid code."));
+      }
+    });
+  });
 });
 
 app.post('/register-account', async (req, res) => {
@@ -174,7 +195,7 @@ app.get('/api/GetMyUserID', (req, res) => {
 app.get('/api/GetMessages', (req, res) => {
 
   pool.getConnection(async (err, connection) => {
-		var sql = 'SELECT Message.MessageID, Message.AuthorID, Message.MessageString, Message.Timestamp FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ?;';
+		var sql = 'SELECT Message.MessageID, Message.AuthorID, Message.MessageString, Message.Timestamp FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
 
 		connection.query(mysql.format(sql, [req.session.UserID, req.query.GroupID]), (error, result, fields) => {
       connection.release();
