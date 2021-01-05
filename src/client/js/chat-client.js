@@ -19,9 +19,7 @@ function SetActiveServerID(id) {
       GroupID: activeServerID
     },
     success: (data) => {
-      JSONData = $.parseJSON(data);
-
-      JSONData.forEach((item, i) => {
+      $.parseJSON(data).forEach((item, i) => {
         $('#chatbox').append($('<li>').text(item.MessageString));
       });
     },
@@ -38,9 +36,8 @@ $(window).on("load", () => {
     type: "GET",
     url: "/api/GetMyDisplayName",
     success: (data) => {
-      JSONData = $.parseJSON(data);
-
-      $('#name-display').text(JSONData[0].DisplayName);
+      $('#name-display').text($.parseJSON(data)[0].DisplayName);
+      $('#profile-options-name-label').text($.parseJSON(data)[0].DisplayName);
     },
     failure: () => {
       console.log("Could not retreive display name. Try again later.");
@@ -122,22 +119,6 @@ $(window).on("load", () => {
   $('#group-create-close-button').click(() => {
     CloseCreateForm();
   })
-
-  $('#group-join-form').submit((e) => {
-    e.preventDefault();
-
-    $.ajax({
-      type: "POST",
-      url: "/api/JoinGroup",
-      data: $('#group-join-form').serialize(),
-      success: () => {
-        alert("Added to group.");
-      },
-      failure: () => {
-        alert("Could not recognise the invite code. Check it and try again.");
-      }
-    });
-  });
 
   socket.on('message return', (message) => {
     // Only render the message if we are on its group.

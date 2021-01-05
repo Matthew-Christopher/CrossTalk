@@ -7,8 +7,8 @@ $(window).on("load", () => {
       $('#profile-options-nav-container').css('visibility', 'hidden');
     } else if ($('#options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#options-nav-container') && !$(event.target).is('#options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#options-button'))) {
       $('#options-nav-container').css('visibility', 'hidden');
-      $('#invite-code-display').css('display', 'none');
-      $('#invite-code').text('');
+
+      HideInviteCode();
     } else if ($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *')) {
       ToggleVisiblity('#profile-options-nav-container');
     } else if ($(event.target).is('#options-button') || $(event.target).is('#options-button *')) {
@@ -26,8 +26,8 @@ $(window).on("load", () => {
 
       // Wait and then automatically clear the copied state.
       setTimeout(() => {
-        $('#invite-code-display').css('background', 'transparent');
-        $('#invite-code-copy').css('background', 'transparent');
+        $('#invite-code-display').css('background', '');
+        $('#invite-code-copy').css('background', '');
         $('#invite-code-copy').text('Copy');
       }, 4000);
     }
@@ -42,8 +42,7 @@ function ToggleVisiblity (name) {
     $(name).css('visibility', 'hidden');
 
     if (name == "#options-nav-container") {
-      $('#invite-code-display').css('display', 'none');
-      $('#invite-code').text('');
+      HideInviteCode();
     }
   } else {
     let otherContainer = (name == '#profile-options-nav-container') ? '#options-nav-container' : '#profile-options-nav-container';
@@ -76,12 +75,19 @@ function SetInviteCode() {
       GroupID: activeServerID
     },
     success: (data) => {
-      JSONData = $.parseJSON(data);
-
       $('#invite-code').text($.parseJSON(data)[0].InviteCode);
     },
     failure: () => {
       $('#invite-code').text("Error. Try again later.");
     }
   });
+}
+
+function HideInviteCode() {
+  $('#invite-code-display').css('background', '');
+  $('#invite-code-copy').css('background', '');
+  $('#invite-code-copy').text('Copy');
+
+  $('#invite-code-display').css('display', 'none');
+  $('#invite-code').text('');
 }

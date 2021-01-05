@@ -78,9 +78,9 @@
 
   <div id="server-container">
     <div id="server-buttons-container">
-      <button id="group-join" class="group-action-button" type="button" value="Join">Join</button>
+      <button id="group-join" class="group-action-button" type="button" value="Join">Join Group</button>
 
-      <button id="group-create" class="group-action-button" type="button" value="Create">Create</button>
+      <button id="group-create" class="group-action-button" type="button" value="Create">Create Group</button>
 
       <form id="group-join-form" class="input-fadein" action="">
         <div class="slide-back">
@@ -111,6 +111,7 @@
   <div id="profile-options-nav-container" class="options-box">
     <div class="arrow-up"></div>
     <ul id="profile-options">
+      <li><p id="profile-options-name-label"></p></li>
       <li><a href="#under-development">Profile Settings</a></li>
       <li><a href="/logout">Log Out</a></li>
     </ul>
@@ -118,11 +119,14 @@
 
   <div id="options-nav-container" class="options-box">
     <div class="arrow-up"></div>
-    <ul id="profile-options">
+    <ul id="options">
+      <li><p id="group-options-label"></p></li>
       <li><a id="show-invite-code">Get invite code</a></li>
       <li id="invite-code-display">
-        <p id="invite-code"></p>
-        <button id="invite-code-copy" value="Copy">Copy</button>
+        <div id="invite-code-container">
+          <p id="invite-code"></p>
+          <button id="invite-code-copy" value="Copy">Copy</button>
+        </div>
       </li>
       <li><a href="#under-development">See group statistics</a></li>
       <li><a href="#under-development">Change nickname</a></li>
@@ -149,10 +153,10 @@
 
   <script src="js/options-buttons.js"></script>
 
+  <script src="js/group-manager.js"></script>
+
   <script src="/socket.io/socket.io.js"></script> <!-- Automatically served by the API, if we are listening correctly. -->
   <script src="js/Message.js"></script>
   <script src="js/chat-client.js"></script>
-
-  <script src="js/group-manager.js"></script>
 </body>
 </html>
