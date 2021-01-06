@@ -446,31 +446,53 @@ input, button {
   border-color: transparent transparent black transparent;
 }
 
-#profile-options-nav-container .arrow-up {
-  right: 6px;
-}
 #options-nav-container .arrow-up {
-  right: 54px;
+	right: 54px;
+}
+
+#options-nav-container #invite-code-container {
+	position: relative;
+	left: 50%;
+	-webkit-transform: translateX(-50%);
+	-ms-transform: translateX(-50%);
+	transform: translateX(-50%);
+	padding: 10px;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	white-space: nowrap;
+}
+
+#options-nav-container #invite-code-container * {
+	float: left;
 }
 
 #options-nav-container #invite-code-display {
-  box-shadow: inset 0 0 5px #888;
-  display: none;
-  align-items: center;
-  background:
+	-webkit-box-shadow: inset 0 0 5px #888;
+	box-shadow: inset 0 0 5px #888;
+	display: none;
+	padding: 0;
 }
 
 #options-nav-container #invite-code-display #invite-code-copy {
-  height: 30px;
-  margin-left: 10px;
-  padding: 2px;
-  font-weight: bolder;
-  border: 1px solid black;
-  border-radius: 10px;
-  background: transparent;
-  cursor: pointer;
-  outline: none;
-  transition: background 0.1s linear;
+	height: 30px;
+	margin-left: 10px;
+	padding: 2px;
+	font-weight: bolder;
+	border: 1px solid #000;
+	border-radius: 10px;
+	background: 0 0;
+	cursor: pointer;
+	outline: 0;
+	-webkit-transition: background .1s linear;
+	-o-transition: background .1s linear;
+	transition: background .1s linear;
 }
 
 .options-box li {

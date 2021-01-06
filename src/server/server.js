@@ -160,9 +160,32 @@ app.get('/api/GetMyGroups', (req, res) => {
 	let servers = [];
 
 	pool.getConnection(async (err, connection) => {
-		var sql = `SELECT \`Group\`.GroupID, \`Group\`.GroupName FROM \`Group\`
-		 JOIN GroupMembership ON \`Group\`.GroupID = GroupMembership.GroupID
-		 WHERE GroupMembership.UserID = ?;`;
+		var sql = `
+    SELECT GroupInfo.GroupID,
+           GroupInfo.GroupName,
+           MessageInfo.LatestMessageString
+    FROM   (SELECT \`Group\`.GroupID,
+                   \`Group\`.GroupName
+            FROM   \`Group\`
+                   JOIN GroupMembership
+                     ON \`Group\`.GroupID = GroupMembership.GroupID
+            WHERE  GroupMembership.UserID = ?)
+           AS
+           GroupInfo
+           JOIN (SELECT Message.Messagestring AS LatestMessageString,
+                        LatestMessage.GroupID,
+                        LatestMessage.Timestamp
+                 FROM   Message
+                        JOIN (SELECT GroupID,
+                                     MAX(timestamp) AS Timestamp
+                              FROM   Message
+                              GROUP  BY GroupID) AS LatestMessage
+                          ON Message.GroupID = LatestMessage.GroupID
+                             AND Message.Timestamp = LatestMessage.Timestamp
+                 ORDER  BY LatestMessage.Timestamp DESC) AS MessageInfo
+             ON GroupInfo.Groupid = MessageInfo.GroupID
+    ORDER  BY MessageInfo.Timestamp DESC;
+    `;
 
 		connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
       connection.release();
