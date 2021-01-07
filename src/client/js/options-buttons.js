@@ -3,10 +3,11 @@ $(window).on("load", () => {
     // Handle click events. We should hide the nav container if it's visible and we click outside of it.
 
     // I MUST UNIFY THIS WITH THE TOGGLE FUNCTION, ONE WAY OR THE OTHER
-    if ($('#profile-options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#profile-options-nav-container') && !$(event.target).is('#profile-options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#options-button'))) {
-      $('#profile-options-nav-container').css('visibility', 'hidden');
-    } else if ($('#options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#options-nav-container') && !$(event.target).is('#options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#options-button'))) {
-      $('#options-nav-container').css('visibility', 'hidden');
+    if ($('#profile-options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#profile-options-nav-container') && !$(event.target).is('#profile-options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *') || $(event.target).is('#options-button') || $(event.target).is('#options-button *'))) {
+      ToggleVisiblity('#profile-options-nav-container');
+
+    } else if ($('#options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#options-nav-container') && !$(event.target).is('#options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *') || $(event.target).is('#options-button') || $(event.target).is('#options-button *'))) {
+      ToggleVisiblity('#options-nav-container');
 
       HideInviteCode();
     } else if ($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *')) {

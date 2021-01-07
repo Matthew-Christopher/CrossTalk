@@ -152,7 +152,7 @@ app.post('/CreateGroup', (req, res) => {
   log.info("Creating a new group called " + req.body.group);
 
   pool.getConnection(async (err, connection) => {
-    var newGroupCreation = `INSERT INTO Group ;`;
+    var newGroupCreation = `INSERT INTO \`Group\` VALUES ();`;
 
     connection.query(mysql.format(newGroupCreation, req.body.group), (error, firstResult, fields) => {
       connection.release();

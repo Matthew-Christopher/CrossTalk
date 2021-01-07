@@ -59,7 +59,6 @@ $(window).on("load", () => {
   });
 
   $(document).on('click', '.server-button', (event) => {
-    console.log(JSONData);
     // If the event target is the text in the button, we actually want the parent button.
 
     // Match by just the GroupID property.
