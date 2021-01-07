@@ -27,23 +27,8 @@ input, button {
   display: none;
 }
 
-#group-create-container * {
-  z-index: 100;
-}
-
-#group-create-form-container {
-  position: relative;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 35%;
-  height: 80%;
-  background: white;
-  border-radius: 15px;
-  box-shadow: 10px 10px 32px 0px rgba(0, 0, 0, 0.75);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+#group-create-container *:not(label) {
+  z-index: 5;
 }
 
 #group-create-container.overlay::after {
@@ -56,6 +41,77 @@ input, button {
   width: 100%;
   height: 100%;
   z-index: 3;
+  box-sizing: border-box;
+}
+
+#group-create-form-container {
+  position: relative;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 35%;
+  padding: 100px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 10px 10px 32px 0px rgba(0, 0, 0, 0.75);
+  display: flex;
+  flex-flow: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+#group-create-form-container p, #group-create-form-container form {
+  margin-top: 50px;
+}
+
+#group-create-form-container .input-field-container {
+  height: 50px;
+  position: relative;
+  margin-bottom: 50px;
+  display: inline-block;
+}
+
+#group-create-form-container .input-submit-container {
+  width: 100%;
+  height: 50px;
+}
+
+#group-create-form-container input[type="submit"] {
+  border-radius: 10px;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  height: 100%;
+  border: 1px solid black;
+  -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.1);
+  box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.1);
+  -webkit-transition: all 0.15s ease-in-out;
+  -o-transition: all 0.15s ease-in-out;
+  transition: all 0.15s ease-in-out;
+  background: #6dd5ed;
+
+  /* Correct text display bug with scaling */
+  -webkit-font-smoothing: antialiased;
+  transform: translate3d(0, 0, 0);
+}
+
+#group-create-form-container input[type="submit"]:hover {
+  background: #8ffd9f;
+  transform: translate3d(0, 0, 0) scale(1.03);
+}
+
+#group-create-form-container input:not([type="submit"]) {
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  outline: none;
+  left: -20px;
+  background: transparent;
+  padding: 20px;
+  border: 1px solid #ccc;
+  -webkit-transition: all 0.5s linear;
+  -o-transition: all 0.5s linear;
+  transition: all 0.5s linear;
+  height: 100%;
 }
 
 #group-create-form-container #group-create-close-button {

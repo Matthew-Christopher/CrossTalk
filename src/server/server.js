@@ -183,7 +183,7 @@ app.get('/api/GetMyGroups', (req, res) => {
                           ON Message.GroupID = LatestMessage.GroupID
                              AND Message.Timestamp = LatestMessage.Timestamp
                  ORDER  BY LatestMessage.Timestamp DESC) AS MessageInfo
-             ON GroupInfo.Groupid = MessageInfo.GroupID
+             ON GroupInfo.GroupID = MessageInfo.GroupID
     ORDER  BY MessageInfo.Timestamp DESC;
     `;
 
