@@ -81,7 +81,7 @@ $(window).on("load", () => {
             $('<button class="server-button" type="button">').attr('id', item.GroupID)
               .append($('<span class="server-info-container">')
               .append($("<h1></h1>").text(item.GroupName))
-              .append($("<i></h1>").text(item.LatestMessageString.substring(0, 21))));
+              .append($("<i></h1>").text(item.LatestMessageString.substring(0, 21) + (item.LatestMessageString.length > 21 ? "..." : ""))));
 
           newGroup.appendTo('#server-selector');
         });
