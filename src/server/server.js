@@ -177,7 +177,7 @@ app.get('/api/GetMyGroups', (req, res) => {
                         LatestMessage.Timestamp
                  FROM   Message
                         JOIN (SELECT GroupID,
-                                     MAX(timestamp) AS Timestamp
+                                     MAX(Timestamp) AS Timestamp
                               FROM   Message
                               GROUP  BY GroupID) AS LatestMessage
                           ON Message.GroupID = LatestMessage.GroupID

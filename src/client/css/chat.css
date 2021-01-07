@@ -450,6 +450,10 @@ input, button {
 	right: 54px;
 }
 
+#profile-options-nav-container .arrow-up {
+  right: 6px;
+}
+
 #options-nav-container #invite-code-container {
 	position: relative;
 	left: 50%;
