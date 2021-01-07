@@ -13,7 +13,7 @@ $(window).on("load", () => {
 
     $.ajax({
       type: "GET",
-      url: "/api/JoinGroup",
+      url: "/JoinGroup",
       data: $('#group-join-form').serialize(),
       success: (data) => {
         if ($.parseJSON(data).toLowerCase() == "success") {
@@ -49,24 +49,8 @@ $(window).on("load", () => {
       type: "POST",
       url: "/CreateGroup",
       data: $('#group-create-form').serialize(),
-      success: (data) => {
-        if ($.parseJSON(data).toLowerCase() == "success") {
-          FetchGroups();
+      success: () => {
 
-          $('#group-join-code').val('');
-          $('#group-join').removeClass('active-button');
-          $('#server-container #group-join-form').css('display', 'none');
-        } else {
-          $('#group-join-code').val('').focus();
-          $('#group-join-button').text('Invalid');
-          $('#group-join-button').css('background', '#e74c3c');
-
-          // Wait and then automatically clear the error state.
-          setTimeout(() => {
-            $('#group-join-button').text('Go');
-            $('#group-join-button').css('background', '');
-          }, 3000);
-        }
       },
       failure: () => {
         alert("Something went wrong. Try again later.");

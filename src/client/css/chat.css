@@ -6,6 +6,7 @@
 body {
   font-size: 100%;
   font-family: 'Work Sans', sans-serif;
+  overflow: hidden;
 }
 
 body *:not(.blur-exclude):not(.blur-exclude *) {

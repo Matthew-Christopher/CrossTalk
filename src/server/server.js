@@ -96,7 +96,7 @@ app.get('/logout', async (req, res) => {
   account.LogOut(req, res);
 });
 
-app.get('/api/JoinGroup', (req, res) => {
+app.get('/JoinGroup', (req, res) => {
   pool.getConnection(async (err, connection) => {
     var checkValid = `SELECT GroupID AS JoinID FROM \`Group\` WHERE InviteCode = ?;`;
 
@@ -146,6 +146,20 @@ app.post('/register-account', async (req, res) => {
 
 		res.status(201).send("<p>A link has been sent to the provided email address. Please click it to verify your account, <u>checking also in your spam folder.</u></p><b>IMPORTANT NOTE: This project is part of my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create an account if you have stumbled upon this website without being given permission to use or test it. Thank you.</b>");
 	}
+});
+
+app.post('/CreateGroup', (req, res) => {
+  log.info("Creating a new group called " + req.body.group);
+
+  pool.getConnection(async (err, connection) => {
+    var newGroupCreation = `INSERT INTO Group ;`;
+
+    connection.query(mysql.format(newGroupCreation, req.body.group), (error, firstResult, fields) => {
+      connection.release();
+
+      if (error) throw error; // Handle post-release error.
+    });
+  });
 });
 
 app.get('/chat', (req, res) => {
