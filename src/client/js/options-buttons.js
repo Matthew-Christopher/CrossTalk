@@ -2,7 +2,6 @@ $(window).on("load", () => {
   $(document).click((event) => {
     // Handle click events. We should hide the nav container if it's visible and we click outside of it.
 
-    // I MUST UNIFY THIS WITH THE TOGGLE FUNCTION, ONE WAY OR THE OTHER
     if ($('#profile-options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#profile-options-nav-container') && !$(event.target).is('#profile-options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *') || $(event.target).is('#options-button') || $(event.target).is('#options-button *'))) {
       ToggleVisiblity('#profile-options-nav-container');
 
