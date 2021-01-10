@@ -22,6 +22,8 @@ function SetActiveServerID(id) {
       $.parseJSON(data).forEach((item, i) => {
         $('#chatbox').append($('<li>').text(item.MessageString));
       });
+
+      $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
     },
     failure: () => {
       console.log("Could not retreive messages. Try again later.");
@@ -70,6 +72,8 @@ $(window).on("load", () => {
           }
 
           $('#message').val(''); // Clear the message input so we can type again immediately.
+
+          $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // Move to the most recent message if the client sent it themselves, independent of the current scroll position.
         },
         failure: () => {
           console.log("Could not retreive display name. Try again later.");
@@ -124,6 +128,13 @@ $(window).on("load", () => {
     // Only render the message if we are on its group.
     if (message.GroupID === activeServerID) {
       $('#chatbox').append($('<li>').text(message.MessageString));
+      $('#server-selector .server-button.active-button .server-info-container i').text(message.MessageString);
+
+      const pixelsStickScrollThreshold = 150;
+
+      if ($('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight() <= pixelsStickScrollThreshold) {
+        $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent message, but only if we haven't already scrolled up to view something older (outside of a certain threshold).
+      }
     }
   });
 });

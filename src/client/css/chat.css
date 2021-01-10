@@ -266,26 +266,25 @@ input, button {
 }
 
 #server-selector .server-button .server-info-container * {
-  margin: auto;
-  margin-left: 10px;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+#server-selector .server-button .server-info-container i {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: initial;
+  -webkit-line-clamp: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  color: #888;
+  font-size: 1em;
+  position: relative;
 }
 
 #server-selector .server-button .server-info-container h1 {
   color: #555;
   font-size: 1.5em;
-}
-
-#server-selector .server-button .server-info-container i {
-  color: #888;
-  font-size: 1em;
-}
-
-#server-selector .server-button .server-info-container i::before {
-    content: open-quote;
-}
-
-#server-selector .server-button .server-info-container i::after {
-    content: close-quote;
 }
 
 #chat-container {
@@ -299,11 +298,12 @@ input, button {
 
 #chat-container #chatbox {
   box-sizing: border-box;
-  height: 100%;
+  height: calc(100% - 50px);
   padding: 15px;
+  padding-bottom: 0;
   overflow-y: auto; /* Only show the scroll bar when necessary */
   list-style-type: none;
-  padding-bottom: 50px; /* Larger bottom padding to prevent overflow into the message box field */
+  margin-bottom: 50px; /* Prevent overflow into the message box field */
 }
 
 #chat-container li {
