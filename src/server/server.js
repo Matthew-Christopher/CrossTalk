@@ -152,12 +152,17 @@ app.post('/CreateGroup', (req, res) => {
   log.info("Creating a new group called " + req.body.group);
 
   pool.getConnection(async (err, connection) => {
-    var newGroupCreation = `INSERT INTO \`Group\` VALUES ();`;
+    if (err) throw err; // Connection failed.
 
-    connection.query(mysql.format(newGroupCreation, req.body.group), (error, firstResult, fields) => {
-      connection.release();
+    GetNewGroupID(connection, (groupID) => {
+      var sql = "INSERT INTO `Group` VALUES (?, ?, ?);";
+      var inserts = [groupID[0], req.body.group, groupID[1]];
 
-      if (error) throw error; // Handle post-release error.
+      connection.query(mysql.format(sql, inserts), (error, res, fields) => {
+        connection.release();
+
+        if (error) throw error; // Handle post-release error.
+      });
     });
   });
 });
@@ -270,8 +275,8 @@ const httpServer = http.createServer(app).listen(defaultPort, () => {
 function GetUserID(connection, callback) {
 	var idArray = [];
 	do {
+		var duplicates = 0;
 
-		var numOfDuplicates = 0;
 		connection.query("SELECT UUID() AS UserID, LEFT(MD5(RAND()), 32) AS VerificationKey;", (error, firstResult, fields) => {
 			if (error) throw error;
 
@@ -281,13 +286,37 @@ function GetUserID(connection, callback) {
 
         if (error) throw error;
 
-        numOfDuplicates = secondResult[0].NumberOfDuplicates;
+        duplicates = secondResult[0].NumberOfDuplicates;
 
-				if (numOfDuplicates == 0) {
+				if (duplicates == 0) {
 					return callback(idArray); // Ensure callback is called after the async activity terminates, to prevent null errors.
 				}
 			});
 		});
 
-	} while (numOfDuplicates != 0);
+	} while (duplicates != 0);
+}
+
+function GetNewGroupID(connection, callback) {
+  var idArray = [];
+
+  do {
+    var duplicates = 0;
+
+    connection.query("SELECT UUID() AS GroupID, LEFT(MD5(RAND()), 12) AS InviteCode;", (error, firstResult, fields) => {
+      if (error) throw error;
+
+      idArray = [firstResult[0].GroupID, firstResult[0].InviteCode];
+
+      connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM `Group` WHERE GroupID = ? OR InviteCode = ?;", [idArray[0], idArray[1]]), (error, secondResult, fields) => {
+        if (error) throw error;
+
+        duplicates = secondResult[0].NumberOfDuplicates;
+
+        if (duplicates == 0) {
+          return callback(idArray); // Ensure callback is called after the async activity terminates, to prevent null errors.
+        }
+      });
+    });
+  } while (duplicates != 0);
 }
