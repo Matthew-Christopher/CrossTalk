@@ -49,10 +49,25 @@ $(window).on("load", () => {
       type: "POST",
       url: "/CreateGroup",
       data: $('#group-create-form').serialize(),
-      success: () => {
+      success: (data) => {
 
+        JSONData = $.parseJSON(data);
+
+        let newGroupID = $.parseJSON(data)[0].GroupID;
+
+        FetchGroups(() => {
+          // Select the new group and scroll to it.
+          $('#' + newGroupID).trigger('click');
+
+          $('#server-container').scrollTop($('#' + newGroupID)[0].offsetTop - $('#server-container').height() + ($('#' + newGroupID).height() - 1));
+        });
+
+        $('#group-create').removeClass('active-button');
+
+        $('#group-create-container').fadeOut(200); // Take 200ms to fade.
+        $('body *:not(.blur-exclude)').css('-webkit-filter', '');
       },
-      failure: () => {
+      error: () => {
         alert("Something went wrong. Try again later.");
       }
     });
@@ -78,7 +93,7 @@ $(window).on("load", () => {
     $('#group-options-label').text(JSONData[targetIndex].GroupName);
   });
 
-  function FetchGroups() {
+  function FetchGroups(callback) {
 
     // Remove the groups we already have, they might have changed.
     $('#server-selector').empty();
@@ -102,6 +117,8 @@ $(window).on("load", () => {
 
           newGroup.appendTo('#server-selector');
         });
+
+        if (callback) callback();
       },
       failure: () => {
         console.log("Could not retreive messaging groups. Try again later.");

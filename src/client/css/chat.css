@@ -252,9 +252,9 @@ input, button {
   position: relative;
   left: 0;
   border: 0;
-  border-bottom: solid 1px #555;
   cursor: pointer;
   text-align: left;
+  border-bottom: solid 1px #555;
 }
 
 #server-selector .server-button:not(.active-button):hover {

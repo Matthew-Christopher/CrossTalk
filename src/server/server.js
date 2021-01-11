@@ -105,9 +105,9 @@ app.get('/JoinGroup', (req, res) => {
       if (error) throw error;
 
       if (firstResult.length > 0) {
-        var checkValid = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
+        var joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
 
-        connection.query(mysql.format(checkValid, [req.session.UserID, firstResult[0].JoinID]), (error, secondResult, fields) => {
+        connection.query(mysql.format(joinGroup, [req.session.UserID, firstResult[0].JoinID]), (error, secondResult, fields) => {
           connection.release();
 
           if (error) throw error; // Handle post-release error.
@@ -158,10 +158,18 @@ app.post('/CreateGroup', (req, res) => {
       var sql = "INSERT INTO `Group` VALUES (?, ?, ?);";
       var inserts = [groupID[0], req.body.group, groupID[1]];
 
-      connection.query(mysql.format(sql, inserts), (error, res, fields) => {
-        connection.release();
+      connection.query(mysql.format(sql, inserts), (error, result, fields) => {
 
-        if (error) throw error; // Handle post-release error.
+        if (error) throw error;
+
+        var sql = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
+
+        connection.query(mysql.format(sql, [req.session.UserID, groupID[0]]), (error, result, fields) => {
+          connection.release();
+
+          if (err) throw error; // Handle post-release error.
+          res.status(200).json(JSON.stringify([{'GroupID': groupID[0]}]));
+        });
       });
     });
   });
@@ -191,7 +199,7 @@ app.get('/api/GetMyGroups', (req, res) => {
             WHERE  GroupMembership.UserID = ?)
            AS
            GroupInfo
-           JOIN (SELECT Message.Messagestring AS LatestMessageString,
+           LEFT JOIN (SELECT Message.Messagestring AS LatestMessageString,
                         LatestMessage.GroupID,
                         LatestMessage.Timestamp
                  FROM   Message
@@ -203,7 +211,7 @@ app.get('/api/GetMyGroups', (req, res) => {
                              AND Message.Timestamp = LatestMessage.Timestamp
                  ORDER  BY LatestMessage.Timestamp DESC) AS MessageInfo
              ON GroupInfo.GroupID = MessageInfo.GroupID
-    ORDER  BY MessageInfo.Timestamp DESC;
+    ORDER  BY MessageInfo.Timestamp DESC, GroupInfo.GroupName;
     `;
 
 		connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
