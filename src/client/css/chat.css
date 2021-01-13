@@ -268,9 +268,6 @@ input, button {
 #server-selector .server-button .server-info-container * {
   padding: 0 10px;
   box-sizing: border-box;
-}
-
-#server-selector .server-button .server-info-container i {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: initial;
@@ -319,16 +316,22 @@ input, button {
   padding: 5px 65px 5px 15px;
 }
 
-#chat-container #select-group-reminder {
+#chat-container #chatbox-reminder {
   position: absolute;
   left: 50%;
   top: 50%;
-
-  /* Manually adjust to fit in the center of the visible window, some of which is blocked by the message input field. */
-  transform: translate(-50%, calc(-50% - 25px));
-
+  transform: translate(-50%, calc(-50% - 25px)); /* Manually adjust to fit in the center of the visible window, some of which is blocked by the message input field. */
   font-size: 2.3em;
   font-weight: lighter;
+}
+
+#chat-container #invite-prompt {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, calc(-50% - 25px + 2.3em));
+  font-weight: 200;
+  display: none;
 }
 
 #message-form .input-field-container {

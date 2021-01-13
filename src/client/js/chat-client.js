@@ -3,9 +3,6 @@ let activeServerID;
 function SetActiveServerID(id) {
   activeServerID = id;
 
-  // Hide the server selection reminder once one has been picked.
-  $('#select-group-reminder').hide();
-
   $('.requires-group-selection').show();
 
   $('#message').focus();
@@ -19,6 +16,17 @@ function SetActiveServerID(id) {
       GroupID: activeServerID
     },
     success: (data) => {
+      let JSONData = $.parseJSON(data);
+
+      if (JSONData.length > 0) {
+        $('#chatbox-reminder').hide();
+        $('#invite-prompt').hide();
+      } else {
+        $('#chatbox-reminder').show();
+        $('#invite-prompt').show();
+        $('#chatbox-reminder').text('No messages yet');
+      }
+
       $.parseJSON(data).forEach((item, i) => {
         $('#chatbox').append($('<li>').text(item.MessageString));
       });

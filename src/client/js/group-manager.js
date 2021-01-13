@@ -66,6 +66,12 @@ $(window).on("load", () => {
 
         $('#group-create-container').fadeOut(200); // Take 200ms to fade.
         $('body *:not(.blur-exclude)').css('-webkit-filter', '');
+
+
+        $('#group-create-form input[name="group"]').val(''); // Clear the name input.
+        $('#group-create-form input[name="group"]').removeClass('non-empty'); // Clear the name input.
+
+        $('#group-create-button').css('background', '#6dd5ed');
       },
       error: () => {
         alert("Something went wrong. Try again later.");
