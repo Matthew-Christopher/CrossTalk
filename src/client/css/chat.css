@@ -151,6 +151,18 @@ input, button {
   overflow-y: auto; /* Only show the scroll bar when necessary */
 }
 
+#server-container #group-prompt {
+  font-weight: 200;
+  position: relative;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  padding: 10px;
+  font-size: 1.5em;
+  display: none;
+}
+
 #server-container #server-selector {
   display: inline-block;
   width: 100%;

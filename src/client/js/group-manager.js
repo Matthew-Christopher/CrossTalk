@@ -111,6 +111,12 @@ $(window).on("load", () => {
       success: (data) => {
         JSONData = $.parseJSON(data);
 
+        if (JSONData.length > 0) {
+          $('#group-prompt').hide();
+        } else {
+          $('#group-prompt').show();
+        }
+
         // Then we can populate the container dynamically.
         $.each(JSONData, (i, item) => {
 
@@ -119,7 +125,7 @@ $(window).on("load", () => {
             $('<button class="server-button" type="button">').attr('id', item.GroupID)
               .append($('<span class="server-info-container">')
               .append($("<h1></h1>").text(item.GroupName))
-              .append($("<i></i>").text(item.LatestMessageString)));
+              .append($("<i></i>").text(item.LatestMessageString ? item.LatestMessageString : "No messages yet.")));
 
           newGroup.appendTo('#server-selector');
         });
