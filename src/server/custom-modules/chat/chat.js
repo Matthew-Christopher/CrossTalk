@@ -21,22 +21,24 @@ module.exports.initialise = (http) => {
     });
 
     socket.on('chat', (message) => {
-      io.emit('message return', message);
+      if (message.MessageString.trim().length > 0) {
+        io.emit('message return', message);
 
-      log.info(`Chat message in group ${message.GroupID} from user ${message.AuthorID} at time ${message.Timestamp}: "${message.MessageString}"`);
+        log.info(`Chat message in group ${message.GroupID} from user ${message.AuthorID} at time ${message.Timestamp}: "${message.MessageString}"`);
 
-      pool.getConnection(async (err, connection) => {
-        // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
-    		var sql = 'INSERT INTO Message VALUES (?, ?, ?, ?, ?);';
+        pool.getConnection(async (err, connection) => {
+          // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
+      		var sql = 'INSERT INTO Message VALUES (?, ?, ?, ?, ?);';
 
-        GetMessageID(connection, (messageID) => {
-          connection.query(mysql.format(sql, [messageID, message.GroupID, message.AuthorID, message.MessageString, message.Timestamp]), (error, result, fields) => {
-            connection.release();
+          GetMessageID(connection, (messageID) => {
+            connection.query(mysql.format(sql, [messageID, message.GroupID, message.AuthorID, message.MessageString, message.Timestamp]), (error, result, fields) => {
+              connection.release();
 
-            if (error) throw error; // Handle post-release error.
-      		});
-        });
-    	});
+              if (error) throw error; // Handle post-release error.
+        		});
+          });
+      	});
+      }
     });
   });
 };

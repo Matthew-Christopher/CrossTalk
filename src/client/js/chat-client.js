@@ -28,7 +28,7 @@ function SetActiveServerID(id) {
       }
 
       $.parseJSON(data).forEach((item, i) => {
-        $('#chatbox').append($('<li style="margin-right: 50px;">').text(item.MessageString).append($('<i style="position: absolute; right: 20px;">').text('Test')));
+        $('#chatbox').append($('<li style="position: relative;">').text(item.MessageString).append($('<i style="color: #888; position: absolute; right: 0;">').text(GetMessageTimestamp(item.Timestamp))));
       });
 
       $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
@@ -58,35 +58,37 @@ $(window).on("load", () => {
   $("#message-form").submit((event) => {
     event.preventDefault(); // Don't refresh, we want a smooth experience.
 
-    let userID;
-    if (activeServerID) {
-      $.ajax({
-        type: "GET",
-        url: "/api/GetMyUserID",
-        success: (data) => {
-          JSONData = $.parseJSON(data);
+    // We trim whitespace from the start and end of the message before sending it.
+    let messageString = $('#message').val().trim();
 
-          userID = JSONData[0].UserID;
+    if (messageString.length > 0) {
+      let userID;
+      if (activeServerID) {
+        $.ajax({
+          type: "GET",
+          url: "/api/GetMyUserID",
+          success: (data) => {
+            JSONData = $.parseJSON(data);
 
-          // We trim whitespace from the start and end of the message before sending it.
-          let messageString = $('#message').val().trim();
+            userID = JSONData[0].UserID;
 
-          // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
-          let message = new Message(null, activeServerID, userID, messageString, Date.now());
+            // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
+            let message = new Message(null, activeServerID, userID, messageString, Date.now());
 
-          // Don't send the message if it's blank.
-          if (message) {
-            socket.emit('chat', message); // Send the message data from the input field.
+            // Don't send the message if it's blank.
+            if (message) {
+              socket.emit('chat', message); // Send the message data from the input field.
+            }
+
+            $('#message').val(''); // Clear the message input so we can type again immediately.
+
+            $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // Move to the most recent message if the client sent it themselves, independent of the current scroll position.
+          },
+          failure: () => {
+            console.log("Could not retreive display name. Try again later.");
           }
-
-          $('#message').val(''); // Clear the message input so we can type again immediately.
-
-          $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // Move to the most recent message if the client sent it themselves, independent of the current scroll position.
-        },
-        failure: () => {
-          console.log("Could not retreive display name. Try again later.");
-        }
-      });
+        });
+      }
     }
   });
 
@@ -139,7 +141,7 @@ $(window).on("load", () => {
       $('#chatbox-reminder').hide();
       $('#invite-prompt').hide();
 
-      $('#chatbox').append($('<li style="margin-right: 50px;">').text(message.MessageString).append($('<i style="position: absolute; right: 20px;">').text('Test')));
+      $('#chatbox').append($('<li style="position: relative;">').text(message.MessageString).append($('<i style="color: #888; position: absolute; right: 0;">').text(GetMessageTimestamp(message.Timestamp))));
       $('#server-selector .server-button.active-button .server-info-container i').text(message.MessageString);
 
       const pixelsStickScrollThreshold = 150;
@@ -158,4 +160,20 @@ function CloseCreateForm() {
 
   $('#group-create-container').fadeOut(200); // Take 200ms to fade.
   $('body *:not(.blur-exclude)').css('-webkit-filter', '');
+}
+
+function GetMessageTimestamp(timestamp) {
+  let date = new Date(eval(timestamp));
+  let today = new Date();
+
+  if (date.getDate() == today.getDate()) {
+    // The message was sent today, so we'll just say the time.
+    return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  } else if (date.getDate() == today.getDate() - 1) {
+    // The date is yesterday.
+    return 'Yesterday';
+  } else {
+    // The message was before yesterday, so just say the day.
+    return date.toLocaleDateString();
+  }
 }
