@@ -28,7 +28,7 @@ function SetActiveServerID(id) {
       }
 
       $.parseJSON(data).forEach((item, i) => {
-        $('#chatbox').append($('<li>').text(item.MessageString));
+        $('#chatbox').append($('<li style="margin-right: 50px;">').text(item.MessageString).append($('<i style="position: absolute; right: 20px;">').text('Test')));
       });
 
       $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
@@ -113,6 +113,7 @@ $(window).on("load", () => {
 
     $('#group-create-container').fadeIn(200); // Take 200ms to fade.
     $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)');
+    $('input[name="group"]').focus();
 
     if($('#group-join').hasClass('active-button')) {
       $('#group-join').removeClass('active-button');
@@ -135,7 +136,10 @@ $(window).on("load", () => {
   socket.on('message return', (message) => {
     // Only render the message if we are on its group.
     if (message.GroupID === activeServerID) {
-      $('#chatbox').append($('<li>').text(message.MessageString));
+      $('#chatbox-reminder').hide();
+      $('#invite-prompt').hide();
+
+      $('#chatbox').append($('<li style="margin-right: 50px;">').text(message.MessageString).append($('<i style="position: absolute; right: 20px;">').text('Test')));
       $('#server-selector .server-button.active-button .server-info-container i').text(message.MessageString);
 
       const pixelsStickScrollThreshold = 150;
@@ -148,6 +152,8 @@ $(window).on("load", () => {
 });
 
 function CloseCreateForm() {
+  $('#message').focus();
+
   $('#group-create').removeClass('active-button');
 
   $('#group-create-container').fadeOut(200); // Take 200ms to fade.
