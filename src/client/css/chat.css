@@ -268,6 +268,9 @@ input, button {
   border: 0;
   cursor: pointer;
   text-align: left;
+}
+
+#server-selector .server-button:not(:last-child) {
   border-bottom: solid 1px #555;
 }
 
@@ -325,6 +328,8 @@ input, button {
   box-sizing: border-box;
   outline: none;
   border: solid 1px black;
+  border-right: none;
+  border-bottom: none;
   height: 100%;
   width: 100%;
   padding: 5px 65px 5px 15px;
