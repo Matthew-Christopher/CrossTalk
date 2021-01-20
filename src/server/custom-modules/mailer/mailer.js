@@ -20,7 +20,18 @@ module.exports.SendVerification = (email, verificationKey) => {
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) throw error;
-
-    log.info("Verification email sent: " + info.response);
-  })
+  });
 };
+
+module.exports.SendRecovery = (email, recoveryKey) => {
+  const mailOptions = {
+    from: process.env.NM_USER,
+    to: email,
+    subject: 'Recover Your Password',
+    html: '<h1>Welcome to Crosstalk</h1><p>Please click the link below to recover your password.</p><a href=\"localhost/account/reset-password?recoveryKey=' + recoveryKey + '\">localhost/account/reset-password?recoveryKey=' + recoveryKey + '</a><p><i>If you didn\'t request this, you can just ignore the email.</i></p><p>IMPORTANT NOTE: This project is part of my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create an account if you have stumbled upon this website without being permission to use or test it. Thank you.</p>'
+  }
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) throw error;
+  });
+}

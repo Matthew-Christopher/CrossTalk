@@ -193,6 +193,12 @@ input {
   background: #8ffd9f;
 }
 
+#login-container #recover {
+  position: relative;
+  top: -20px;
+  right: 0;
+}
+
 @-webkit-keyframes blink {
   50% {
     opacity: 0;

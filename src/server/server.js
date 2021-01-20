@@ -59,7 +59,7 @@ const chat = require('./custom-modules/chat');
 const AvailableGroup = require('./custom-modules/AvailableGroup.js');
 // END CUSTOM MODULES
 
-app.use(bodyParser.urlencoded({extended : true}));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
@@ -76,7 +76,7 @@ app.get('/verify', (req, res) => {
   pool.getConnection(async (err, connection) => {
     if (err) throw err;
 
-    var sql = "UPDATE USER SET Verified = 1, VerificationKey = NULL WHERE VerificationKey = ?";
+    let sql = "UPDATE USER SET Verified = 1, VerificationKey = NULL WHERE VerificationKey = ?";
 
     connection.query(mysql.format(sql, req.query.verificationKey), (error, res, fields) => {
       connection.release();
@@ -86,6 +86,81 @@ app.get('/verify', (req, res) => {
   });
 
   res.status(201).send("Verified. You may now log in.");
+});
+
+app.get('/verify', (req, res) => {
+  pool.getConnection(async (err, connection) => {
+    if (err) throw err;
+
+    let sql = "UPDATE USER SET Verified = 1, VerificationKey = NULL WHERE VerificationKey = ?";
+
+    connection.query(mysql.format(sql, req.query.verificationKey), (error, res, fields) => {
+      connection.release();
+
+      if (error) throw error; // Handle post-release error.
+    });
+  });
+
+  res.status(201).send("Verified. You may now log in.");
+});
+
+app.get('/account/reset-password', (req, res) => {
+  pool.getConnection(async (err, connection) => {
+    if (err) throw err;
+
+    let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE RecoveryKey = ? AND RecoveryKeyExpires > ?;";
+
+    if (!req.query.recoveryKey) {
+      res.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
+    } else {
+      connection.query(mysql.format(sql, [req.query.recoveryKey, new Date().getTime()]), (error, result, fields) => {
+        if (error) throw error;
+
+        if (result[0].NumberOfMatches != 1) {
+          res.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
+        } else {
+          res.status(200).sendFile(path.join(__dirname + '/../client/account/reset-password.html'));
+        }
+
+        connection.release();
+
+        if (error) throw error; // Handle post-release error.
+      });
+    }
+  });
+});
+
+app.post('/account/reset-password', async (req, res) => {
+  let newHash = await cryptography.Hash(req.body.formData.newPassword);
+  if (!await cryptography.CompareHashes(newHash, req.body.formData.confirmNewPassword)) {
+    res.status(105).send("Passwords did not match.");
+  } else {
+    pool.getConnection(async (err, connection) => {
+      if (err) throw err;
+
+      let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE RecoveryKey = ? AND RecoveryKeyExpires > ?;";
+
+      connection.query(mysql.format(sql, [req.body.recoveryKey, new Date().getTime()]), (error, result, fields) => {
+        if (error) throw error;
+
+        if (result[0].NumberOfMatches != 1) {
+          res.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
+        } else {
+          sql = "UPDATE User SET PasswordHash = ?, RecoveryKey = NULL, RecoveryKeyExpires = NULL WHERE RecoveryKey = ?;";
+
+          connection.query(mysql.format(sql, [newHash, req.body.recoveryKey]), (error, result, fields) => {
+            if (error) throw error;
+
+            res.status(202).send('<meta http-equiv="refresh" content="5; url=/login" />Password reset. You may now proceed to log in. Redirecting in 5 seconds.');
+          });
+        }
+
+        connection.release();
+
+        if (error) throw error; // Handle post-release error.
+      });
+    });
+  }
 });
 
 app.post('/authenticate-login', async (req, res) => {
@@ -98,14 +173,14 @@ app.get('/logout', async (req, res) => {
 
 app.get('/JoinGroup', (req, res) => {
   pool.getConnection(async (err, connection) => {
-    var checkValid = `SELECT GroupID AS JoinID FROM \`Group\` WHERE InviteCode = ?;`;
+    let checkValid = `SELECT GroupID AS JoinID FROM \`Group\` WHERE InviteCode = ?;`;
 
     connection.query(mysql.format(checkValid, req.query.code), (error, firstResult, fields) => {
 
       if (error) throw error;
 
       if (firstResult.length > 0) {
-        var joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
+        let joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
 
         connection.query(mysql.format(joinGroup, [req.session.UserID, firstResult[0].JoinID]), (error, secondResult, fields) => {
           connection.release();
@@ -122,7 +197,7 @@ app.get('/JoinGroup', (req, res) => {
 });
 
 app.post('/register-account', async (req, res) => {
-	var hash = await cryptography.Hash(req.body.password);
+	let hash = await cryptography.Hash(req.body.password);
 
 	if ((req.body.email != req.body['confirm-email']) || !await cryptography.CompareHashes(hash, req.body['confirm-password'])){
 		res.status(105).send("Data entered was not valid.");
@@ -131,8 +206,8 @@ app.post('/register-account', async (req, res) => {
 			if (err) throw err; // Connection failed.
 
 			GetUserID(connection, (userId) => {
-				var sql = "INSERT INTO User VALUES (?, ?, ?, ?, False, ?);";
-				var inserts = [userId[0], req.body['display-name'], req.body.email, hash, userId[1]];
+				let sql = "INSERT INTO User (UserID, DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, ?, False, ?);";
+				let inserts = [userId[0], req.body['display-name'], req.body.email, hash, userId[1]];
 
 				connection.query(mysql.format(sql, inserts), (error, res, fields) => {
 					connection.release();
@@ -148,6 +223,34 @@ app.post('/register-account', async (req, res) => {
 	}
 });
 
+app.post('/recover-account', async (req, res) => {
+
+	if (!req.body.email) {
+		res.status(105).send("Data entered was not valid.");
+	} else {
+    pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
+      GetRecoveryKey(connection, (recoveryKey) => {
+        let sql = "UPDATE User SET RecoveryKey = ?, RecoveryKeyExpires = ? WHERE EmailAddress = ?;";
+
+        let expiryDate = new Date();
+        expiryDate.setHours(expiryDate.getHours() + 24);
+
+        connection.query(mysql.format(sql, [recoveryKey, expiryDate.valueOf(), req.body.email]), (error, res, fields) => {
+          connection.release();
+
+          if (error) throw error; // Handle post-release error.
+
+          mailer.SendRecovery(req.body.email, recoveryKey);
+        });
+      });
+    });
+
+    res.status(201).send("<p>A link has been sent to the provided email address. Please click it to recover your password, <u>checking also in your spam folder.</u></p><b>IMPORTANT NOTE: This project is part of my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create an account if you have stumbled upon this website without being given permission to use or test it. Thank you.</b>");
+	}
+});
+
 app.post('/CreateGroup', (req, res) => {
   log.info("Creating a new group called " + req.body.group);
 
@@ -155,14 +258,14 @@ app.post('/CreateGroup', (req, res) => {
     if (err) throw err; // Connection failed.
 
     GetNewGroupID(connection, (groupID) => {
-      var sql = "INSERT INTO `Group` VALUES (?, ?, ?);";
-      var inserts = [groupID[0], req.body.group, groupID[1]];
+      let sql = "INSERT INTO `Group` VALUES (?, ?, ?);";
+      let inserts = [groupID[0], req.body.group, groupID[1]];
 
       connection.query(mysql.format(sql, inserts), (error, result, fields) => {
 
         if (error) throw error;
 
-        var sql = `INSERT INTO GroupMembership VALUES (?, ?, "Owner");`;
+        let sql = `INSERT INTO GroupMembership VALUES (?, ?, "Owner");`;
 
         connection.query(mysql.format(sql, [req.session.UserID, groupID[0]]), (error, result, fields) => {
           connection.release();
@@ -187,7 +290,7 @@ app.get('/api/GetMyGroups', (req, res) => {
 	let servers = [];
 
 	pool.getConnection(async (err, connection) => {
-		var sql = `
+		let sql = `
     SELECT GroupInfo.GroupID,
            GroupInfo.GroupName,
            MessageInfo.LatestMessageString
@@ -226,7 +329,7 @@ app.get('/api/GetMyGroups', (req, res) => {
 
 app.get('/api/GetMyDisplayName', (req, res) => {
 	pool.getConnection(async (err, connection) => {
-		var sql = "SELECT DisplayName FROM User WHERE UserID = ?;";
+		let sql = "SELECT DisplayName FROM User WHERE UserID = ?;";
 
 		connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
       connection.release();
@@ -245,7 +348,7 @@ app.get('/api/GetMyUserID', (req, res) => {
 app.get('/api/GetMessages', (req, res) => {
 
   pool.getConnection(async (err, connection) => {
-		var sql = 'SELECT Message.MessageID, Message.AuthorID, Message.MessageString, Message.Timestamp FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
+		let sql = 'SELECT Message.MessageID, Message.AuthorID, Message.MessageString, Message.Timestamp FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
 
 		connection.query(mysql.format(sql, [req.session.UserID, req.query.GroupID]), (error, result, fields) => {
       connection.release();
@@ -259,7 +362,7 @@ app.get('/api/GetMessages', (req, res) => {
 
 app.get('/api/GetInviteCode', (req, res) => {
 	pool.getConnection(async (err, connection) => {
-		var sql = "SELECT InviteCode FROM `Group` WHERE GroupID = ?;";
+		let sql = "SELECT InviteCode FROM `Group` WHERE GroupID = ?;";
 
 		connection.query(mysql.format(sql, req.query.GroupID), (error, result, fields) => {
       connection.release();
@@ -281,9 +384,9 @@ const httpServer = http.createServer(app).listen(defaultPort, () => {
 });
 
 function GetUserID(connection, callback) {
-	var idArray = [];
+	let idArray = [];
 	do {
-		var duplicates = 0;
+		let duplicates = 0;
 
 		connection.query("SELECT UUID() AS UserID, LEFT(MD5(RAND()), 32) AS VerificationKey;", (error, firstResult, fields) => {
 			if (error) throw error;
@@ -306,10 +409,10 @@ function GetUserID(connection, callback) {
 }
 
 function GetNewGroupID(connection, callback) {
-  var idArray = [];
+  let idArray = [];
 
   do {
-    var duplicates = 0;
+    let duplicates = 0;
 
     connection.query("SELECT UUID() AS GroupID, LEFT(MD5(RAND()), 12) AS InviteCode;", (error, firstResult, fields) => {
       if (error) throw error;
@@ -327,4 +430,28 @@ function GetNewGroupID(connection, callback) {
       });
     });
   } while (duplicates != 0);
+}
+
+function GetRecoveryKey(connection, callback) {
+  let duplicates = 0;
+
+	do {
+		connection.query("SELECT LEFT(MD5(RAND()), 32) AS RecoveryKey;", (error, firstResult, fields) => {
+			if (error) throw error;
+
+			let recoveryKey = firstResult[0].RecoveryKey;
+
+			connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE RecoveryKey = ?;", recoveryKey), (error, secondResult, fields) => {
+
+        if (error) throw error;
+
+        duplicates = secondResult[0].NumberOfDuplicates;
+
+				if (duplicates == 0) {
+					return callback(recoveryKey); // Ensure callback is called after the async activity terminates, to prevent null errors.
+				}
+			});
+		});
+
+	} while (duplicates != 0);
 }
