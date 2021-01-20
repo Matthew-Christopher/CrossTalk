@@ -388,10 +388,10 @@ function GetUserID(connection, callback) {
 	do {
 		let duplicates = 0;
 
-		connection.query("SELECT UUID() AS UserID, LEFT(MD5(RAND()), 32) AS VerificationKey;", (error, firstResult, fields) => {
+		connection.query("SELECT UUID() AS UserID;", (error, firstResult, fields) => {
 			if (error) throw error;
 
-			idArray = [firstResult[0].UserID, firstResult[0].VerificationKey];
+			idArray = [firstResult[0].UserID, require('crypto').randomBytes(16).toString('hex')];
 
 			connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE UserID = ? OR VerificationKey = ?;", [idArray[0], idArray[1]]), (error, secondResult, fields) => {
 
@@ -410,14 +410,14 @@ function GetUserID(connection, callback) {
 
 function GetNewGroupID(connection, callback) {
   let idArray = [];
+  let duplicates = 0;
 
   do {
-    let duplicates = 0;
 
-    connection.query("SELECT UUID() AS GroupID, LEFT(MD5(RAND()), 12) AS InviteCode;", (error, firstResult, fields) => {
+    connection.query("SELECT UUID() AS GroupID;", (error, firstResult, fields) => {
       if (error) throw error;
 
-      idArray = [firstResult[0].GroupID, firstResult[0].InviteCode];
+      idArray = [firstResult[0].GroupID, require('crypto').randomBytes(6).toString('hex')];
 
       connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM `Group` WHERE GroupID = ? OR InviteCode = ?;", [idArray[0], idArray[1]]), (error, secondResult, fields) => {
         if (error) throw error;
