@@ -608,10 +608,18 @@ input, button {
 	border-top: 1px solid #888;
 }
 
+.options-box li:not(:first-child) {
+  background: #fff;
+}
+
 .options-box li:nth-child(2) {
-	background: #fff;
 	border-top-left-radius: 10px;
 	border-top-right-radius: 10px;
+}
+
+.options-box li:last-child {
+  border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
 }
 
 .options-box li a {
