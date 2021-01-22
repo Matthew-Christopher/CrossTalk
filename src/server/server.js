@@ -265,7 +265,7 @@ app.post('/CreateGroup', (req, res) => {
 
         if (error) throw error;
 
-        let sql = `INSERT INTO GroupMembership VALUES (?, ?, "Owner");`;
+        let sql = `INSERT INTO GroupMembership VALUES (?, ?, 2);`;
 
         connection.query(mysql.format(sql, [req.session.UserID, groupID[0]]), (error, result, fields) => {
           connection.release();
