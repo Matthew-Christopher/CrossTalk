@@ -106,6 +106,7 @@ button {
 
 #error-container p {
   font-size: 1.5em;
+  margin-bottom: 75px;
 }
 
 #error-container #return-button {
@@ -115,7 +116,6 @@ button {
   width: 30%;
   height: 50px;
   font-size: 1.1em;
-  margin-top: 30px;
   border: 1px solid black;
   -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.1);
   box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.1);
