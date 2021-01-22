@@ -53,7 +53,6 @@ const path = require('path');
 const account = require('./custom-modules/account');
 const cryptography = require('./custom-modules/cryptography');
 const log = require('./custom-modules/logging');
-const mailer = require('./custom-modules/mailer');
 const chat = require('./custom-modules/chat');
 const AvailableGroup = require('./custom-modules/AvailableGroup.js');
 // END CUSTOM MODULES
@@ -103,65 +102,6 @@ app.get('/verify', (req, res) => {
   res.status(201).send("Verified. You may now log in.");
 });
 
-app.get('/account/reset-password', (req, res) => {
-  pool.getConnection(async (err, connection) => {
-    if (err) throw err;
-
-    let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE RecoveryKey = ? AND RecoveryKeyExpires > ?;";
-
-    if (!req.query.recoveryKey) {
-      res.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
-    } else {
-      connection.query(mysql.format(sql, [req.query.recoveryKey, new Date().getTime()]), (error, result, fields) => {
-        if (error) throw error;
-
-        if (result[0].NumberOfMatches != 1) {
-          res.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
-        } else {
-          res.status(200).sendFile(path.join(__dirname + '/../client/servable/account/reset-password.html'));
-        }
-
-        connection.release();
-
-        if (error) throw error; // Handle post-release error.
-      });
-    }
-  });
-});
-
-app.post('/account/reset-password', async (req, res) => {
-  let newHash = await cryptography.Hash(req.body.formData.newPassword);
-  if (!await cryptography.CompareHashes(newHash, req.body.formData.confirmNewPassword)) {
-    res.status(105).send("Passwords did not match.");
-  } else {
-    pool.getConnection(async (err, connection) => {
-      if (err) throw err;
-
-      let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE RecoveryKey = ? AND RecoveryKeyExpires > ?;";
-
-      connection.query(mysql.format(sql, [req.body.recoveryKey, new Date().getTime()]), (error, result, fields) => {
-        if (error) throw error;
-
-        if (result[0].NumberOfMatches != 1) {
-          res.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
-        } else {
-          sql = "UPDATE User SET PasswordHash = ?, RecoveryKey = NULL, RecoveryKeyExpires = NULL WHERE RecoveryKey = ?;";
-
-          connection.query(mysql.format(sql, [newHash, req.body.recoveryKey]), (error, result, fields) => {
-            if (error) throw error;
-
-            res.status(202).send('<meta http-equiv="refresh" content="5; url=/login" />Password reset. You may now proceed to log in. Redirecting in 5 seconds.');
-          });
-        }
-
-        connection.release();
-
-        if (error) throw error; // Handle post-release error.
-      });
-    });
-  }
-});
-
 app.post('/authenticate-login', async (req, res) => {
 	account.LogIn(req, res);
 });
@@ -196,58 +136,41 @@ app.get('/JoinGroup', (req, res) => {
 });
 
 app.post('/register-account', async (req, res) => {
-	let hash = await cryptography.Hash(req.body.password);
-
-	if ((req.body.email != req.body['confirm-email']) || !await cryptography.CompareHashes(hash, req.body['confirm-password'])){
-		res.status(105).send("Data entered was not valid.");
-	} else {
-		pool.getConnection(async (err, connection) => {
-			if (err) throw err; // Connection failed.
-
-			GetUserID(connection, (userId) => {
-				let sql = "INSERT INTO User (UserID, DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, ?, False, ?);";
-				let inserts = [userId[0], req.body['display-name'], req.body.email, hash, userId[1]];
-
-				connection.query(mysql.format(sql, inserts), (error, res, fields) => {
-					connection.release();
-
-					if (error) throw error; // Handle post-release error.
-
-					mailer.SendVerification(req.body.email, userId[1]);
-				});
-			});
-		});
-
-		res.status(201).send("<p>A link has been sent to the provided email address. Please click it to verify your account, <u>checking also in your spam folder.</u></p><b>IMPORTANT NOTE: This project is part of my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create an account if you have stumbled upon this website without being given permission to use or test it. Thank you.</b>");
-	}
+	account.Register(req, res);
 });
 
 app.post('/recover-account', async (req, res) => {
+  account.Recover(req, res);
+});
 
-	if (!req.body.email) {
-		res.status(105).send("Data entered was not valid.");
-	} else {
-    pool.getConnection(async (err, connection) => {
-      if (err) throw err; // Connection failed.
+app.get('/account/reset-password', (req, res) => {
+  pool.getConnection(async (err, connection) => {
+    if (err) throw err;
 
-      GetRecoveryKey(connection, (recoveryKey) => {
-        let sql = "UPDATE User SET RecoveryKey = ?, RecoveryKeyExpires = ? WHERE EmailAddress = ?;";
+    let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE RecoveryKey = ? AND RecoveryKeyExpires > ?;";
 
-        let expiryDate = new Date();
-        expiryDate.setHours(expiryDate.getHours() + 24);
+    if (!req.query.recoveryKey) {
+      res.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
+    } else {
+      connection.query(mysql.format(sql, [req.query.recoveryKey, new Date().getTime()]), (error, result, fields) => {
+        if (error) throw error;
 
-        connection.query(mysql.format(sql, [recoveryKey, expiryDate.valueOf(), req.body.email]), (error, res, fields) => {
-          connection.release();
+        if (result[0].NumberOfMatches != 1) {
+          res.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
+        } else {
+          res.status(200).sendFile(path.join(__dirname + '/../client/servable/account/reset-password.html'));
+        }
 
-          if (error) throw error; // Handle post-release error.
+        connection.release();
 
-          mailer.SendRecovery(req.body.email, recoveryKey);
-        });
+        if (error) throw error; // Handle post-release error.
       });
-    });
+    }
+  });
+});
 
-    res.status(201).send("<p>A link has been sent to the provided email address. Please click it to recover your password, <u>checking also in your spam folder.</u></p><b>IMPORTANT NOTE: This project is part of my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create an account if you have stumbled upon this website without being given permission to use or test it. Thank you.</b>");
-	}
+app.post('/account/reset-password', async (req, res) => {
+  account.ResetPassword(req, res);
 });
 
 app.post('/CreateGroup', (req, res) => {
@@ -433,28 +356,4 @@ function GetNewGroupID(connection, callback) {
       });
     });
   } while (duplicates != 0);
-}
-
-function GetRecoveryKey(connection, callback) {
-  let duplicates = 0;
-
-	do {
-		connection.query("SELECT LEFT(MD5(RAND()), 32) AS RecoveryKey;", (error, firstResult, fields) => {
-			if (error) throw error;
-
-			let recoveryKey = firstResult[0].RecoveryKey;
-
-			connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE RecoveryKey = ?;", recoveryKey), (error, secondResult, fields) => {
-
-        if (error) throw error;
-
-        duplicates = secondResult[0].NumberOfDuplicates;
-
-				if (duplicates == 0) {
-					return callback(recoveryKey); // Ensure callback is called after the async activity terminates, to prevent null errors.
-				}
-			});
-		});
-
-	} while (duplicates != 0);
 }
