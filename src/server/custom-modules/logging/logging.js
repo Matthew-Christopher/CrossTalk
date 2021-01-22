@@ -4,7 +4,7 @@ const path = require('path');
 const log4js = require('log4js');
 const logger = log4js.getLogger();
 
-const logFile = GetLogTimeStamp().replace(/\//g,'-').replace(/\:/g,'.') + '.log';
+const logFile = GetLogTimeStamp().replace(/\//g, '-').replace(/\:/g, '.') + '.log';
 fs.writeFile(path.join(__dirname, '../../../../logs', logFile), '', (err) => {
   if (err) throw err
   logger.info(`Log file created: ${logFile}`);
@@ -12,11 +12,27 @@ fs.writeFile(path.join(__dirname, '../../../../logs', logFile), '', (err) => {
 
 log4js.configure({
   appenders: {
-    out:{ type: 'console', layout: { type: 'pattern', pattern: "%d{dd/MM/yyyy hh:mm:ss} [%p] %m" } },
-    app:{ type: 'file', filename: path.join(__dirname, '../../../../logs', logFile), layout: { type: 'pattern', pattern: "%d{dd/MM/yyyy hh:mm:ss} [%p] %m" } }
+    out: {
+      type: 'console',
+      layout: {
+        type: 'pattern',
+        pattern: "%d{dd/MM/yyyy hh:mm:ss} [%p] %m"
+      }
+    },
+    app: {
+      type: 'file',
+      filename: path.join(__dirname, '../../../../logs', logFile),
+      layout: {
+        type: 'pattern',
+        pattern: "%d{dd/MM/yyyy hh:mm:ss} [%p] %m"
+      }
+    }
   },
   categories: {
-    default: { appenders: [ 'out', 'app' ], level: 'debug' }
+    default: {
+      appenders: ['out', 'app'],
+      level: 'debug'
+    }
   },
   replaceConsole: false
 });

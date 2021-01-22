@@ -17,34 +17,34 @@ const pool = mysql.createPool({
 module.exports.Register = async (request, response) => {
   let hash = await cryptography.Hash(request.body.password);
 
-	if ((request.body.email != request.body['confirm-email']) || !await cryptography.CompareHashes(hash, request.body['confirm-password'])){
-		response.status(105).send("Data entered was not valid.");
-	} else {
-		pool.getConnection(async (err, connection) => {
-			if (err) throw err; // Connection failed.
+  if ((request.body.email != request.body['confirm-email']) || !await cryptography.CompareHashes(hash, request.body['confirm-password'])) {
+    response.status(105).send("Data entered was not valid.");
+  } else {
+    pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
 
-			GetUserID(connection, (userId) => {
-				let sql = "INSERT INTO User (UserID, DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, ?, False, ?);";
-				let inserts = [userId[0], request.body['display-name'], request.body.email, hash, userId[1]];
+      GetUserID(connection, (userId) => {
+        let sql = "INSERT INTO User (UserID, DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, ?, False, ?);";
+        let inserts = [userId[0], request.body['display-name'], request.body.email, hash, userId[1]];
 
-				connection.query(mysql.format(sql, inserts), (error, res, fields) => {
-					connection.release();
+        connection.query(mysql.format(sql, inserts), (error, res, fields) => {
+          connection.release();
 
-					if (error) throw error; // Handle post-release error.
+          if (error) throw error; // Handle post-release error.
 
-					mailer.SendVerification(request.body.email, userId[1]);
-				});
-			});
-		});
+          mailer.SendVerification(request.body.email, userId[1]);
+        });
+      });
+    });
 
-		response.status(201).send("<p>A link has been sent to the provided email address. Please click it to verify your account, <u>checking also in your spam folder.</u></p><b>IMPORTANT NOTE: This project is part of my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create an account if you have stumbled upon this website without being given permission to use or test it. Thank you.</b>");
-	}
+    response.status(201).send("<p>A link has been sent to the provided email address. Please click it to verify your account, <u>checking also in your spam folder.</u></p><b>IMPORTANT NOTE: This project is part of my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create an account if you have stumbled upon this website without being given permission to use or test it. Thank you.</b>");
+  }
 };
 
 module.exports.Recover = (request, response) => {
   if (!request.body.email) {
-		response.status(105).send("Data entered was not valid.");
-	} else {
+    response.status(105).send("Data entered was not valid.");
+  } else {
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
 
@@ -65,7 +65,7 @@ module.exports.Recover = (request, response) => {
     });
 
     response.status(201).send("<p>A link has been sent to the provided email address. Please click it to recover your password, <u>checking also in your spam folder.</u></p><b>IMPORTANT NOTE: This project is part of my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create an account if you have stumbled upon this website without being given permission to use or test it. Thank you.</b>");
-	}
+  }
 };
 
 module.exports.ResetPassword = async (request, response) => {
@@ -145,23 +145,23 @@ module.exports.LogOut = async (request, response) => {
 function GetRecoveryKey(connection, callback) {
   let duplicates = 0;
 
-	do {
-		connection.query("SELECT LEFT(MD5(RAND()), 32) AS RecoveryKey;", (error, firstResult, fields) => {
-			if (error) throw error;
+  do {
+    connection.query("SELECT LEFT(MD5(RAND()), 32) AS RecoveryKey;", (error, firstResult, fields) => {
+      if (error) throw error;
 
-			let recoveryKey = firstResult[0].RecoveryKey;
+      let recoveryKey = firstResult[0].RecoveryKey;
 
-			connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE RecoveryKey = ?;", recoveryKey), (error, secondResult, fields) => {
+      connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE RecoveryKey = ?;", recoveryKey), (error, secondResult, fields) => {
 
         if (error) throw error;
 
         duplicates = secondResult[0].NumberOfDuplicates;
 
-				if (duplicates == 0) {
-					return callback(recoveryKey); // Ensure callback is called after the async activity terminates, to prevent null errors.
-				}
-			});
-		});
+        if (duplicates == 0) {
+          return callback(recoveryKey); // Ensure callback is called after the async activity terminates, to prevent null errors.
+        }
+      });
+    });
 
-	} while (duplicates != 0);
+  } while (duplicates != 0);
 }

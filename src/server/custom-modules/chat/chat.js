@@ -28,42 +28,42 @@ module.exports.initialise = (http) => {
 
         pool.getConnection(async (err, connection) => {
           // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
-      		var sql = 'INSERT INTO Message VALUES (?, ?, ?, ?, ?);';
+          var sql = 'INSERT INTO Message VALUES (?, ?, ?, ?, ?);';
 
           GetMessageID(connection, (messageID) => {
             connection.query(mysql.format(sql, [messageID, message.GroupID, message.AuthorID, message.MessageString, message.Timestamp]), (error, result, fields) => {
               connection.release();
 
               if (error) throw error; // Handle post-release error.
-        		});
+            });
           });
-      	});
+        });
       }
     });
   });
 };
 
 function GetMessageID(connection, callback) {
-	do {
+  do {
 
-		var numOfDuplicates = 0;
+    var numOfDuplicates = 0;
 
-		connection.query("SELECT UUID() AS MessageID;", (error, firstResult, fields) => {
-			if (error) throw error;
+    connection.query("SELECT UUID() AS MessageID;", (error, firstResult, fields) => {
+      if (error) throw error;
 
       let candidateID = firstResult[0].MessageID;
 
-			connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM Message WHERE MessageID = ?;", candidateID), (error, secondResult, fields) => {
+      connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM Message WHERE MessageID = ?;", candidateID), (error, secondResult, fields) => {
 
         if (error) throw error;
 
         numOfDuplicates = secondResult[0].NumberOfDuplicates;
 
-				if (numOfDuplicates == 0) {
-					return callback(candidateID); // Ensure callback is called after the async activity terminates, to prevent null errors.
-				}
-			});
-		});
+        if (numOfDuplicates == 0) {
+          return callback(candidateID); // Ensure callback is called after the async activity terminates, to prevent null errors.
+        }
+      });
+    });
 
-	} while (numOfDuplicates != 0);
+  } while (numOfDuplicates != 0);
 }

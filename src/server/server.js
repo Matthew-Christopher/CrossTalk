@@ -20,29 +20,29 @@ const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session); // Persist user sessions between restarts if the cookie hasn't expired.
 
 const sessionStore = new MySQLStore({
-	clearExpired: true,
-	createDatabaseTable: true,
-	expiration: 86400000, // 24 hours.
-	endConnectionOnClose: true,
-	schema: {
-		tableName: 'UserSession',
-		columnNames: {
-			session_id: 'SessionID',
-			expires: 'Expires',
-			data: 'Data'
-		}
-	}
+  clearExpired: true,
+  createDatabaseTable: true,
+  expiration: 86400000, // 24 hours.
+  endConnectionOnClose: true,
+  schema: {
+    tableName: 'UserSession',
+    columnNames: {
+      session_id: 'SessionID',
+      expires: 'Expires',
+      data: 'Data'
+    }
+  }
 }, pool);
 
 app.use(session({
-	name: 'crosstalk.user.sid',
-	secret: process.env.SESSION_SECRET,
-	store: sessionStore,
-	resave: false,
-	saveUninitialized: false,
-	cookie: {
-		maxAge: 86400000 // 24 hours.
-	}
+  name: 'crosstalk.user.sid',
+  secret: process.env.SESSION_SECRET,
+  store: sessionStore,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 86400000 // 24 hours.
+  }
 }));
 
 const http = require('http');
@@ -57,15 +57,17 @@ const chat = require('./custom-modules/chat');
 const AvailableGroup = require('./custom-modules/AvailableGroup.js');
 // END CUSTOM MODULES
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-	if (req.session.LoggedIn){
-		res.redirect('/chat')
-	} else {
-		res.sendFile(path.join(__dirname + '/../client/servable/login.html'));
-	}
+  if (req.session.LoggedIn) {
+    res.redirect('/chat')
+  } else {
+    res.sendFile(path.join(__dirname + '/../client/servable/login.html'));
+  }
 });
 
 app.get('/verify', (req, res) => {
@@ -103,7 +105,7 @@ app.get('/verify', (req, res) => {
 });
 
 app.post('/authenticate-login', async (req, res) => {
-	account.LogIn(req, res);
+  account.LogIn(req, res);
 });
 
 app.get('/logout', async (req, res) => {
@@ -136,7 +138,7 @@ app.get('/JoinGroup', (req, res) => {
 });
 
 app.post('/register-account', async (req, res) => {
-	account.Register(req, res);
+  account.Register(req, res);
 });
 
 app.post('/recover-account', async (req, res) => {
@@ -193,7 +195,9 @@ app.post('/CreateGroup', (req, res) => {
           connection.release();
 
           if (err) throw error; // Handle post-release error.
-          res.status(200).json(JSON.stringify([{'GroupID': groupID[0]}]));
+          res.status(200).json(JSON.stringify([{
+            'GroupID': groupID[0]
+          }]));
         });
       });
     });
@@ -201,18 +205,18 @@ app.post('/CreateGroup', (req, res) => {
 });
 
 app.get('/chat', (req, res) => {
-	if (req.session.LoggedIn) { // Only allow access to the chat page for logged-in users.
-		res.sendFile(path.join(__dirname + '/../client/servable/chat.html'));
-	} else {
-		res.redirect('/');
-	}
+  if (req.session.LoggedIn) { // Only allow access to the chat page for logged-in users.
+    res.sendFile(path.join(__dirname + '/../client/servable/chat.html'));
+  } else {
+    res.redirect('/');
+  }
 });
 
 app.get('/api/GetMyGroups', (req, res) => {
-	let servers = [];
+  let servers = [];
 
-	pool.getConnection(async (err, connection) => {
-		let sql = `
+  pool.getConnection(async (err, connection) => {
+    let sql = `
     SELECT GroupInfo.GroupID,
            GroupInfo.GroupName,
            MessageInfo.LatestMessageString
@@ -239,61 +243,63 @@ app.get('/api/GetMyGroups', (req, res) => {
     ORDER  BY MessageInfo.Timestamp DESC, GroupInfo.GroupName;
     `;
 
-		connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
+    connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
       connection.release();
 
       if (error) throw error; // Handle post-release error.
 
-			res.json(JSON.stringify(result));
-		});
-	});
+      res.json(JSON.stringify(result));
+    });
+  });
 });
 
 app.get('/api/GetMyDisplayName', (req, res) => {
-	pool.getConnection(async (err, connection) => {
-		let sql = "SELECT DisplayName FROM User WHERE UserID = ?;";
+  pool.getConnection(async (err, connection) => {
+    let sql = "SELECT DisplayName FROM User WHERE UserID = ?;";
 
-		connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
+    connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
       connection.release();
 
       if (error) throw error; // Handle post-release error.
 
-			res.json(JSON.stringify(result));
-		});
-	});
+      res.json(JSON.stringify(result));
+    });
+  });
 });
 
 app.get('/api/GetMyUserID', (req, res) => {
-	res.json(JSON.stringify([{'UserID': req.session.UserID}]));
+  res.json(JSON.stringify([{
+    'UserID': req.session.UserID
+  }]));
 });
 
 app.get('/api/GetMessages', (req, res) => {
 
   pool.getConnection(async (err, connection) => {
-		let sql = 'SELECT Message.MessageID, Message.AuthorID, Message.MessageString, Message.Timestamp FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
+    let sql = 'SELECT Message.MessageID, Message.AuthorID, Message.MessageString, Message.Timestamp FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
 
-		connection.query(mysql.format(sql, [req.session.UserID, req.query.GroupID]), (error, result, fields) => {
+    connection.query(mysql.format(sql, [req.session.UserID, req.query.GroupID]), (error, result, fields) => {
       connection.release();
 
       if (error) throw error; // Handle post-release error.
 
-			res.json(JSON.stringify(result));
-		});
-	});
+      res.json(JSON.stringify(result));
+    });
+  });
 });
 
 app.get('/api/GetInviteCode', (req, res) => {
-	pool.getConnection(async (err, connection) => {
-		let sql = "SELECT InviteCode FROM `Group` WHERE GroupID = ?;";
+  pool.getConnection(async (err, connection) => {
+    let sql = "SELECT InviteCode FROM `Group` WHERE GroupID = ?;";
 
-		connection.query(mysql.format(sql, req.query.GroupID), (error, result, fields) => {
+    connection.query(mysql.format(sql, req.query.GroupID), (error, result, fields) => {
       connection.release();
 
       if (error) throw error; // Handle post-release error.
 
-			res.json(JSON.stringify(result));
-		});
-	});
+      res.json(JSON.stringify(result));
+    });
+  });
 });
 
 app.use(express.static('../client/servable', {
@@ -301,37 +307,37 @@ app.use(express.static('../client/servable', {
 }));
 
 app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname + '/../client/error/404.html'));
+  res.status(404).sendFile(path.join(__dirname + '/../client/error/404.html'));
 });
 
 const httpServer = http.createServer(app).listen(defaultPort, () => {
   log.info('Node.js HTTP web server started on port ' + httpServer.address().port);
-	chat.initialise(httpServer);
+  chat.initialise(httpServer);
 });
 
 function GetUserID(connection, callback) {
-	let idArray = [];
-	do {
-		let duplicates = 0;
+  let idArray = [];
+  do {
+    let duplicates = 0;
 
-		connection.query("SELECT UUID() AS UserID;", (error, firstResult, fields) => {
-			if (error) throw error;
+    connection.query("SELECT UUID() AS UserID;", (error, firstResult, fields) => {
+      if (error) throw error;
 
-			idArray = [firstResult[0].UserID, require('crypto').randomBytes(16).toString('hex')];
+      idArray = [firstResult[0].UserID, require('crypto').randomBytes(16).toString('hex')];
 
-			connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE UserID = ? OR VerificationKey = ?;", [idArray[0], idArray[1]]), (error, secondResult, fields) => {
+      connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE UserID = ? OR VerificationKey = ?;", [idArray[0], idArray[1]]), (error, secondResult, fields) => {
 
         if (error) throw error;
 
         duplicates = secondResult[0].NumberOfDuplicates;
 
-				if (duplicates == 0) {
-					return callback(idArray); // Ensure callback is called after the async activity terminates, to prevent null errors.
-				}
-			});
-		});
+        if (duplicates == 0) {
+          return callback(idArray); // Ensure callback is called after the async activity terminates, to prevent null errors.
+        }
+      });
+    });
 
-	} while (duplicates != 0);
+  } while (duplicates != 0);
 }
 
 function GetNewGroupID(connection, callback) {
