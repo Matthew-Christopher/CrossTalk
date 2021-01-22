@@ -17,7 +17,7 @@ const pool = mysql.createPool({
 });
 
 const session = require('express-session');
-const MySQLStore = require('express-mysql-session')(session); // Persist user sessions between restartsif the cookie hasn't expired.
+const MySQLStore = require('express-mysql-session')(session); // Persist user sessions between restarts if the cookie hasn't expired.
 
 const sessionStore = new MySQLStore({
 	clearExpired: true,
@@ -46,7 +46,6 @@ app.use(session({
 }));
 
 const http = require('http');
-//const https = require('https'); // Running on localhost, we could implement SSL later.
 
 const path = require('path');
 
