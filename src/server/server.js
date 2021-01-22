@@ -66,7 +66,7 @@ app.get('/', (req, res) => {
 	if (req.session.LoggedIn){
 		res.redirect('/chat')
 	} else {
-		res.sendFile(path.join(__dirname + '/../client/login.html'));
+		res.sendFile(path.join(__dirname + '/../client/servable/login.html'));
 	}
 });
 
@@ -119,7 +119,7 @@ app.get('/account/reset-password', (req, res) => {
         if (result[0].NumberOfMatches != 1) {
           res.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
         } else {
-          res.status(200).sendFile(path.join(__dirname + '/../client/account/reset-password.html'));
+          res.status(200).sendFile(path.join(__dirname + '/../client/servable/account/reset-password.html'));
         }
 
         connection.release();
@@ -280,7 +280,7 @@ app.post('/CreateGroup', (req, res) => {
 
 app.get('/chat', (req, res) => {
 	if (req.session.LoggedIn) { // Only allow access to the chat page for logged-in users.
-		res.sendFile(path.join(__dirname + '/../client/chat.html'));
+		res.sendFile(path.join(__dirname + '/../client/servable/chat.html'));
 	} else {
 		res.redirect('/');
 	}
@@ -374,9 +374,13 @@ app.get('/api/GetInviteCode', (req, res) => {
 	});
 });
 
-app.use(express.static('../client', {
+app.use(express.static('../client/servable', {
   extensions: ['html', 'htm']
 }));
+
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname + '/../client/error/404.html'));
+});
 
 const httpServer = http.createServer(app).listen(defaultPort, () => {
   log.info('Node.js HTTP web server started on port ' + httpServer.address().port);
