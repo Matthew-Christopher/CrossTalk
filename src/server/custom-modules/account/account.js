@@ -77,17 +77,17 @@ module.exports.ResetPassword = async (request, response) => {
     pool.getConnection(async (err, connection) => {
       if (err) throw err;
 
-      let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE RecoveryKey = ? AND RecoveryKeyExpires > ?;";
+      let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE (RecoveryKey = ? AND RecoveryKeyExpires > ?) OR UserID = ?;";
 
-      connection.query(mysql.format(sql, [request.body.recoveryKey, new Date().getTime()]), (error, result, fields) => {
+      connection.query(mysql.format(sql, [request.body.recoveryKey, new Date().getTime(), request.session.UserID]), (error, result, fields) => {
         if (error) throw error;
 
         if (result[0].NumberOfMatches != 1) {
           response.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
         } else {
-          sql = "UPDATE User SET PasswordHash = ?, RecoveryKey = NULL, RecoveryKeyExpires = NULL WHERE RecoveryKey = ?;";
+          sql = "UPDATE User SET PasswordHash = ?, RecoveryKey = NULL, RecoveryKeyExpires = NULL WHERE RecoveryKey = ? OR UserID = ?;";
 
-          connection.query(mysql.format(sql, [newHash, request.body.recoveryKey]), (error, result, fields) => {
+          connection.query(mysql.format(sql, [newHash, request.body.recoveryKey, request.session.UserID]), (error, result, fields) => {
             if (error) throw error;
 
             response.status(202).send('<meta http-equiv="refresh" content="5; url=/login" />Password reset. You may now proceed to log in. Redirecting in 5 seconds.');

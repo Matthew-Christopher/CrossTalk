@@ -150,13 +150,13 @@ app.get('/account/reset-password(.html)?', (req, res) => {
 
     let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE RecoveryKey = ? AND RecoveryKeyExpires > ?;";
 
-    if (!req.query.recoveryKey) {
+    if (!(req.query.recoveryKey || req.session.LoggedIn)) {
       res.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
     } else {
       connection.query(mysql.format(sql, [req.query.recoveryKey, new Date().getTime()]), (error, result, fields) => {
         if (error) throw error;
 
-        if (result[0].NumberOfMatches != 1) {
+        if (result[0].NumberOfMatches != 1 && !req.session.LoggedIn) {
           res.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
         } else {
           res.status(200).sendFile(path.join(__dirname + '/../client/servable/account/reset-password.html'));
