@@ -171,7 +171,7 @@ app.get('/account/change-password(.html)?', (req, res) => {
 });
 
 app.post('/account/change-password', async (req, res) => {
-  account.ResetPassword(req, res);
+  account.ChangePassword(req, res);
 });
 
 app.post('/CreateGroup', (req, res) => {
