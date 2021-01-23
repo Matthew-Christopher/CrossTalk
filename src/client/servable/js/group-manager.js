@@ -16,8 +16,16 @@ $(window).on("load", () => {
       url: "/JoinGroup",
       data: $('#group-join-form').serialize(),
       success: (data) => {
-        if ($.parseJSON(data).toLowerCase() == "success") {
-          FetchGroups();
+        console.log($.parseJSON(data));
+        if ($.parseJSON(data).status.toLowerCase() == "success") {
+          FetchGroups(() => {
+            let newGroupID = $.parseJSON(data).groupID;
+
+            // Select the new group and scroll to it.
+            $('#' + newGroupID).trigger('click');
+
+            $('#server-selector').scrollTop($('#' + newGroupID)[0].offsetTop - $('#server-container').height() + ($('#' + newGroupID).height() - 1));
+          });
 
           $('#group-join-code').val('');
           $('#group-join').removeClass('active-button');

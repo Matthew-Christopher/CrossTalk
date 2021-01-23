@@ -127,10 +127,13 @@ app.get('/JoinGroup', (req, res) => {
 
           if (error) throw error; // Handle post-release error.
 
-          res.json(JSON.stringify("success"));
+          res.json(JSON.stringify({
+            status: "success",
+            groupID: firstResult[0].JoinID
+          }));
         });
       } else {
-        res.json(JSON.stringify("Invalid code."));
+        res.json(JSON.stringify({status: 'invalid'}));
       }
     });
   });
