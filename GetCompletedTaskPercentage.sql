@@ -1,1 +1,1 @@
-SELECT (SELECT COUNT(*) FROM Message WHERE GroupID = "449dc213-567d-11eb-b511-7085c2833bdf" AND MessageString LIKE "✓%")/(SELECT COUNT(*) FROM Message WHERE GroupID = "449dc213-567d-11eb-b511-7085c2833bdf") * 100 AS CompletedPercentage;
+SELECT CONCAT(ROUND((SELECT COUNT(*) FROM Message WHERE GroupID = "449dc213-567d-11eb-b511-7085c2833bdf" AND MessageString LIKE "✓%")/(SELECT COUNT(*) FROM Message WHERE GroupID = "449dc213-567d-11eb-b511-7085c2833bdf") * 100, 1), '%') AS CompletedPercentage;
