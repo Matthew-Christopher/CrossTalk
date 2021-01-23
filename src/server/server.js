@@ -62,30 +62,29 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
+
+app.get('(/login(.html)?)?', (req, res) => {
   if (req.session.LoggedIn) {
-    res.redirect('/chat')
+    res.redirect('/chat');
   } else {
     res.sendFile(path.join(__dirname + '/../client/servable/login.html'));
   }
 });
 
-app.get('/verify', (req, res) => {
-  log.info(req.query.verificationKey);
+app.get('/recover(.html)?', (req, res) => {
+  if (req.session.LoggedIn) {
+    res.redirect('/chat');
+  } else {
+    res.sendFile(path.join(__dirname + '/../client/servable/recover.html'));
+  }
+});
 
-  pool.getConnection(async (err, connection) => {
-    if (err) throw err;
-
-    let sql = "UPDATE USER SET Verified = 1, VerificationKey = NULL WHERE VerificationKey = ?";
-
-    connection.query(mysql.format(sql, req.query.verificationKey), (error, res, fields) => {
-      connection.release();
-
-      if (error) throw error; // Handle post-release error.
-    });
-  });
-
-  res.status(201).send("Verified. You may now log in.");
+app.get('/register(.html)?', (req, res) => {
+  if (req.session.LoggedIn) {
+    res.redirect('/chat');
+  } else {
+    res.sendFile(path.join(__dirname + '/../client/servable/register.html'));
+  }
 });
 
 app.get('/verify', (req, res) => {
@@ -145,7 +144,7 @@ app.post('/recover-account', async (req, res) => {
   account.Recover(req, res);
 });
 
-app.get('/account/reset-password', (req, res) => {
+app.get('/account/reset-password(.html)?', (req, res) => {
   pool.getConnection(async (err, connection) => {
     if (err) throw err;
 
@@ -204,7 +203,7 @@ app.post('/CreateGroup', (req, res) => {
   });
 });
 
-app.get('/chat', (req, res) => {
+app.get('/chat(.html)?', (req, res) => {
   if (req.session.LoggedIn) { // Only allow access to the chat page for logged-in users.
     res.sendFile(path.join(__dirname + '/../client/servable/chat.html'));
   } else {
