@@ -68,7 +68,7 @@ module.exports.Recover = (request, response) => {
   }
 };
 
-module.exports.ResetPassword = async (request, response) => {
+module.exports.ChangePassword = async (request, response) => {
   let newHash = await cryptography.Hash(request.body.formData.newPassword);
 
   if (!await cryptography.CompareHashes(newHash, request.body.formData.confirmNewPassword)) {
@@ -90,7 +90,7 @@ module.exports.ResetPassword = async (request, response) => {
           connection.query(mysql.format(sql, [newHash, request.body.recoveryKey, request.session.UserID]), (error, result, fields) => {
             if (error) throw error;
 
-            response.status(202).send('<meta http-equiv="refresh" content="5; url=/login" />Password reset. You may now proceed to log in. Redirecting in 5 seconds.');
+            response.status(202).send('<meta http-equiv="refresh" content="5; url=/login" />Password changed. You may now proceed to log in. Redirecting in 5 seconds.');
           });
         }
 

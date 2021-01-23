@@ -4,7 +4,7 @@ $(window).on("load", () => {
 
     $.ajax({
       type: "POST",
-      url: "/account/reset-password",
+      url: "/account/change-password",
       data: JSON.stringify({
         recoveryKey: new URLSearchParams(window.location.search).get('recoveryKey'),
         formData: {

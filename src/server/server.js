@@ -144,7 +144,7 @@ app.post('/recover-account', async (req, res) => {
   account.Recover(req, res);
 });
 
-app.get('/account/reset-password(.html)?', (req, res) => {
+app.get('/account/change-password(.html)?', (req, res) => {
   pool.getConnection(async (err, connection) => {
     if (err) throw err;
 
@@ -159,7 +159,7 @@ app.get('/account/reset-password(.html)?', (req, res) => {
         if (result[0].NumberOfMatches != 1 && !req.session.LoggedIn) {
           res.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
         } else {
-          res.status(200).sendFile(path.join(__dirname + '/../client/servable/account/reset-password.html'));
+          res.status(200).sendFile(path.join(__dirname + '/../client/servable/account/change-password.html'));
         }
 
         connection.release();
@@ -170,7 +170,7 @@ app.get('/account/reset-password(.html)?', (req, res) => {
   });
 });
 
-app.post('/account/reset-password', async (req, res) => {
+app.post('/account/change-password', async (req, res) => {
   account.ResetPassword(req, res);
 });
 
