@@ -72,7 +72,7 @@ module.exports.ChangePassword = async (request, response) => {
   let newHash = await cryptography.Hash(request.body.formData.newPassword);
 
   if (!await cryptography.CompareHashes(newHash, request.body.formData.confirmNewPassword)) {
-    response.status(105).send("Passwords did not match.");
+    response.json(JSON.stringify({outcome: 'mismatch'}));
   } else {
     pool.getConnection(async (err, connection) => {
       if (err) throw err;
@@ -83,14 +83,14 @@ module.exports.ChangePassword = async (request, response) => {
         if (error) throw error;
 
         if (result[0].NumberOfMatches != 1) {
-          response.status(422).send('<meta http-equiv="refresh" content="5; url=/recover" />Invalid recovery link. It might have expired or have been mis-copied. Redirecting in 5 seconds.');
+          response.json(JSON.stringify({outcome: 'invalid'}));
         } else {
           sql = "UPDATE User SET PasswordHash = ?, RecoveryKey = NULL, RecoveryKeyExpires = NULL WHERE RecoveryKey = ? OR UserID = ?;";
 
           connection.query(mysql.format(sql, [newHash, request.body.recoveryKey, request.session.UserID]), (error, result, fields) => {
             if (error) throw error;
 
-            response.status(202).send('<meta http-equiv="refresh" content="5; url=/login" />Password changed. You may now proceed to log in. Redirecting in 5 seconds.');
+            response.json(JSON.stringify({outcome: 'change'}));
           });
         }
 

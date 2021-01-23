@@ -16,7 +16,7 @@ function SetActiveServerID(id) {
     success: (data) => {
 
       $('#chatbox').empty();
-      
+
       let JSONData = $.parseJSON(data);
 
       if (JSONData.length > 0) {

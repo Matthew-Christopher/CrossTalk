@@ -113,13 +113,24 @@ app.get('/logout', async (req, res) => {
 
 app.get('/JoinGroup', (req, res) => {
   pool.getConnection(async (err, connection) => {
-    let checkValid = `SELECT GroupID AS JoinID FROM \`Group\` WHERE InviteCode = ?;`;
+    let checkValid = `
+    SELECT \`Group\`.GroupID AS JoinID
+    FROM   \`Group\`
+    WHERE  InviteCode = ?
+    UNION ALL
+          (
+                 SELECT GroupMembership.GroupID
+                 FROM   GroupMembership
+                 JOIN   \`Group\`
+                 ON     GroupMembership.GroupID = \`Group\`.GroupID
+                 WHERE  UserID = ?
+                 AND    \`Group\`.InviteCode = ?);`;
 
-    connection.query(mysql.format(checkValid, req.query.code), (error, firstResult, fields) => {
+    connection.query(mysql.format(checkValid, [req.query.code, req.session.UserID, req.query.code]), (error, firstResult, fields) => {
 
       if (error) throw error;
 
-      if (firstResult.length > 0) {
+      if (firstResult.length == 1) {
         let joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
 
         connection.query(mysql.format(joinGroup, [req.session.UserID, firstResult[0].JoinID]), (error, secondResult, fields) => {
