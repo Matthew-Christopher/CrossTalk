@@ -88,19 +88,27 @@ app.get('/register(.html)?', (req, res) => {
 });
 
 app.get('/verify', (req, res) => {
-  pool.getConnection(async (err, connection) => {
-    if (err) throw err;
+  if (req.session.LoggedIn || !req.query.verificationKey) {
+    res.redirect('/chat');
+  } else {
+    pool.getConnection(async (err, connection) => {
+      if (err) throw err;
 
-    let sql = "UPDATE USER SET Verified = 1, VerificationKey = NULL WHERE VerificationKey = ?";
+      let sql = "UPDATE USER SET Verified = 1, VerificationKey = NULL WHERE VerificationKey = ?";
 
-    connection.query(mysql.format(sql, req.query.verificationKey), (error, res, fields) => {
-      connection.release();
+      connection.query(mysql.format(sql, req.query.verificationKey), (error, result, fields) => {
+        connection.release();
 
-      if (error) throw error; // Handle post-release error.
+        if (error) throw error; // Handle post-release error.
+
+        if (result.affectedRows > 0) {
+          res.status(201).send("Verified. You may now log in.");
+        } else {
+          res.status(422).send("Invalid verification key.");
+        }
+      });
     });
-  });
-
-  res.status(201).send("Verified. You may now log in.");
+  }
 });
 
 app.post('/authenticate-login', async (req, res) => {
@@ -112,42 +120,46 @@ app.get('/logout', async (req, res) => {
 });
 
 app.get('/JoinGroup', (req, res) => {
-  pool.getConnection(async (err, connection) => {
-    let checkValid = `
-    SELECT \`Group\`.GroupID AS JoinID
-    FROM   \`Group\`
-    WHERE  InviteCode = ?
-    UNION ALL
-          (
-                 SELECT GroupMembership.GroupID
-                 FROM   GroupMembership
-                 JOIN   \`Group\`
-                 ON     GroupMembership.GroupID = \`Group\`.GroupID
-                 WHERE  UserID = ?
-                 AND    \`Group\`.InviteCode = ?);`;
+  if (!req.session.LoggedIn || !req.query.code) {
+    res.redirect('/chat');
+  } else {
+    pool.getConnection(async (err, connection) => {
+      let checkValid = `
+      SELECT \`Group\`.GroupID AS JoinID
+      FROM   \`Group\`
+      WHERE  InviteCode = ?
+      UNION ALL
+            (
+                   SELECT GroupMembership.GroupID
+                   FROM   GroupMembership
+                   JOIN   \`Group\`
+                   ON     GroupMembership.GroupID = \`Group\`.GroupID
+                   WHERE  UserID = ?
+                   AND    \`Group\`.InviteCode = ?);`;
 
-    connection.query(mysql.format(checkValid, [req.query.code, req.session.UserID, req.query.code]), (error, firstResult, fields) => {
+      connection.query(mysql.format(checkValid, [req.query.code, req.session.UserID, req.query.code]), (error, firstResult, fields) => {
 
-      if (error) throw error;
+        if (error) throw error;
 
-      if (firstResult.length == 1) {
-        let joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
+        if (firstResult.length == 1) {
+          let joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
 
-        connection.query(mysql.format(joinGroup, [req.session.UserID, firstResult[0].JoinID]), (error, secondResult, fields) => {
-          connection.release();
+          connection.query(mysql.format(joinGroup, [req.session.UserID, firstResult[0].JoinID]), (error, secondResult, fields) => {
+            connection.release();
 
-          if (error) throw error; // Handle post-release error.
+            if (error) throw error; // Handle post-release error.
 
-          res.json(JSON.stringify({
-            status: "success",
-            groupID: firstResult[0].JoinID
-          }));
-        });
-      } else {
-        res.json(JSON.stringify({status: 'invalid'}));
-      }
+            res.json(JSON.stringify({
+              status: "success",
+              groupID: firstResult[0].JoinID
+            }));
+          });
+        } else {
+          res.json(JSON.stringify({status: 'invalid'}));
+        }
+      });
     });
-  });
+  }
 });
 
 app.post('/register-account', async (req, res) => {
@@ -225,94 +237,113 @@ app.get('/chat(.html)?', (req, res) => {
   }
 });
 
-app.get('/api/GetMyGroups', (req, res) => {
-  let servers = [];
+app.get('/api/GetMyGroups', (req, res, next) => {
+  if (req.session.LoggedIn) {
+    let servers = [];
 
-  pool.getConnection(async (err, connection) => {
-    let sql = `
-    SELECT GroupInfo.GroupID,
-           GroupInfo.GroupName,
-           MessageInfo.LatestMessageString
-    FROM   (SELECT \`Group\`.GroupID,
-                   \`Group\`.GroupName
-            FROM   \`Group\`
-                   JOIN GroupMembership
-                     ON \`Group\`.GroupID = GroupMembership.GroupID
-            WHERE  GroupMembership.UserID = ?)
-           AS
-           GroupInfo
-           LEFT JOIN (SELECT Message.Messagestring AS LatestMessageString,
-                        LatestMessage.GroupID,
-                        LatestMessage.Timestamp
-                 FROM   Message
-                        JOIN (SELECT GroupID,
-                                     MAX(Timestamp) AS Timestamp
-                              FROM   Message
-                              GROUP  BY GroupID) AS LatestMessage
-                          ON Message.GroupID = LatestMessage.GroupID
-                             AND Message.Timestamp = LatestMessage.Timestamp
-                 ORDER  BY LatestMessage.Timestamp DESC) AS MessageInfo
-             ON GroupInfo.GroupID = MessageInfo.GroupID
-    ORDER  BY MessageInfo.Timestamp DESC, GroupInfo.GroupName;
-    `;
+    pool.getConnection(async (err, connection) => {
+      let sql = `
+      SELECT GroupInfo.GroupID,
+             GroupInfo.GroupName,
+             MessageInfo.LatestMessageString
+      FROM   (SELECT \`Group\`.GroupID,
+                     \`Group\`.GroupName
+              FROM   \`Group\`
+                     JOIN GroupMembership
+                       ON \`Group\`.GroupID = GroupMembership.GroupID
+              WHERE  GroupMembership.UserID = ?)
+             AS
+             GroupInfo
+             LEFT JOIN (SELECT Message.Messagestring AS LatestMessageString,
+                          LatestMessage.GroupID,
+                          LatestMessage.Timestamp
+                   FROM   Message
+                          JOIN (SELECT GroupID,
+                                       MAX(Timestamp) AS Timestamp
+                                FROM   Message
+                                GROUP  BY GroupID) AS LatestMessage
+                            ON Message.GroupID = LatestMessage.GroupID
+                               AND Message.Timestamp = LatestMessage.Timestamp
+                   ORDER  BY LatestMessage.Timestamp DESC) AS MessageInfo
+               ON GroupInfo.GroupID = MessageInfo.GroupID
+      ORDER  BY MessageInfo.Timestamp DESC, GroupInfo.GroupName;
+      `;
 
-    connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
-      connection.release();
+      connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
+        connection.release();
 
-      if (error) throw error; // Handle post-release error.
+        if (error) throw error; // Handle post-release error.
 
-      res.json(JSON.stringify(result));
+        res.json(JSON.stringify(result));
+      });
     });
-  });
+  } else {
+    next();
+  }
 });
 
-app.get('/api/GetMyDisplayName', (req, res) => {
-  pool.getConnection(async (err, connection) => {
-    let sql = "SELECT DisplayName FROM User WHERE UserID = ?;";
+app.get('/api/GetMyDisplayName', (req, res, next) => {
+  if (req.session.LoggedIn) {
+    pool.getConnection(async (err, connection) => {
+      let sql = "SELECT DisplayName FROM User WHERE UserID = ?;";
 
-    connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
-      connection.release();
+      connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
+        connection.release();
 
-      if (error) throw error; // Handle post-release error.
+        if (error) throw error; // Handle post-release error.
 
-      res.json(JSON.stringify(result));
+        res.json(JSON.stringify(result));
+      });
     });
-  });
+  } else {
+    next();
+  }
 });
 
-app.get('/api/GetMyUserID', (req, res) => {
-  res.json(JSON.stringify([{
-    'UserID': req.session.UserID
-  }]));
+app.get('/api/GetMyUserID', (req, res, next) => {
+  if (req.session.LoggedIn) {
+    res.json(JSON.stringify([{
+      'UserID': req.session.UserID
+    }]));
+  } else {
+    next();
+  }
 });
 
-app.get('/api/GetMessages', (req, res) => {
+app.get('/api/GetMessages', (req, res, next) => {
+  if (req.session.LoggedIn && req.query.GroupID) {
+    pool.getConnection(async (err, connection) => {
+      let sql = 'SELECT Message.MessageID, Message.AuthorID, Message.MessageString, Message.Timestamp FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
 
-  pool.getConnection(async (err, connection) => {
-    let sql = 'SELECT Message.MessageID, Message.AuthorID, Message.MessageString, Message.Timestamp FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
+      connection.query(mysql.format(sql, [req.session.UserID, req.query.GroupID]), (error, result, fields) => {
+        connection.release();
 
-    connection.query(mysql.format(sql, [req.session.UserID, req.query.GroupID]), (error, result, fields) => {
-      connection.release();
+        if (error) throw error; // Handle post-release error.
 
-      if (error) throw error; // Handle post-release error.
-
-      res.json(JSON.stringify(result));
+        res.json(JSON.stringify(result));
+      });
     });
-  });
+  } else {
+    next();
+  }
 });
 
-app.get('/api/GetInviteCode', (req, res) => {
-  pool.getConnection(async (err, connection) => {
-    let sql = "SELECT InviteCode FROM `Group` WHERE GroupID = ?;";
+app.get('/api/GetInviteCode', (req, res, next) => {
+  if (req.session.LoggedIn && req.query.GroupID) {
+    pool.getConnection(async (err, connection) => {
+      let sql = "SELECT InviteCode FROM `Group` WHERE GroupID = ?;";
 
-    connection.query(mysql.format(sql, req.query.GroupID), (error, result, fields) => {
-      connection.release();
+      connection.query(mysql.format(sql, req.query.GroupID), (error, result, fields) => {
+        connection.release();
 
-      if (error) throw error; // Handle post-release error.
+        if (error) throw error; // Handle post-release error.
 
-      res.json(JSON.stringify(result));
+        res.json(JSON.stringify(result));
+      });
     });
-  });
+  } else {
+    next();
+  }
 });
 
 app.use(express.static('../client/servable', {
