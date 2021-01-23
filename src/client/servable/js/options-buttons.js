@@ -16,7 +16,7 @@ $(window).on("load", () => {
 
       ToggleVisiblity('#options-nav-container');
     } else if ($(event.target).is('#show-invite-code')) {
-      $('#invite-code-display').css('display', 'flex');
+      $('#invite-code-display').css('display', ($('#invite-code-display').css('display') == 'none') ? 'flex' : 'none');
     } else if ($(event.target).is('#invite-code-copy')) {
       CopyInviteCode();
 
