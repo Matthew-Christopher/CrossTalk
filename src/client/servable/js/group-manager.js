@@ -59,7 +59,7 @@ $(window).on("load", () => {
           // Select the new group and scroll to it.
           $('#' + newGroupID).trigger('click');
 
-          $('#server-container').scrollTop($('#' + newGroupID)[0].offsetTop - $('#server-container').height() + ($('#' + newGroupID).height() - 1));
+          $('#server-selector').scrollTop($('#' + newGroupID)[0].offsetTop - $('#server-container').height() + ($('#' + newGroupID).height() - 1));
         });
 
         $('#group-create').removeClass('active-button');
