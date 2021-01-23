@@ -7,8 +7,6 @@ function SetActiveServerID(id) {
 
   $('#message').focus();
 
-  $('#chatbox').empty();
-
   $.ajax({
     type: "GET",
     url: "/api/GetMessages",
@@ -16,6 +14,9 @@ function SetActiveServerID(id) {
       GroupID: activeServerID
     },
     success: (data) => {
+
+      $('#chatbox').empty();
+      
       let JSONData = $.parseJSON(data);
 
       if (JSONData.length > 0) {
