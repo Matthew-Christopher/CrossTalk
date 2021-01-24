@@ -25,7 +25,9 @@
       <div id="login-container">
         <h1>Forgot your password?</h1>
         <p style="margin: 20px;">We will send a link to the email address associated with your account.</p>
-        <form action="recover-account" method="POST">
+        <form id="recover-form" action="recover-account" method="POST">
+
+          <p id="result" style="font-weight: bolder; margin: 50px 0; font-size: 1.1em;"></p>
 
           <div class="input-field-container">
             <input class="effect-20" type="email" name="email" placeholder="" required autofocus>
@@ -56,5 +58,6 @@
 
   <script src="particles/LoginParticlesLoader.js"></script>
   <script src="js/empty-input.js"></script>
+  <script src="js/account-forms.js"></script>
 </body>
 </html>

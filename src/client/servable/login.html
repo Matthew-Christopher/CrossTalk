@@ -8,6 +8,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+
   <meta name="apple-mobile-web-app-title" content="Crosstalk">
   <meta name="application-name" content="Crosstalk">
   <meta name="theme-color" content="#ffffff">
@@ -24,7 +25,9 @@
     <div id="login-section">
       <div id="login-container">
         <h1>Welcome Back</h1>
-        <form action="authenticate-login" method="POST">
+        <form id="login-form" action="authenticate-login" method="POST">
+
+          <p id="result" style="font-weight: bolder; margin: 50px 0; font-size: 1.1em;"></p>
 
           <div class="input-field-container">
             <input class="effect-20" type="email" name="email" placeholder="" required autofocus>
@@ -64,5 +67,6 @@
 
   <script src="particles/LoginParticlesLoader.js"></script>
   <script src="js/empty-input.js"></script>
+  <script src="js/account-forms.js"></script>
 </body>
 </html>

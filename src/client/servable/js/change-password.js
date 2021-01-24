@@ -38,7 +38,7 @@ $(window).on("load", () => {
         }
       },
       error: () => {
-        alert("Something went wrong. Try again later.");
+        $('#result').text('Something went wrong. Try again later.');
       }
     });
   });

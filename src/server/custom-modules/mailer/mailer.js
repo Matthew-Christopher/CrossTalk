@@ -35,3 +35,16 @@ module.exports.SendRecovery = (email, recoveryKey) => {
     if (error) throw error;
   });
 }
+
+module.exports.SendChangeNotification = (displayName, email) => {
+  const mailOptions = {
+    from: process.env.NM_USER,
+    to: email,
+    subject: 'Notification of Password Change',
+    html: '<h1>Crosstalk</h1><p>Dear ' + displayName + ',</p><p>This automated email is to let you know that the password associated with your account was just changed. If this was you, you do not need to take any further action.</p><p>IMPORTANT NOTE: This project is part of my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create or use an account if you have stumbled upon this website without being permission to use or test it. Thank you.</p>'
+  }
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) throw error;
+  });
+}

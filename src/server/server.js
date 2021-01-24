@@ -57,6 +57,13 @@ const chat = require('./custom-modules/chat');
 const AvailableGroup = require('./custom-modules/AvailableGroup.js');
 // END CUSTOM MODULES
 
+app.set('etag', false);
+
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store')
+  next()
+});
+
 app.use(bodyParser.urlencoded({
   extended: true
 }));
@@ -359,32 +366,8 @@ const httpServer = http.createServer(app).listen(defaultPort, () => {
   chat.initialise(httpServer);
 });
 
-function GetUserID(connection, callback) {
-  let idArray = [];
-  do {
-    let duplicates = 0;
-
-    connection.query("SELECT UUID() AS UserID;", (error, firstResult, fields) => {
-      if (error) throw error;
-
-      idArray = [firstResult[0].UserID, require('crypto').randomBytes(16).toString('hex')];
-
-      connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE UserID = ? OR VerificationKey = ?;", [idArray[0], idArray[1]]), (error, secondResult, fields) => {
-
-        if (error) throw error;
-
-        duplicates = secondResult[0].NumberOfDuplicates;
-
-        if (duplicates == 0) {
-          return callback(idArray); // Ensure callback is called after the async activity terminates, to prevent null errors.
-        }
-      });
-    });
-
-  } while (duplicates != 0);
-}
-
 function GetNewGroupID(connection, callback) {
+  
   let idArray = [];
   let duplicates = 0;
 
