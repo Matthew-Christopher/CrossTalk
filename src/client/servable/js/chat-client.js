@@ -66,7 +66,7 @@ $(window).on("load", () => {
       let userID;
       if (activeServerID) {
         $.ajax({
-          type: "GET",
+          type: "POST",
           url: "/api/GetMyUserID",
           success: (data) => {
             JSONData = $.parseJSON(data);
