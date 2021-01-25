@@ -34,7 +34,6 @@ $(window).on("load", () => {
       url: "/authenticate-login",
       data: $('#login-form').serialize(),
       success: (data) => {
-        console.log(data);
         if (data == 'fail') {
           $('#result').text('Invalid credentials.');
           $('input[name="email"]').val('').focus();
