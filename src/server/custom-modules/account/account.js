@@ -105,16 +105,20 @@ module.exports.ChangePassword = async (request, response) => {
         if (error) throw error;
 
         if (result[0].NumberOfMatches != 1) {
+          connection.release();
           response.status(422).sendFile(path.join(__dirname + '/../client/error/invalid-recovery-key.html'));
         } else {
           sql = "SELECT DisplayName, EmailAddress FROM User WHERE RecoveryKey = ? OR UserID = ?";
 
           connection.query(mysql.format(sql, [request.body.recoveryKey, request.session.UserID]), (error, firstResult, fields) => {
+
             if (error) throw error;
 
             sql = "UPDATE User SET PasswordHash = ?, RecoveryKey = NULL, RecoveryKeyExpires = NULL WHERE RecoveryKey = ? OR UserID = ?;";
 
             connection.query(mysql.format(sql, [newHash, request.body.recoveryKey, request.session.UserID]), (error, secondResult, fields) => {
+              connection.release();
+
               mailer.SendChangeNotification(firstResult[0].DisplayName, firstResult[0].EmailAddress);
 
               response.json(JSON.stringify({
@@ -123,10 +127,6 @@ module.exports.ChangePassword = async (request, response) => {
             });
           });
         }
-
-        connection.release();
-
-        if (error) throw error; // Handle post-release error.
       });
     });
   }

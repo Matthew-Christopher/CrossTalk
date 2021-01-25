@@ -184,6 +184,8 @@ app.get('/account/change-password(.html)?', (req, res) => {
     let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE RecoveryKey = ? AND RecoveryKeyExpires > ?;";
 
     if (!(req.query.recoveryKey || req.session.LoggedIn)) {
+      connection.release();
+
       res.status(422).sendFile(path.join(__dirname + '/../client/error/invalid-recovery-key.html'));
     } else {
       connection.query(mysql.format(sql, [req.query.recoveryKey, new Date().getTime()]), (error, result, fields) => {
