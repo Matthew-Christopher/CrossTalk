@@ -12,7 +12,7 @@ $(window).on("load", () => {
     $('#group-join-button').css('background', '#8ffd9f');
 
     $.ajax({
-      type: "GET",
+      type: "POST",
       url: "/JoinGroup",
       data: $('#group-join-form').serialize(),
       success: (data) => {
@@ -126,7 +126,7 @@ $(window).on("load", () => {
 
     // Call the server's API to get the user's groups.
     $.ajax({
-      type: "GET",
+      type: "POST",
       url: "/api/GetMyGroups",
       success: (data) => {
         JSONData = $.parseJSON(data);

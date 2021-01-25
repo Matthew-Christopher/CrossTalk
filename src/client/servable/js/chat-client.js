@@ -8,7 +8,7 @@ function SetActiveServerID(id) {
   $('#message').focus();
 
   $.ajax({
-    type: "GET",
+    type: "POST",
     url: "/api/GetMessages",
     data:  {
       GroupID: activeServerID
@@ -44,7 +44,7 @@ $(window).on("load", () => {
 
   // Get the user's display name from their session cookie and the database.
   $.ajax({
-    type: "GET",
+    type: "POST",
     url: "/api/GetMyDisplayName",
     success: (data) => {
       $('#name-display').text($.parseJSON(data)[0].DisplayName);

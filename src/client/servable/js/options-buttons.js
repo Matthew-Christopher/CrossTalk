@@ -12,7 +12,7 @@ $(window).on("load", () => {
     } else if ($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *')) {
       ToggleVisiblity('#profile-options-nav-container');
     } else if ($(event.target).is('#options-button') || $(event.target).is('#options-button *')) {
-      if ($('#options-nav-container').css('visibility') == 'hidden') SetInviteCode();
+      if ($('#options-nav-container').css('visibility') == 'hidden') GetInviteCode();
 
       ToggleVisiblity('#options-nav-container');
     } else if ($(event.target).is('#show-invite-code')) {
@@ -67,9 +67,9 @@ function CopyInviteCode() {
 }
 // END SOURCE
 
-function SetInviteCode() {
+function GetInviteCode() {
   $.ajax({
-    type: "GET",
+    type: "POST",
     url: "/api/GetInviteCode",
     data:  {
       GroupID: activeServerID
