@@ -105,9 +105,7 @@ module.exports.ChangePassword = async (request, response) => {
         if (error) throw error;
 
         if (result[0].NumberOfMatches != 1) {
-          response.json(JSON.stringify({
-            outcome: 'invalid'
-          }));
+          response.status(422).sendFile(path.join(__dirname + '/../client/error/invalid-recovery-key.html'));
         } else {
           sql = "SELECT DisplayName, EmailAddress FROM User WHERE RecoveryKey = ? OR UserID = ?";
 
