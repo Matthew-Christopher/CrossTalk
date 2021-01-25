@@ -132,23 +132,23 @@ app.get('/JoinGroup', (req, res) => {
   } else {
     pool.getConnection(async (err, connection) => {
       let checkValid = `
-      SELECT \`Group\`.GroupID AS JoinID
-      FROM   \`Group\`
-      WHERE  InviteCode = ?
-      UNION ALL
-            (
-                   SELECT GroupMembership.GroupID
-                   FROM   GroupMembership
-                   JOIN   \`Group\`
-                   ON     GroupMembership.GroupID = \`Group\`.GroupID
-                   WHERE  UserID = ?
-                   AND    \`Group\`.InviteCode = ?);`;
+      SELECT *
+      FROM   (SELECT \`Group\`.GroupID AS JoinID
+        FROM   \`Group\`
+        WHERE  InviteCode = ?) AS t1
+        LEFT JOIN (SELECT GroupMembership.GroupID AS MembershipJoinID
+                  FROM   GroupMembership
+                         JOIN \`Group\`
+                         ON GroupMembership.GroupID = \`Group\`.GroupID
+                  WHERE  UserID = ?
+                         AND \`Group\`.InviteCode = ?) AS t2
+                  ON TRUE;`;
 
       connection.query(mysql.format(checkValid, [req.query.code, req.session.UserID, req.query.code]), (error, firstResult, fields) => {
 
         if (error) throw error;
 
-        if (firstResult.length == 1) {
+        if (firstResult[0].JoinID && !firstResult[0].MembershipJoinID) {
           let joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
 
           connection.query(mysql.format(joinGroup, [req.session.UserID, firstResult[0].JoinID]), (error, secondResult, fields) => {
@@ -157,10 +157,15 @@ app.get('/JoinGroup', (req, res) => {
             if (error) throw error; // Handle post-release error.
 
             res.json(JSON.stringify({
-              status: "success",
+              status: 'success',
               groupID: firstResult[0].JoinID
             }));
           });
+        } else if (firstResult[0].MembershipJoinID) {
+          res.json(JSON.stringify({
+            status: 'existing',
+            groupID: firstResult[0].JoinID
+          }));
         } else {
           res.json(JSON.stringify({status: 'invalid'}));
         }

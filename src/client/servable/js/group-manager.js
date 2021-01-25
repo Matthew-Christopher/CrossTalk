@@ -16,7 +16,7 @@ $(window).on("load", () => {
       url: "/JoinGroup",
       data: $('#group-join-form').serialize(),
       success: (data) => {
-        console.log($.parseJSON(data));
+        console.log($.parseJSON(data).status.toLowerCase());
         if ($.parseJSON(data).status.toLowerCase() == "success") {
           FetchGroups(() => {
             let newGroupID = $.parseJSON(data).groupID;
@@ -30,6 +30,18 @@ $(window).on("load", () => {
           $('#group-join-code').val('');
           $('#group-join').removeClass('active-button');
           $('#server-container #group-join-form').css('display', 'none');
+        } else if ($.parseJSON(data).status.toLowerCase() == "existing") {
+          let newGroupID = $.parseJSON(data).groupID;
+
+          // Select the new group and scroll to it.
+          $('#' + newGroupID).trigger('click');
+
+          $('#server-selector').scrollTop($('#' + newGroupID)[0].offsetTop - $('#server-container').height() + ($('#' + newGroupID).height() - 1));
+
+          $('#group-join-code').val('');
+          $('#group-join').removeClass('active-button');
+          $('#server-container #group-join-form').css('display', 'none');
+          $('#group-join-button').css('background', 'transparent');
         } else {
           $('#group-join-code').val('').focus();
           $('#group-join-button').text('Invalid');
