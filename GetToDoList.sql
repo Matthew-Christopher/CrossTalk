@@ -1,1 +1,1 @@
-SELECT * FROM crosstalk.message WHERE GroupID="449dc213-567d-11eb-b511-7085c2833bdf" ORDER BY Timestamp;
+SELECT * FROM Crosstalk.Message WHERE GroupID="449dc213-567d-11eb-b511-7085c2833bdf" ORDER BY Timestamp;
