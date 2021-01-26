@@ -152,6 +152,20 @@ $(window).on("load", () => {
       }
     }
   });
+
+  $('#search').on('input', () => {
+    if ($('#search').val()) {
+      $('#server-name-display').attr('data-before', 'Search in ');
+    } else {
+      $('#server-name-display').attr('data-before', '');
+    }
+
+    let search = $('#search').val().toLowerCase();
+
+    $("#chatbox li").filter((index, node) => {
+      $(node).toggle($(node).text().toLowerCase().indexOf(search) > -1)
+    });
+  });
 });
 
 function CloseCreateForm() {

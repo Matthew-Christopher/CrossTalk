@@ -448,6 +448,21 @@ input, button {
   float: left;
 }
 
+#info-container #server-name-display {
+  text-overflow: ellipsis;
+  white-space: initial;
+  -webkit-line-clamp: 1;
+  max-width: 50%;
+  overflow: hidden;
+  display: block;
+  padding-top: 6px;
+  box-sizing: border-box;
+}
+
+#info-container #server-name-display:before {
+  content: attr(data-before);
+}
+
 #info-container #name-display {
   float: right;
   margin-right: 10px;
@@ -502,7 +517,6 @@ input, button {
 }
 
 .options-box {
-  text-align: center;
   border: 1px solid black;
   position: absolute;
   display: inline-block;
@@ -574,6 +588,11 @@ input, button {
 	-webkit-transition: background .1s linear;
 	-o-transition: background .1s linear;
 	transition: background .1s linear;
+}
+
+#options-nav-container #search {
+  outline: none;
+  border: none;
 }
 
 .options-box li {

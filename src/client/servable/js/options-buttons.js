@@ -43,6 +43,7 @@ function ToggleVisiblity (name) {
 
     if (name == "#options-nav-container") {
       HideInviteCode();
+      $('#search').val('').trigger('input');
     }
   } else {
     let otherContainer = (name == '#profile-options-nav-container') ? '#options-nav-container' : '#profile-options-nav-container';
