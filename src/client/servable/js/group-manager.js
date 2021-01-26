@@ -16,7 +16,6 @@ $(window).on("load", () => {
       url: "/JoinGroup",
       data: $('#group-join-form').serialize(),
       success: (data) => {
-        console.log($.parseJSON(data).status.toLowerCase());
         if ($.parseJSON(data).status.toLowerCase() == "success") {
           FetchGroups(() => {
             let newGroupID = $.parseJSON(data).groupID;

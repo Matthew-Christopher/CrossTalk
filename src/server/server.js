@@ -109,9 +109,9 @@ app.get('/verify', (req, res) => {
         if (error) throw error; // Handle post-release error.
 
         if (result.affectedRows > 0) {
-          res.status(201).send("Verified. You may now log in.");
+          res.status(201).sendFile(path.join(__dirname + '/../client/hidden/verified.html'));
         } else {
-          res.status(422).send("Invalid verification key.");
+          res.status(422).send(path.join(__dirname + '/../client/hidden/invalid-verification-key.html'));
         }
       });
     });
@@ -128,7 +128,7 @@ app.get('/logout', async (req, res) => {
 
 app.post('/JoinGroup', (req, res) => {
   if (!req.session.LoggedIn || !req.body.code) {
-    res.redirect('/chat');
+    res.json(JSON.stringify({status: 'invalid'}));
   } else {
     pool.getConnection(async (err, connection) => {
       let checkValid = `
@@ -143,12 +143,11 @@ app.post('/JoinGroup', (req, res) => {
                   WHERE  UserID = ?
                          AND \`Group\`.InviteCode = ?) AS t2
                   ON TRUE;`;
-
       connection.query(mysql.format(checkValid, [req.body.code, req.session.UserID, req.body.code]), (error, firstResult, fields) => {
 
         if (error) throw error;
 
-        if (firstResult[0].JoinID && !firstResult[0].MembershipJoinID) {
+        if (firstResult[0] && firstResult[0].JoinID && !firstResult[0].MembershipJoinID) {
           let joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
 
           connection.query(mysql.format(joinGroup, [req.session.UserID, firstResult[0].JoinID]), (error, secondResult, fields) => {
@@ -161,7 +160,7 @@ app.post('/JoinGroup', (req, res) => {
               groupID: firstResult[0].JoinID
             }));
           });
-        } else if (firstResult[0].MembershipJoinID) {
+        } else if (firstResult[0] && firstResult[0].MembershipJoinID) {
           res.json(JSON.stringify({
             status: 'existing',
             groupID: firstResult[0].JoinID
@@ -191,13 +190,13 @@ app.get('/account/change-password(.html)?', (req, res) => {
     if (!(req.query.recoveryKey || req.session.LoggedIn)) {
       connection.release();
 
-      res.status(422).sendFile(path.join(__dirname + '/../client/error/invalid-recovery-key.html'));
+      res.status(422).sendFile(path.join(__dirname + '/../client/hidden/invalid-recovery-key.html'));
     } else {
       connection.query(mysql.format(sql, [req.query.recoveryKey, new Date().getTime()]), (error, result, fields) => {
         if (error) throw error;
 
         if (result[0].NumberOfMatches != 1 && !req.session.LoggedIn) {
-          res.status(422).sendFile(path.join(__dirname + '/../client/error/invalid-recovery-key.html'));
+          res.status(422).sendFile(path.join(__dirname + '/../client/hidden/invalid-recovery-key.html'));
         } else {
           res.status(200).sendFile(path.join(__dirname + '/../client/servable/account/change-password.html'));
         }
@@ -372,7 +371,7 @@ app.use(express.static('../client/servable', {
 }));
 
 app.use((req, res) => {
-  res.status(404).sendFile(path.join(__dirname + '/../client/error/404.html'));
+  res.status(404).sendFile(path.join(__dirname + '/../client/hidden/404.html'));
 });
 
 const httpServer = http.createServer(app).listen(defaultPort, () => {
@@ -381,7 +380,7 @@ const httpServer = http.createServer(app).listen(defaultPort, () => {
 });
 
 function GetNewGroupID(connection, callback) {
-  
+
   let duplicates = 0;
 
   do {
