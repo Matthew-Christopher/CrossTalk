@@ -220,23 +220,30 @@ app.post('/CreateGroup', (req, res) => {
   pool.getConnection(async (err, connection) => {
     if (err) throw err; // Connection failed.
 
-    GetNewGroupID(connection, (groupID) => {
-      let sql = "INSERT INTO `Group` VALUES (?, ?, ?);";
-      let inserts = [groupID[0], req.body.group, groupID[1]];
+    GetNewGroupID(connection, (inviteCode) => {
+      let sql = "INSERT INTO \`Group\` (GroupName, InviteCode) VALUES (?, ?);";
+      let inserts = [req.body.group, inviteCode];
 
-      connection.query(mysql.format(sql, inserts), (error, result, fields) => {
-
+      connection.query(mysql.format(sql, inserts), (error, firstResult, fields) => {
         if (error) throw error;
 
-        let sql = `INSERT INTO GroupMembership VALUES (?, ?, 2);`;
+        connection.query(mysql.format("SELECT GroupID FROM \`Group\` WHERE InviteCode = ?;", inviteCode), (error, secondResult, fields) => {
 
-        connection.query(mysql.format(sql, [req.session.UserID, groupID[0]]), (error, result, fields) => {
-          connection.release();
+          if (error) throw error;
 
-          if (err) throw error; // Handle post-release error.
-          res.status(200).json(JSON.stringify([{
-            'GroupID': groupID[0]
-          }]));
+          let sql = `INSERT INTO GroupMembership VALUES (?, ?, 2);`;
+
+          connection.query(mysql.format(sql, [req.session.UserID, secondResult[0].GroupID, inviteCode]), (error, thirdResult, fields) => {
+            if (error) throw error;
+
+            connection.release();
+
+            if (error) throw error; // Handle post-release error.
+
+            res.status(200).json(JSON.stringify([{
+              'GroupID': secondResult[0].GroupID
+            }]));
+          });
         });
       });
     });
@@ -374,26 +381,21 @@ const httpServer = http.createServer(app).listen(defaultPort, () => {
 });
 
 function GetNewGroupID(connection, callback) {
-
-  let idArray = [];
+  
   let duplicates = 0;
 
   do {
 
-    connection.query("SELECT UUID() AS GroupID;", (error, firstResult, fields) => {
+    let candidateID = require('crypto').randomBytes(6).toString('hex');
+
+    connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM `Group` WHERE InviteCode = ?;", candidateID), (error, result, fields) => {
       if (error) throw error;
 
-      idArray = [firstResult[0].GroupID, require('crypto').randomBytes(6).toString('hex')];
+      duplicates = result[0].NumberOfDuplicates;
 
-      connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM `Group` WHERE GroupID = ? OR InviteCode = ?;", [idArray[0], idArray[1]]), (error, secondResult, fields) => {
-        if (error) throw error;
-
-        duplicates = secondResult[0].NumberOfDuplicates;
-
-        if (duplicates == 0) {
-          return callback(idArray); // Ensure callback is called after the async activity terminates, to prevent null errors.
-        }
-      });
+      if (duplicates == 0) {
+        return callback(candidateID); // Ensure callback is called after the async activity terminates, to prevent null errors.
+      }
     });
   } while (duplicates != 0);
 }

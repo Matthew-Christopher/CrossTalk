@@ -39,16 +39,16 @@ module.exports.Register = async (request, response) => {
         } else if (res[0].EmailDuplicates > 0) {
           response.send('email');
         } else {
-          GetUserID(connection, (userId) => {
-            sql = "INSERT INTO User (UserID, DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, ?, False, ?);";
-            let inserts = [userId[0], request.body['display-name'], request.body.email, hash, userId[1]];
+          GetUserID(connection, (verificationKey) => {
+            sql = "INSERT INTO User (DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, False, ?);";
+            let inserts = [request.body['display-name'], request.body.email, hash, verificationKey];
 
             connection.query(mysql.format(sql, inserts), (error, res, fields) => {
               connection.release();
 
               if (error) throw error; // Handle post-release error.
 
-              mailer.SendVerification(request.body.email, userId[1]);
+              mailer.SendVerification(request.body.email, verificationKey);
             });
           });
 
@@ -199,27 +199,19 @@ function GetRecoveryKey(connection, callback) {
 
 function GetUserID(connection, callback) {
 
-  let idArray = [];
   let duplicates = 0;
+  let candidateID = require('crypto').randomBytes(16).toString('hex');
 
   do {
 
-    connection.query("SELECT UUID() AS UserID;", (error, firstResult, fields) => {
+    connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE VerificationKey = ?;", candidateID), (error, result, fields) => {
       if (error) throw error;
 
-      idArray = [firstResult[0].UserID, require('crypto').randomBytes(16).toString('hex')];
+      duplicates = result[0].NumberOfDuplicates;
 
-      connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE UserID = ? OR VerificationKey = ?;", [idArray[0], idArray[1]]), (error, secondResult, fields) => {
-
-        if (error) throw error;
-
-        duplicates = secondResult[0].NumberOfDuplicates;
-
-        if (duplicates == 0) {
-          return callback(idArray); // Ensure callback is called after the async activity terminates, to prevent null errors.
-        }
-      });
+      if (duplicates == 0) {
+        return callback(candidateID); // Ensure callback is called after the async activity terminates, to prevent null errors.
+      }
     });
-
   } while (duplicates != 0);
 }

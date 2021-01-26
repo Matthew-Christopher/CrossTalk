@@ -101,9 +101,8 @@ $(window).on("load", () => {
 
   $(document).on('click', '.server-button', (event) => {
     // If the event target is the text in the button, we actually want the parent button.
-
     // Match by just the GroupID property.
-    let targetIndex = JSONData.map(x => x.GroupID).indexOf($(event.target).closest('button').attr('id'));
+    targetIndex = JSONData.findIndex(x => x.GroupID == $(event.target).closest('button').attr('id'));
 
     $('#' + JSONData[targetIndex].GroupID).addClass('active-button');
 
