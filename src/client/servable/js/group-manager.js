@@ -23,7 +23,7 @@ $(window).on("load", () => {
             // Select the new group and scroll to it.
             $('#' + newGroupID).trigger('click');
 
-            $('#server-selector').scrollTop($('#' + newGroupID)[0].offsetTop - $('#server-container').height() + ($('#' + newGroupID).height() - 1));
+            ScrollTo(newGroupID);
           });
 
           $('#group-join-code').val('');
@@ -35,7 +35,7 @@ $(window).on("load", () => {
           // Select the new group and scroll to it.
           $('#' + newGroupID).trigger('click');
 
-          $('#server-selector').scrollTop($('#' + newGroupID)[0].offsetTop - $('#server-container').height() + ($('#' + newGroupID).height() - 1));
+          ScrollTo(newGroupID);
 
           $('#group-join-code').val('');
           $('#group-join').removeClass('active-button');
@@ -78,7 +78,7 @@ $(window).on("load", () => {
           // Select the new group and scroll to it.
           $('#' + newGroupID).trigger('click');
 
-          $('#server-selector').scrollTop($('#' + newGroupID)[0].offsetTop - $('#server-container').height() + ($('#' + newGroupID).height() - 1));
+          ScrollTo(newGroupID);
         });
 
         $('#group-create').removeClass('active-button');
@@ -156,3 +156,12 @@ $(window).on("load", () => {
     });
   }
 });
+
+function ScrollTo(newGroupID) {
+  $('#server-selector').scrollTop(
+    $('#' + newGroupID)[0].offsetTop
+    - $('#server-buttons-container').height()
+    - ($('#group-join-form .slide-back').height() + 1)
+    - $('#server-selector').height()
+    + $('#' + newGroupID).height());
+}
