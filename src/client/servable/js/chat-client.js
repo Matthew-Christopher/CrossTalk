@@ -162,8 +162,8 @@ $(window).on("load", () => {
 
     let search = $('#search').val().toLowerCase();
 
-    $("#chatbox li").filter((index, node) => {
-      $(node).toggle($(node).text().toLowerCase().indexOf(search) > -1)
+    $('#chatbox li p.message-content').filter((index, node) => {
+      $(node).parent().toggle($(node).text().toLowerCase().indexOf(search) > -1)
     });
   });
 });
