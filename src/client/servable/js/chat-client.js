@@ -29,7 +29,7 @@ function SetActiveServerID(id) {
       }
 
       $.parseJSON(data).forEach((item, i) => {
-        $('#chatbox').append($('<li style="position: relative;">').text(item.MessageString).append($('<i style="color: #888; position: absolute; right: 0;">').text(GetMessageTimestamp(item.Timestamp))));
+        $('#chatbox').append($('<li style="position: relative;">').append($('<p class="message-content" style="display: inline;">').text(item.MessageString)).append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0;">').text(GetMessageTimestamp(item.Timestamp))));
       });
 
       $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
@@ -142,7 +142,7 @@ $(window).on("load", () => {
       $('#chatbox-reminder').hide();
       $('#invite-prompt').hide();
 
-      $('#chatbox').append($('<li style="position: relative;">').text(message.MessageString).append($('<i style="color: #888; position: absolute; right: 0;">').text(GetMessageTimestamp(message.Timestamp))));
+      $('#chatbox').append($('<li style="position: relative;">').append($('<p class="message-content" style="display: inline;">').text(message.MessageString)).append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0;">').text(GetMessageTimestamp(message.Timestamp))));
       $('#server-selector .server-button.active-button .server-info-container i').text(message.MessageString);
 
       const pixelsStickScrollThreshold = 150;
