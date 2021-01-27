@@ -159,9 +159,9 @@ $(window).on("load", () => {
 
 function ScrollTo(newGroupID) {
   $('#server-selector').scrollTop(
-    $('#' + newGroupID)[0].offsetTop
-    - $('#server-buttons-container').height()
-    - ($('#group-join-form .slide-back').height() + 1)
-    - $('#server-selector').height()
-    + $('#' + newGroupID).height());
+    $('#' + newGroupID)[0].offsetTop // The distance from the top of this element that the desired elemenent is.
+    - $('#server-buttons-container').height() // Account for height of the top buttons.
+    - ($('#group-join-form .slide-back').height() + 1) // The invite form will hide after executing and we need to account for its height.
+    - $('#server-selector').height() // Scroll so that the element is at the bottom of the window.
+    + $('#' + newGroupID).height()); // Account for the height of the element itself, so that its bottom edge is at the bottom of this element.
 }
