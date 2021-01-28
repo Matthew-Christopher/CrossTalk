@@ -62,7 +62,7 @@ $(window).on("load", () => {
     // We trim whitespace from the start and end of the message before sending it.
     let messageString = $('#message').val().trim();
 
-    if (messageString.length > 0) {
+    if (0 < messageString.length && messageString.length <= 2000) {
       let userID;
       if (activeServerID) {
         $.ajax({
@@ -142,10 +142,12 @@ $(window).on("load", () => {
       $('#chatbox-reminder').hide();
       $('#invite-prompt').hide();
 
+      let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
+
       $('#chatbox').append($('<li style="position: relative;">').append($('<p class="message-content" style="display: inline;">').text(message.MessageString)).append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0;">').text(GetMessageTimestamp(message.Timestamp))));
       $('#server-selector .server-button.active-button .server-info-container i').text(message.MessageString);
 
-      StickScroll();
+      StickScroll(scrollOffset);
     }
   });
 
@@ -205,10 +207,10 @@ function GetMessageTimestamp(timestamp) {
   }
 }
 
-function StickScroll() {
+function StickScroll(scrollOffset) {
   const pixelsStickScrollThreshold = 150;
 
-  if ($('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight() <= pixelsStickScrollThreshold) {
+  if (scrollOffset <= pixelsStickScrollThreshold) {
     $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent message, but only if we haven't already scrolled up to view something older (outside of a certain threshold).
   }
 }
