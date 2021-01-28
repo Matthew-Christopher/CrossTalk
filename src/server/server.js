@@ -151,7 +151,6 @@ app.post('/JoinGroup', (req, res) => {
           let joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
 
           connection.query(mysql.format(joinGroup, [req.session.UserID, firstResult[0].JoinID]), (error, secondResult, fields) => {
-            connection.release();
 
             if (error) throw error; // Handle post-release error.
 
@@ -169,6 +168,8 @@ app.post('/JoinGroup', (req, res) => {
           res.json(JSON.stringify({status: 'invalid'}));
         }
       });
+
+      connection.release();
     });
   }
 });
