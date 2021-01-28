@@ -158,9 +158,23 @@ $(window).on("load", () => {
 
     let search = $('#search').val().toLowerCase();
 
-    $('#chatbox li p.message-content').filter((index, node) => {
-      $(node).parent().toggle($(node).text().toLowerCase().indexOf(search) > -1)
-    });
+    let listItems = $('#chatbox li p.message-content');
+    let nothingFound = true;
+
+    for (let i = 0; i < listItems.length; i++) {
+      if (listItems[i].innerHTML.toLowerCase().indexOf(search) > -1) {
+        nothingFound = false;
+        listItems[i].parentElement.style.display = "list-item";
+      } else {
+        listItems[i].parentElement.style.display = "none";
+      }
+    }
+
+    if (nothingFound) {
+      $('#chatbox-reminder').css('display', 'block').text('No messages found');
+    } else {
+      $('#chatbox-reminder').css('display', 'none');
+    }
 
     StickScroll();
   });
