@@ -15,19 +15,13 @@ const pool = mysql.createPool({
 module.exports.initialise = (http) => {
   io = io(http);
   io.on('connection', (socket) => {
-    log.info("User connected to the chat.");
-    socket.on('disconnect', () => {
-      log.info("User disconnected from the chat.");
-    });
 
     socket.on('chat', (message) => {
       if (message.MessageString.trim().length > 0) {
         io.emit('message return', message);
 
-        log.info(`Chat message in group ${message.GroupID} from user ${message.AuthorID} at time ${message.Timestamp}: "${message.MessageString}"`);
-
         pool.getConnection(async (err, connection) => {
-          
+
           // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
           var sql = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
 
