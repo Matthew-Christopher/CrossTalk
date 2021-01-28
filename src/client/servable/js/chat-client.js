@@ -145,11 +145,7 @@ $(window).on("load", () => {
       $('#chatbox').append($('<li style="position: relative;">').append($('<p class="message-content" style="display: inline;">').text(message.MessageString)).append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0;">').text(GetMessageTimestamp(message.Timestamp))));
       $('#server-selector .server-button.active-button .server-info-container i').text(message.MessageString);
 
-      const pixelsStickScrollThreshold = 150;
-
-      if ($('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight() <= pixelsStickScrollThreshold) {
-        $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent message, but only if we haven't already scrolled up to view something older (outside of a certain threshold).
-      }
+      StickScroll();
     }
   });
 
@@ -165,6 +161,8 @@ $(window).on("load", () => {
     $('#chatbox li p.message-content').filter((index, node) => {
       $(node).parent().toggle($(node).text().toLowerCase().indexOf(search) > -1)
     });
+
+    StickScroll();
   });
 });
 
@@ -190,5 +188,13 @@ function GetMessageTimestamp(timestamp) {
   } else {
     // The message was before yesterday, so just say the day.
     return date.toLocaleDateString();
+  }
+}
+
+function StickScroll() {
+  const pixelsStickScrollThreshold = 150;
+
+  if ($('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight() <= pixelsStickScrollThreshold) {
+    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent message, but only if we haven't already scrolled up to view something older (outside of a certain threshold).
   }
 }
