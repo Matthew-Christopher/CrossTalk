@@ -163,6 +163,8 @@ $(window).on("load", () => {
     let listItems = $('#chatbox li p.message-content');
     let nothingFound = true;
 
+    let scrollOffsetBeforeFilter = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
+
     for (let i = 0; i < listItems.length; i++) {
       if (listItems[i].innerHTML.toLowerCase().indexOf(search) > -1) {
         nothingFound = false;
@@ -172,13 +174,13 @@ $(window).on("load", () => {
       }
     }
 
+    StickScroll(scrollOffsetBeforeFilter);
+
     if (nothingFound) {
       $('#chatbox-reminder').css('display', 'block').text('No messages found');
     } else {
       $('#chatbox-reminder').css('display', 'none');
     }
-
-    StickScroll();
   });
 });
 
