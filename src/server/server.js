@@ -54,7 +54,6 @@ const account = require('./custom-modules/account');
 const cryptography = require('./custom-modules/cryptography');
 const log = require('./custom-modules/logging');
 const chat = require('./custom-modules/chat');
-const AvailableGroup = require('./custom-modules/AvailableGroup.js');
 // END CUSTOM MODULES
 
 app.set('etag', false);
