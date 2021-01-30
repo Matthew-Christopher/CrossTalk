@@ -285,6 +285,7 @@ input, button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: initial;
+  word-break: break-all;
   -webkit-line-clamp: 1;
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -451,10 +452,12 @@ input, button {
 #info-container #server-name-display {
   text-overflow: ellipsis;
   white-space: initial;
+  word-break: break-all;
   -webkit-line-clamp: 1;
   max-width: 50%;
   overflow: hidden;
-  display: block;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
   padding-top: 6px;
   box-sizing: border-box;
 }
