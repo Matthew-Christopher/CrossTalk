@@ -38,6 +38,37 @@ function SetActiveServerID(id) {
       console.log("Could not retreive messages. Try again later.");
     }
   });
+
+  CheckPinnedMessage();
+}
+
+function CheckPinnedMessage() {
+  $.ajax({
+    type: "POST",
+    url: "/api/GetPinnedMessage",
+    data:  {
+      GroupID: activeServerID
+    },
+    success: (data) => {
+
+      let JSONData = $.parseJSON(data);
+
+      if (JSONData.length > 0) {
+        $('#pinned-message-container').show();
+
+        $('#pinned-message-label').text('Pinned message from ' + JSONData[0].AuthorDisplayName + ', sent ' + GetPinnedMessageTimestamp(JSONData[0].Timestamp));
+        $('#pinned-message-text').text(JSONData[0].MessageString);
+      } else {
+        $('#pinned-message-container').hide();
+
+        $('#pinned-message-label').text();
+        $('#pinned-message-text').text();
+      }
+    },
+    failure: () => {
+      console.log("Could not retreive messages. Try again later.");
+    }
+  });
 }
 
 $(window).on("load", () => {
@@ -206,6 +237,25 @@ function GetMessageTimestamp(timestamp) {
   } else {
     // The message was before yesterday, so just say the day.
     return date.toLocaleDateString();
+  }
+}
+
+function GetPinnedMessageTimestamp(timestamp) {
+  // A more contextualised timestamp function for the pinned message box.
+
+  let date = new Date(eval(timestamp));
+  let today = new Date();
+
+  let atTimeString = 'today at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  if (date.getDate() == today.getDate()) {
+    // The message was sent today, so we'll just say the time.
+    return atTimeString;
+  } else if (date.getDate() == today.getDate() - 1) {
+    // The date is yesterday.
+    return 'yesterday ' + atTimeString;
+  } else {
+    // The message was before yesterday, so just say the day.
+    return 'on ' + date.toLocaleDateString() + atTimeString;
   }
 }
 

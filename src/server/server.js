@@ -264,28 +264,25 @@ app.post('/api/GetMyGroups', (req, res, next) => {
     pool.getConnection(async (err, connection) => {
       let sql = `
       SELECT GroupInfo.GroupID,
-             GroupInfo.GroupName,
-             MessageInfo.LatestMessageString
-      FROM   (SELECT \`Group\`.GroupID,
-                     \`Group\`.GroupName
-              FROM   \`Group\`
-                     JOIN GroupMembership
-                       ON \`Group\`.GroupID = GroupMembership.GroupID
-              WHERE  GroupMembership.UserID = ?)
-             AS
-             GroupInfo
-             LEFT JOIN (SELECT Message.Messagestring AS LatestMessageString,
-                          LatestMessage.GroupID,
-                          LatestMessage.Timestamp
-                   FROM   Message
-                          JOIN (SELECT GroupID,
-                                       MAX(Timestamp) AS Timestamp
-                                FROM   Message
-                                GROUP  BY GroupID) AS LatestMessage
-                            ON Message.GroupID = LatestMessage.GroupID
-                               AND Message.Timestamp = LatestMessage.Timestamp
-                   ORDER  BY LatestMessage.Timestamp DESC) AS MessageInfo
-               ON GroupInfo.GroupID = MessageInfo.GroupID
+        GroupInfo.GroupName,
+        MessageInfo.LatestMessageString
+      FROM (SELECT \`Group\`.GroupID,
+            \`Group\`.GroupName
+            FROM   \`Group\`
+            JOIN GroupMembership
+            ON \`Group\`.GroupID = GroupMembership.GroupID
+            WHERE  GroupMembership.UserID = ?) AS GroupInfo
+      LEFT JOIN (SELECT Message.Messagestring AS LatestMessageString,
+                        LatestMessage.GroupID,
+                        LatestMessage.Timestamp
+                 FROM   Message
+                 JOIN (SELECT GroupID, MAX(Timestamp) AS Timestamp
+                      FROM   Message
+                      GROUP  BY GroupID) AS LatestMessage
+                      ON Message.GroupID = LatestMessage.GroupID
+                      AND Message.Timestamp = LatestMessage.Timestamp
+                      ORDER  BY LatestMessage.Timestamp DESC) AS MessageInfo
+      ON GroupInfo.GroupID = MessageInfo.GroupID
       ORDER  BY MessageInfo.Timestamp DESC, GroupInfo.GroupName;
       `;
 
@@ -347,6 +344,35 @@ app.post('/api/GetMessages', (req, res, next) => {
     next();
   }
 });
+
+app.post('/api/GetPinnedMessage', (req, res, next) => {
+  if (req.session.LoggedIn && req.body.GroupID) {
+    pool.getConnection(async (err, connection) => {
+      let sql = `
+      SELECT User.DisplayName AS AuthorDisplayName,
+        Message.MessageString, Message.Timestamp
+      FROM Message
+        JOIN User
+          ON Message.AuthorID = User.UserID
+        JOIN \`Group\`
+          ON \`Group\`.PinnedMessageID = Message.MessageID
+        JOIN GroupMembership
+          ON \`Group\`.GroupID = GroupMembership.GroupID
+      WHERE  Groupmembership.UserID = ?
+        AND \`group\`.GroupID = ?;`;
+
+      connection.query(mysql.format(sql, [req.session.UserID, req.body.GroupID]), (error, result, fields) => {
+        connection.release();
+
+        if (error) throw error; // Handle post-release error.
+
+        res.json(JSON.stringify(result));
+      });
+    });
+  } else {
+    next();
+  }
+})
 
 app.post('/api/GetInviteCode', (req, res, next) => {
   if (req.session.LoggedIn && req.body.GroupID) {

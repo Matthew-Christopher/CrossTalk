@@ -308,6 +308,40 @@ input, button {
   overflow-wrap: break-word;
 }
 
+#chat-container #pinned-message-container {
+  display: none;
+  width: 100%;
+  min-height: 80px;
+  border-bottom: 1px solid black;
+  padding: 10px;
+  font-size: 1.1em;
+  flex-flow: column;
+}
+
+#chat-container #pinned-message-container #pinned-message-label {
+  font-weight: bolder;
+  color: #555;
+}
+
+#chat-container #pinned-message-container #pinned-message {
+  box-sizing: border-box;
+  margin: 10px;
+  max-width: calc(100% - 40px);
+  height: 100%;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  flex: 1;
+}
+
+#chat-container #pinned-message-container #pinned-message-text::before {
+  content: open-quote;
+}
+
+#chat-container #pinned-message-container #pinned-message-text::after {
+  content: close-quote;
+}
+
 #chat-container #chatbox {
   box-sizing: border-box;
   height: calc(100% - 50px);
