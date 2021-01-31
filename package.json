@@ -1,7 +1,7 @@
 {
   "name": "crosstalk",
   "version": "1.0.0",
-  "description": "A secure instant messaging platform.",
+  "description": "A web-based instant messaging platform built with Node.js and Socket.IO",
   "main": "index.js",
   "dependencies": {
     "argon2": "^0.27.0",
