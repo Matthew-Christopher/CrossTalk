@@ -1,3 +1,5 @@
+'use strict';
+
 const log = require('../logging');
 const cryptography = require('../cryptography');
 const mailer = require('../mailer');

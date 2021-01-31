@@ -1,3 +1,5 @@
+'use strict';
+
 const log = require('../logging');
 let io = require('socket.io');
 
