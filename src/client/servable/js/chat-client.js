@@ -54,7 +54,7 @@ function CheckPinnedMessage() {
       let JSONData = $.parseJSON(data);
 
       if (JSONData.length > 0) {
-        $('#pinned-message-container').show();
+        $('#pinned-message-container').css('display', 'flex');
 
         $('#pinned-message-label').text('Pinned message from ' + JSONData[0].AuthorDisplayName + ', sent ' + GetPinnedMessageTimestamp(JSONData[0].Timestamp));
         $('#pinned-message-text').text(JSONData[0].MessageString);
@@ -246,7 +246,7 @@ function GetPinnedMessageTimestamp(timestamp) {
   let date = new Date(eval(timestamp));
   let today = new Date();
 
-  let atTimeString = 'today at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  let atTimeString = ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
   if (date.getDate() == today.getDate()) {
     // The message was sent today, so we'll just say the time.
     return atTimeString;
