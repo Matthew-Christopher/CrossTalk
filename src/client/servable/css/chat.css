@@ -306,6 +306,8 @@ input, button {
   height: calc(100% - 50px);
   width: 85%;
   overflow-wrap: break-word;
+  display: flex;
+  flex-direction: column;
 }
 
 #chat-container #pinned-message-container {
@@ -344,7 +346,6 @@ input, button {
 
 #chat-container #chatbox {
   box-sizing: border-box;
-  height: calc(100% - 50px);
   padding: 10px;
   padding-bottom: 0;
   overflow-y: auto; /* Only show the scroll bar when necessary */
