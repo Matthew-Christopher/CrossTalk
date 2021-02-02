@@ -30,8 +30,8 @@ function SetActiveServerID(id) {
         $('#chatbox-reminder').text('No messages yet');
       }
 
-      $.parseJSON(data).forEach((item, i) => {
-        $('#chatbox').append($('<li style="position: relative;">').append($('<p class="message-content" style="display: inline;">').text(item.MessageString)).append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0;">').text(GetMessageTimestamp(item.Timestamp))));
+      $.parseJSON(data).forEach((message, i) => {
+        $('#chatbox').append($('<li style="position: relative;">').append($('<p class="message-author" style="display: inline;">').text(message.AuthorName)).append('<br />').append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0; top: 0;">').text(GetMessageTimestamp(message.Timestamp))).append($('<p class="message-content" style="display: inline;">').text(message.MessageString)));
       });
 
       $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
@@ -105,7 +105,7 @@ $(window).on("load", () => {
             userID = JSONData[0].UserID;
 
             // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
-            let message = new Message(null, activeServerID, userID, messageString, Date.now());
+            let message = new Message(null, activeServerID, userID, null, messageString, Date.now());
 
             // Don't send the message if it's blank.
             if (message) {
@@ -175,9 +175,8 @@ $(window).on("load", () => {
 
       let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
 
-      $('#chatbox').append($('<li style="position: relative;">').append($('<p class="message-content" style="display: inline;">').text(message.MessageString)).append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0;">').text(GetMessageTimestamp(message.Timestamp))));
+      $('#chatbox').append($('<li style="position: relative;">').append($('<p class="message-author" style="display: inline;">').text(message.AuthorDisplayName)).append('<br />').append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0; top: 0;">').text(GetMessageTimestamp(message.Timestamp))).append($('<p class="message-content" style="display: inline;">').text(message.MessageString)));
       $('#server-selector .server-button.active-button .server-info-container i').text(message.MessageString);
-
       StickScroll(scrollOffset);
     }
   });

@@ -20,9 +20,12 @@ module.exports.initialise = (http) => {
 
     socket.on('chat', (message) => {
       if (message.MessageString.trim().length > 0) {
-        io.emit('message return', message);
-
         pool.getConnection(async (err, connection) => {
+
+          connection.query(mysql.format('SELECT DisplayName FROM User WHERE UserID = ?;', message.AuthorID), (error, result, fields) => {
+            message.AuthorDisplayName = result[0].DisplayName;
+            io.emit('message return', message);
+          });
 
           // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
           var sql = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';

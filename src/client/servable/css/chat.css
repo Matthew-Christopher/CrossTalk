@@ -353,14 +353,20 @@ input, button {
   margin-bottom: 50px; /* Prevent overflow into the message box field */
 }
 
-#chat-container li {
+#chat-container #chatbox li {
   margin-bottom: 12px; /* Space long, wrapped message lines differently to brand new messages */
+  padding: 5px;
+  border-radius: 5px;
 }
 
-#chat-container li:hover {
+#chat-container #chatbox li:hover {
    background: #f5f5f5;
-   border-radius: 5px;
 }
+
+#chat-container #chatbox li .message-timestamp {
+   padding-right: inherit;
+   padding-top: inherit;
+ }
 
 #chat-container #message {
   box-sizing: border-box;
