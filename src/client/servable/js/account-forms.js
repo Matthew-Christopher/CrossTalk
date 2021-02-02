@@ -16,8 +16,12 @@ $(window).on("load", () => {
           $('#result').text('An account already exists under that email address.');
           $('input[name="email"]').val('').focus();
           $('input[name="confirm-email"]').removeClass('non-empty').val('');
+        } else if (data == 'password') {
+          $('#result').text('Password does not meet the security requirements. It needs to be at least 8 characters long.')
+          $('input[name="password"]').val('').focus();
+          $('input[name="confirm-password"]').removeClass('non-empty').val('');
         } else {
-          $('#result').text('Data entered was not valid. Check that the confirmation fields match.');
+          $('#result').text('Data entered was not valid.');
         }
       },
       error: () => {

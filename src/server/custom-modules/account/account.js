@@ -19,7 +19,7 @@ const pool = mysql.createPool({
 module.exports.Register = async (request, response) => {
   let hash = await cryptography.Hash(request.body.password);
 
-  if ((request.body.email != request.body['confirm-email']) || !await cryptography.CompareHashes(hash, request.body['confirm-password'])) {
+  if (!request.body['display-name'].trim() || (request.body.email != request.body['confirm-email']) || !await cryptography.CompareHashes(hash, request.body['confirm-password'])) {
     response.send("fail");
   } else {
     pool.getConnection(async (err, connection) => {
@@ -40,6 +40,8 @@ module.exports.Register = async (request, response) => {
           response.send('display');
         } else if (res[0].EmailDuplicates > 0) {
           response.send('email');
+        } else if (request.body.password.length < 8) {
+          response.send('password');
         } else {
           GetUserID(connection, (verificationKey) => {
             sql = "INSERT INTO User (DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, False, ?);";
