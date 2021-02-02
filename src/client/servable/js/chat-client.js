@@ -7,6 +7,8 @@ function SetActiveServerID(id) {
 
   $('#message').focus();
 
+  CheckPinnedMessage();
+
   $.ajax({
     type: "POST",
     url: "/api/GetMessages",
@@ -38,8 +40,6 @@ function SetActiveServerID(id) {
       console.log("Could not retreive messages. Try again later.");
     }
   });
-
-  CheckPinnedMessage();
 }
 
 function CheckPinnedMessage() {
@@ -263,6 +263,6 @@ function StickScroll(scrollOffset) {
   const pixelsStickScrollThreshold = 150;
 
   if (scrollOffset <= pixelsStickScrollThreshold) {
-    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent message, but only if we haven't already scrolled up to view something older (outside of a certain threshold).
+    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight + 100); // View the most recent message, but only if we haven't already scrolled up to view something older (outside of a certain threshold).
   }
 }
