@@ -354,7 +354,12 @@ input, button {
 }
 
 #chat-container li {
-   margin-bottom: 12px; /* Space long, wrapped message lines differently to brand new messages */
+  margin-bottom: 12px; /* Space long, wrapped message lines differently to brand new messages */
+}
+
+#chat-container li:hover {
+   background: #f5f5f5;
+   border-radius: 5px;
 }
 
 #chat-container #message {

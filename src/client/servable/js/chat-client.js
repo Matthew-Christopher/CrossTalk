@@ -56,7 +56,7 @@ function CheckPinnedMessage() {
       if (JSONData.length > 0) {
         $('#pinned-message-container').css('display', 'flex');
 
-        $('#pinned-message-label').text('Pinned message from ' + JSONData[0].AuthorDisplayName + ', sent ' + GetPinnedMessageTimestamp(JSONData[0].Timestamp));
+        $('#pinned-message-label').text('Pinned message from ' + JSONData[0].AuthorDisplayName + ', sent ' + GetPinnedMessageTimestamp(JSONData[0].Timestamp) + '.');
         $('#pinned-message-text').text(JSONData[0].MessageString);
       } else {
         $('#pinned-message-container').hide();
