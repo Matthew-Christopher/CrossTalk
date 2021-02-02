@@ -31,7 +31,7 @@ function SetActiveServerID(id) {
       }
 
       $.parseJSON(data).forEach((message, i) => {
-        $('#chatbox').append($('<li style="position: relative;">').append($('<p class="message-author" style="display: inline;">').text(message.AuthorName)).append('<br />').append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0; top: 0;">').text(GetMessageTimestamp(message.Timestamp))).append($('<p class="message-content" style="display: inline;">').text(message.MessageString)));
+        $('#chatbox').append($('<li style="position: relative;">').append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorName)).append('<br />').append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0; top: 0;">').text(GetMessageTimestamp(message.Timestamp))).append($('<p class="message-content" style="display: inline;">').text(message.MessageString)));
       });
 
       $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
@@ -175,7 +175,7 @@ $(window).on("load", () => {
 
       let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
 
-      $('#chatbox').append($('<li style="position: relative;">').append($('<p class="message-author" style="display: inline;">').text(message.AuthorDisplayName)).append('<br />').append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0; top: 0;">').text(GetMessageTimestamp(message.Timestamp))).append($('<p class="message-content" style="display: inline;">').text(message.MessageString)));
+      $('#chatbox').append($('<li style="position: relative;">').append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName)).append('<br />').append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0; top: 0;">').text(GetMessageTimestamp(message.Timestamp))).append($('<p class="message-content" style="display: inline;">').text(message.MessageString)));
       $('#server-selector .server-button.active-button .server-info-container i').text(message.MessageString);
       StickScroll(scrollOffset);
     }
