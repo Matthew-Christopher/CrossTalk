@@ -383,6 +383,10 @@ input, button {
   background: white;
 }
 
+#chat-container #chatbox li .message-options-container:empty{
+    border: none;
+}
+
 #chat-container #chatbox li .message-options-container button {
   cursor: pointer;
   outline: none;

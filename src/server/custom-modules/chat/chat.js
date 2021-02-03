@@ -40,5 +40,9 @@ module.exports.initialise = (instance) => {
         });
       }
     });
+
+    module.exports.bin = (messageID) => {
+      io.emit('binned', messageID);
+    };
   });
 };

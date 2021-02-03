@@ -412,6 +412,7 @@ app.delete('/api/DeleteMessage', (req, res, next) => {
             if (error) throw error;
 
             res.json(JSON.stringify({status: 'success'}));
+            chat.bin(req.body.MessageID);
           });
         } else {
           res.json(JSON.stringify({status: 'invalid'}));

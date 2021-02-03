@@ -38,7 +38,7 @@ function SetActiveServerID(id) {
                        .text(GetMessageTimestamp(message.Timestamp)))
                      .append($('<div class="message-options-container">')
                      .append(JSONData.isAdmin ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
-                     .append(message.Owned || JSONData.isAdmin ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
+                     .append((message.Owned || JSONData.isAdmin) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
                      .append('<br />')
                      .append($('<p class="message-content" style="display: inline;">')
                        .text(message.MessageString)));
@@ -176,6 +176,10 @@ $(window).on("load", () => {
       $('#server-selector .server-button.active-button .server-info-container i').text(message.MessageString);
       StickScroll(scrollOffset);
     }
+  });
+
+  socket.on('binned', (messageID) => {
+    $('#' + messageID).remove();
   });
 
   $('#search').on('input', () => {
