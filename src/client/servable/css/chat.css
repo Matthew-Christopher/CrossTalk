@@ -355,7 +355,7 @@ input, button {
 }
 
 #chat-container #chatbox li {
-  margin-bottom: 12px; /* Space long, wrapped message lines differently to brand new messages */
+  margin-bottom: 20px; /* Space long, wrapped message lines differently to brand new messages */
   padding: 5px;
   border-radius: 5px;
 }
@@ -375,14 +375,46 @@ input, button {
 #chat-container #chatbox li .message-options-container {
   display: none;
   float: right;
-  padding-top: inherit;
-  height: 10px;
-  transform: translateY(-20px);
+  height: 30px;
+  margin-top: -20px;
   margin-right: 10px;
+  border: 1px solid black;
+  border-radius: 7px;
+  background: white;
 }
 
 #chat-container #chatbox li .message-options-container button {
   cursor: pointer;
+  outline: none;
+  border: none;
+  padding: 5px;
+  background: none;
+  height: 100%;
+  -webkit-transition: background .1s linear;
+	-o-transition: background .1s linear;
+	transition: background .1s linear;
+}
+
+#chat-container #chatbox li .message-options-container button img {
+  height: 100%;
+}
+
+#chat-container #chatbox li .message-options-container button:first-child {
+  border-top-left-radius: 7px;
+  border-bottom-left-radius: 7px;
+}
+
+#chat-container #chatbox li .message-options-container button:last-child {
+  border-top-right-radius: 7px;
+  border-bottom-right-radius: 7px;
+}
+
+#chat-container #chatbox li .message-options-container button:not(:last-child) {
+  border-right: 1px solid black;
+}
+
+#chat-container #chatbox li .message-options-container button:hover {
+  background: #ddd;
 }
 
 #chat-container #message {

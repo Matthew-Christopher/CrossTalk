@@ -330,14 +330,20 @@ app.post('/api/GetMyUserID', (req, res, next) => {
 app.post('/api/GetMessages', (req, res, next) => {
   if (req.session.LoggedIn && req.body.GroupID) {
     pool.getConnection(async (err, connection) => {
-      let sql = 'SELECT Message.MessageID, User.DisplayName AS AuthorName, Message.MessageString, Message.Timestamp FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID JOIN User ON User.UserID = Message.AuthorID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
+      connection.query(mysql.format('SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;', [req.session.UserID, req.body.GroupID]), (error, result, fields) => {
+        let isAdmin = result[0].Role > 0;
+        let sql = 'SELECT Message.MessageID, User.DisplayName AS AuthorName, Message.MessageString, Message.Timestamp, Message.AuthorID = ? AS Owned FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID JOIN User ON User.UserID = Message.AuthorID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
 
-      connection.query(mysql.format(sql, [req.session.UserID, req.body.GroupID]), (error, result, fields) => {
-        connection.release();
+        connection.query(mysql.format(sql, [req.session.UserID, req.session.UserID, req.body.GroupID]), (error, result, fields) => {
+          connection.release();
 
-        if (error) throw error; // Handle post-release error.
+          if (error) throw error; // Handle post-release error.
 
-        res.json(JSON.stringify(result));
+          res.json(JSON.stringify({
+            isAdmin: isAdmin,
+            messageData: result
+          }));
+        });
       });
     });
   } else {

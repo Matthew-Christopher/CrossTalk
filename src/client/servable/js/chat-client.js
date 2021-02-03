@@ -20,8 +20,9 @@ function SetActiveServerID(id) {
       $('#chatbox').empty();
 
       let JSONData = $.parseJSON(data);
+      console.log(JSONData);
 
-      if (JSONData.length > 0) {
+      if (JSONData.messageData.length > 0) {
         $('#chatbox-reminder').hide();
         $('#invite-prompt').hide();
       } else {
@@ -30,15 +31,15 @@ function SetActiveServerID(id) {
         $('#chatbox-reminder').text('No messages yet');
       }
 
-      $.parseJSON(data).forEach((message, i) => {
+      $.parseJSON(data).messageData.forEach((message, i) => {
         $('#chatbox').append($('<li style="position: relative;">')
                      .append($('<i class="message-author" style="display: inline; color: #888;">')
                        .text(message.AuthorName))
                      .append($('<i class="message-timestamp" style="color: #888; float: right;">')
                        .text(GetMessageTimestamp(message.Timestamp)))
                      .append($('<div class="message-options-container">')
-                     .append($('<button class="message-option-button" value="Pin">').text('Pin'))
-                     .append($('<button class="message-option-button" value="Bin">').text('Bin')))
+                     .append(JSONData.isAdmin ? $('<button class="message-option-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
+                     .append(message.Owned || JSONData.isAdmin ? $('<button class="message-option-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
                      .append('<br />')
                      .append($('<p class="message-content" style="display: inline;">')
                        .text(message.MessageString)));
