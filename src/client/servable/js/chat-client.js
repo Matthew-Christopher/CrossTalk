@@ -96,7 +96,7 @@ $(window).on("load", () => {
     }
   });
 
-  const socket = io();
+  const socket = io.connect('/');
   $("#message-form").submit((event) => {
     event.preventDefault(); // Don't refresh, we want a smooth experience.
 
@@ -106,30 +106,17 @@ $(window).on("load", () => {
     if (0 < messageString.length && messageString.length <= 2000) {
       let userID;
       if (activeServerID) {
-        $.ajax({
-          type: "POST",
-          url: "/api/GetMyUserID",
-          success: (data) => {
-            JSONData = $.parseJSON(data);
+        // Message object format: (MessageID, GroupID, AuthorID, AuthorDisplayName, MessageString, Timestamp)
+        let message = new Message(null, activeServerID, null, null, messageString, Date.now());
 
-            userID = JSONData[0].UserID;
+        // Don't send the message if it's blank.
+        if (message) {
+          socket.emit('chat', message); // Send the message data from the input field.
+        }
 
-            // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
-            let message = new Message(null, activeServerID, userID, null, messageString, Date.now());
+        $('#message').val(''); // Clear the message input so we can type again immediately.
 
-            // Don't send the message if it's blank.
-            if (message) {
-              socket.emit('chat', message); // Send the message data from the input field.
-            }
-
-            $('#message').val(''); // Clear the message input so we can type again immediately.
-
-            $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // Move to the most recent message if the client sent it themselves, independent of the current scroll position.
-          },
-          failure: () => {
-            console.log("Could not retreive display name. Try again later.");
-          }
-        });
+        $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // Move to the most recent message if the client sent it themselves, independent of the current scroll position.
       }
     }
   });

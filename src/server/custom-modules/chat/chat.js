@@ -14,26 +14,28 @@ const pool = mysql.createPool({
   database: process.env.DB_DATABASE
 });
 
-module.exports.initialise = (http) => {
-  io = io(http);
-  io.on('connection', (socket) => {
+module.exports.initialise = (instance) => {
+  io = instance;
+
+  io.sockets.on('connection', (socket) => {
 
     socket.on('chat', (message) => {
       if (0 < message.MessageString.trim().length && message.MessageString.trim().length <= 2000) {
         pool.getConnection(async (err, connection) => {
 
-          connection.query(mysql.format('SELECT DisplayName FROM User WHERE UserID = ?;', message.AuthorID), (error, result, fields) => {
+          connection.query(mysql.format('SELECT DisplayName FROM User WHERE UserID = ?;', socket.request.session.UserID), (error, result, fields) => {
             message.AuthorDisplayName = result[0].DisplayName;
+            message.AuthorID = socket.request.session.UserID;
             io.emit('message return', message);
-          });
 
-          // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
-          var sql = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
+            // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
+            var sql = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
 
-          connection.query(mysql.format(sql, [message.GroupID, message.AuthorID, message.MessageString, message.Timestamp]), (error, result, fields) => {
-            connection.release();
+            connection.query(mysql.format(sql, [message.GroupID, socket.request.session.UserID, message.MessageString, message.Timestamp]), (error, result, fields) => {
+              connection.release();
 
-            if (error) throw error; // Handle post-release error.
+              if (error) throw error; // Handle post-release error.
+            });
           });
         });
       }

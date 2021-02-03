@@ -34,7 +34,7 @@ const sessionStore = new MySQLStore({
   }
 }, pool);
 
-app.use(session({
+let sessionMiddleware = session({
   name: 'crosstalk.user.sid',
   secret: process.env.SESSION_SECRET,
   store: sessionStore,
@@ -43,7 +43,9 @@ app.use(session({
   cookie: {
     maxAge: 86400000 // 24 hours.
   }
-}));
+});
+
+app.use(sessionMiddleware);
 
 const http = require('http');
 
@@ -405,7 +407,7 @@ app.delete('/api/DeleteMessage', (req, res, next) => {
       connection.query(mysql.format(checkValidQuery, [req.body.MessageID, req.session.UserID]), (error, result, fields) => {
         if (result[0].Matches == 1) {
           let deleteQuery = "DELETE FROM Message WHERE MessageID = ?;";
-          
+
           connection.query(mysql.format(deleteQuery, req.body.MessageID), (error, result, fields) => {
             if (error) throw error;
 
@@ -433,7 +435,13 @@ app.use((req, res) => {
 
 const httpServer = http.createServer(app).listen(defaultPort, () => {
   log.info('Node.js HTTP web server started on port ' + httpServer.address().port);
-  chat.initialise(httpServer);
+  chat.initialise(io);
+});
+
+let io = require('socket.io')(httpServer);
+
+io.use((socket, next) => {
+  sessionMiddleware(socket.request, socket.request.res, next);
 });
 
 function GetNewGroupID(connection, callback) {
