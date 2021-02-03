@@ -334,7 +334,7 @@ app.post('/api/GetMessages', (req, res, next) => {
     pool.getConnection(async (err, connection) => {
       connection.query(mysql.format('SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;', [req.session.UserID, req.body.GroupID]), (error, result, fields) => {
         let isAdmin = result[0].Role > 0;
-        let sql = 'SELECT Message.MessageID, User.DisplayName AS AuthorName, Message.MessageString, Message.Timestamp, Message.AuthorID = ? AS Owned FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID JOIN User ON User.UserID = Message.AuthorID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
+        let sql = 'SELECT Message.MessageID, User.DisplayName AS AuthorDisplayName, Message.MessageString, Message.Timestamp, Message.AuthorID = ? AS Owned FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID JOIN User ON User.UserID = Message.AuthorID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
 
         connection.query(mysql.format(sql, [req.session.UserID, req.session.UserID, req.body.GroupID]), (error, result, fields) => {
           connection.release();

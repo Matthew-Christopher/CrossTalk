@@ -1,4 +1,4 @@
-let activeServerID;
+let activeServerID, showAdminButtons;
 const socket = io.connect('/');
 
 function SetActiveServerID(id) {
@@ -31,15 +31,17 @@ function SetActiveServerID(id) {
         $('#chatbox-reminder').text('No messages yet');
       }
 
+      showAdminButtons = JSONData.isAdmin;
+
       $.parseJSON(data).messageData.forEach((message, i) => {
         $('#chatbox').append($('<li style="position: relative;">').attr('id', message.MessageID)
                      .append($('<i class="message-author" style="display: inline; color: #888;">')
-                       .text(message.AuthorName))
+                       .text(message.AuthorDisplayName))
                      .append($('<i class="message-timestamp" style="color: #888; float: right;">')
                        .text(GetMessageTimestamp(message.Timestamp)))
                      .append($('<div class="message-options-container">')
-                     .append(JSONData.isAdmin ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
-                     .append((message.Owned || JSONData.isAdmin) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
+                     .append(showAdminButtons ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
+                     .append((message.Owned || showAdminButtons) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
                      .append('<br />')
                      .append($('<p class="message-content" style="display: inline;">')
                        .text(message.MessageString)));
@@ -172,8 +174,29 @@ $(window).on("load", () => {
 
       let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
 
-      $('#chatbox').append($('<li style="position: relative;">').append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName)).append('<br />').append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0; top: 0;">').text(GetMessageTimestamp(message.Timestamp))).append($('<p class="message-content" style="display: inline;">').text(message.MessageString)));
-      StickScroll(scrollOffset);
+      // Get the user's ID from their session cookie.
+      $.ajax({
+        type: "POST",
+        url: "/api/GetMyUserID",
+        success: (data) => {
+          $('#chatbox').append($('<li style="position: relative;">').attr('id', message.MessageID)
+                       .append($('<i class="message-author" style="display: inline; color: #888;">')
+                         .text(message.AuthorDisplayName))
+                       .append($('<i class="message-timestamp" style="color: #888; float: right;">')
+                         .text(GetMessageTimestamp(message.Timestamp)))
+                       .append($('<div class="message-options-container">')
+                       .append(showAdminButtons ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
+                       .append((message.AuthorID == $.parseJSON(data)[0].UserID || showAdminButtons) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
+                       .append('<br />')
+                       .append($('<p class="message-content" style="display: inline;">')
+                         .text(message.MessageString)));
+
+          StickScroll(scrollOffset);
+        },
+        failure: () => {
+          console.log("Could not retreive display name. Try again later.");
+        }
+      });
     }
     $('#' + message.GroupID + ' .server-info-container i').text(message.MessageString);
   });
@@ -222,6 +245,7 @@ $(window).on("load", () => {
         MessageID: $(event.target).closest('li').attr('id')
       },
       success: (data) => {
+        console.log($.parseJSON(data));
         if ($.parseJSON(data).status.toLowerCase() == 'success') {
           $(event.target).closest('li').remove();
         }

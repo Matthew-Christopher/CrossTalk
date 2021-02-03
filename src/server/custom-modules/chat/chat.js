@@ -43,8 +43,6 @@ module.exports.initialise = (instance) => {
             message.AuthorDisplayName = result[0].DisplayName;
             message.AuthorID = socket.request.session.UserID;
 
-            io.sockets.in(message.GroupID).emit('message return', message);
-
             // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
             var sql = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
 
@@ -54,6 +52,10 @@ module.exports.initialise = (instance) => {
               connection.release();
 
               if (error) throw error; // Handle post-release error.
+
+              message.MessageID = result.insertId;
+
+              io.sockets.in(message.GroupID).emit('message return', message);
             });
           });
         });
