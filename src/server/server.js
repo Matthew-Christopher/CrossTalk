@@ -398,6 +398,31 @@ app.post('/api/GetInviteCode', (req, res, next) => {
   }
 });
 
+app.delete('/api/DeleteMessage', (req, res, next) => {
+  if (req.session.LoggedIn && req.body.MessageID) {
+    pool.getConnection(async (err, connection) => {
+      let checkValidQuery = 'SELECT COUNT(*) AS Matches FROM Message JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE (Message.AuthorID = GroupMembership.UserID OR GroupMembership.Role > 0) AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
+      connection.query(mysql.format(checkValidQuery, [req.body.MessageID, req.session.UserID]), (error, result, fields) => {
+        if (result[0].Matches == 1) {
+          let deleteQuery = "DELETE FROM Message WHERE MessageID = ?;";
+          
+          connection.query(mysql.format(deleteQuery, req.body.MessageID), (error, result, fields) => {
+            if (error) throw error;
+
+            res.json(JSON.stringify({status: 'success'}));
+          });
+        } else {
+          res.json(JSON.stringify({status: 'invalid'}));
+        }
+
+        connection.release();
+      });
+    });
+  } else {
+    res.json(JSON.stringify({status: 'invalid'}));
+  }
+});
+
 app.use(express.static('../client/servable', {
   extensions: ['html', 'htm']
 }));

@@ -20,7 +20,6 @@ function SetActiveServerID(id) {
       $('#chatbox').empty();
 
       let JSONData = $.parseJSON(data);
-      console.log(JSONData);
 
       if (JSONData.messageData.length > 0) {
         $('#chatbox-reminder').hide();
@@ -32,14 +31,14 @@ function SetActiveServerID(id) {
       }
 
       $.parseJSON(data).messageData.forEach((message, i) => {
-        $('#chatbox').append($('<li style="position: relative;">')
+        $('#chatbox').append($('<li style="position: relative;">').attr('id', message.MessageID)
                      .append($('<i class="message-author" style="display: inline; color: #888;">')
                        .text(message.AuthorName))
                      .append($('<i class="message-timestamp" style="color: #888; float: right;">')
                        .text(GetMessageTimestamp(message.Timestamp)))
                      .append($('<div class="message-options-container">')
-                     .append(JSONData.isAdmin ? $('<button class="message-option-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
-                     .append(message.Owned || JSONData.isAdmin ? $('<button class="message-option-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
+                     .append(JSONData.isAdmin ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
+                     .append(message.Owned || JSONData.isAdmin ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
                      .append('<br />')
                      .append($('<p class="message-content" style="display: inline;">')
                        .text(message.MessageString)));
@@ -222,6 +221,24 @@ $(window).on("load", () => {
     } else {
       $('#chatbox-reminder').css('display', 'none');
     }
+  });
+
+  $(document).on('click', '.message-bin-button', (event) => {
+    $.ajax({
+      type: "DELETE",
+      url: "/api/DeleteMessage",
+      data:  {
+        MessageID: $(event.target).closest('li').attr('id')
+      },
+      success: (data) => {
+        if ($.parseJSON(data).status.toLowerCase() == 'success') {
+          $(event.target).closest('li').remove();
+        }
+      },
+      failure: () => {
+        console.log("Could not retreive display name. Try again later.");
+      }
+    });
   });
 });
 
