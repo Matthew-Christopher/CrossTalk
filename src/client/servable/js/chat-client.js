@@ -173,9 +173,9 @@ $(window).on("load", () => {
       let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
 
       $('#chatbox').append($('<li style="position: relative;">').append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName)).append('<br />').append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0; top: 0;">').text(GetMessageTimestamp(message.Timestamp))).append($('<p class="message-content" style="display: inline;">').text(message.MessageString)));
-      $('#server-selector .server-button.active-button .server-info-container i').text(message.MessageString);
       StickScroll(scrollOffset);
     }
+    $('#' + message.GroupID + ' .server-info-container i').text(message.MessageString);
   });
 
   socket.on('binned', (messageID) => {
