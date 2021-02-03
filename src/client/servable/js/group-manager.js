@@ -19,6 +19,7 @@ $(window).on("load", () => {
         if ($.parseJSON(data).status.toLowerCase() == 'success') {
           FetchGroups(() => {
             let newGroupID = $.parseJSON(data).groupID;
+            socket.emit('join', newGroupID);
 
             // Select the new group and scroll to it.
             $('#' + newGroupID).trigger('click');
@@ -73,6 +74,7 @@ $(window).on("load", () => {
         JSONData = $.parseJSON(data);
 
         let newGroupID = $.parseJSON(data)[0].GroupID;
+        socket.emit('join', newGroupID);
 
         FetchGroups(() => {
           // Select the new group and scroll to it.
@@ -144,6 +146,8 @@ $(window).on("load", () => {
               .append($('<span class="server-info-container">')
               .append($("<h1></h1>").text(item.GroupName))
               .append($("<i></i>").text(item.LatestMessageString ? item.LatestMessageString : "No messages yet.")));
+
+          socket.emit('join', item.GroupID);
 
           newGroup.appendTo('#server-selector');
         });

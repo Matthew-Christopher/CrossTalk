@@ -1,4 +1,5 @@
 let activeServerID;
+const socket = io.connect('/');
 
 function SetActiveServerID(id) {
   activeServerID = id;
@@ -96,7 +97,6 @@ $(window).on("load", () => {
     }
   });
 
-  const socket = io.connect('/');
   $("#message-form").submit((event) => {
     event.preventDefault(); // Don't refresh, we want a smooth experience.
 
