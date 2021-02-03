@@ -363,10 +363,26 @@ input, button {
    background: #f5f5f5;
 }
 
+#chat-container #chatbox li:hover .message-options-container {
+   display: block;
+}
+
 #chat-container #chatbox li .message-timestamp {
    padding-right: inherit;
-   padding-top: inherit;
- }
+}
+
+#chat-container #chatbox li .message-options-container {
+  display: none;
+  float: right;
+  padding-top: inherit;
+  height: 10px;
+  transform: translateY(-20px);
+  margin-right: 10px;
+}
+
+#chat-container #chatbox li .message-options-container button {
+  cursor: pointer;
+}
 
 #chat-container #message {
   box-sizing: border-box;

@@ -31,7 +31,17 @@ function SetActiveServerID(id) {
       }
 
       $.parseJSON(data).forEach((message, i) => {
-        $('#chatbox').append($('<li style="position: relative;">').append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorName)).append('<br />').append($('<i class="message-timestamp" style="color: #888; position: absolute; right: 0; top: 0;">').text(GetMessageTimestamp(message.Timestamp))).append($('<p class="message-content" style="display: inline;">').text(message.MessageString)));
+        $('#chatbox').append($('<li style="position: relative;">')
+                     .append($('<i class="message-author" style="display: inline; color: #888;">')
+                       .text(message.AuthorName))
+                     .append($('<i class="message-timestamp" style="color: #888; float: right;">')
+                       .text(GetMessageTimestamp(message.Timestamp)))
+                     .append($('<div class="message-options-container">')
+                     .append($('<button class="message-option-button" value="Pin">').text('Pin'))
+                     .append($('<button class="message-option-button" value="Bin">').text('Bin')))
+                     .append('<br />')
+                     .append($('<p class="message-content" style="display: inline;">')
+                       .text(message.MessageString)));
       });
 
       $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
