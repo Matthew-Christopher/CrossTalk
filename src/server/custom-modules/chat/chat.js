@@ -19,7 +19,7 @@ module.exports.initialise = (http) => {
   io.on('connection', (socket) => {
 
     socket.on('chat', (message) => {
-      if (message.MessageString.trim().length > 0) {
+      if (0 < message.MessageString.trim().length && message.MessageString.trim().length <= 2000) {
         pool.getConnection(async (err, connection) => {
 
           connection.query(mysql.format('SELECT DisplayName FROM User WHERE UserID = ?;', message.AuthorID), (error, result, fields) => {
