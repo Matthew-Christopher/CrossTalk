@@ -201,10 +201,6 @@ $(window).on("load", () => {
     $('#' + message.GroupID + ' .server-info-container i').text(message.MessageString);
   });
 
-  socket.on('binned', (messageID) => {
-    $('#' + messageID).remove();
-  });
-
   $('#search').on('input', () => {
     if ($('#search').val()) {
       $('#server-name-display').attr('data-before', 'Search in ');
@@ -244,16 +240,31 @@ $(window).on("load", () => {
       data:  {
         MessageID: $(event.target).closest('li').attr('id')
       },
-      success: (data) => {
-        console.log($.parseJSON(data));
-        if ($.parseJSON(data).status.toLowerCase() == 'success') {
-          $(event.target).closest('li').remove();
-        }
+      failure: () => {
+        console.log("Could not retreive display name. Try again later.");
+      }
+    });
+  });
+
+  socket.on('binned', (messageID) => {
+    $('#' + messageID).remove();
+  });
+
+  $(document).on('click', '.message-pin-button', (event) => {
+    $.ajax({
+      type: "POST",
+      url: "/api/PinMessage",
+      data:  {
+        MessageID: $(event.target).closest('li').attr('id')
       },
       failure: () => {
         console.log("Could not retreive display name. Try again later.");
       }
     });
+  });
+
+  socket.on('pinned', (groupID) => {
+    if (groupID == activeServerID) CheckPinnedMessage();
   });
 });
 
