@@ -357,7 +357,7 @@ app.post('/api/GetPinnedMessage', (req, res, next) => {
   if (req.session.LoggedIn && req.body.GroupID) {
     pool.getConnection(async (err, connection) => {
       let sql = `
-      SELECT User.DisplayName AS AuthorDisplayName,
+      SELECT Message.MessageID, User.DisplayName AS AuthorDisplayName,
         Message.MessageString, Message.Timestamp
       FROM Message
         JOIN User

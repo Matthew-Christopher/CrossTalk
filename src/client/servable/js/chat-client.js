@@ -8,52 +8,54 @@ function SetActiveServerID(id) {
 
   $('#message').focus();
 
-  CheckPinnedMessage();
+  $.when(
+    $.ajax({
+      type: "POST",
+      url: "/api/GetMessages",
+      data:  {
+        GroupID: activeServerID
+      },
+      success: (data) => {
 
-  $.ajax({
-    type: "POST",
-    url: "/api/GetMessages",
-    data:  {
-      GroupID: activeServerID
-    },
-    success: (data) => {
+        $('#chatbox').empty();
 
-      $('#chatbox').empty();
+        let JSONData = $.parseJSON(data);
 
-      let JSONData = $.parseJSON(data);
+        if (JSONData.messageData.length > 0) {
+          $('#chatbox-reminder').hide();
+          $('#invite-prompt').hide();
+        } else {
+          $('#chatbox-reminder').show();
+          $('#invite-prompt').show();
+          $('#chatbox-reminder').text('No messages yet');
+        }
 
-      if (JSONData.messageData.length > 0) {
-        $('#chatbox-reminder').hide();
-        $('#invite-prompt').hide();
-      } else {
-        $('#chatbox-reminder').show();
-        $('#invite-prompt').show();
-        $('#chatbox-reminder').text('No messages yet');
+        showAdminButtons = JSONData.isAdmin;
+
+        $('#pinned-message-delete-button').css('display', showAdminButtons ? 'block' : 'none');
+
+        $.parseJSON(data).messageData.forEach((message, i) => {
+          $('#chatbox').append($('<li style="position: relative;">').attr('id', message.MessageID)
+                       .append($('<i class="message-author" style="display: inline; color: #888;">')
+                         .text(message.AuthorDisplayName))
+                       .append($('<i class="message-timestamp" style="color: #888; float: right;">')
+                         .text(GetMessageTimestamp(message.Timestamp)))
+                       .append($('<div class="message-options-container">')
+                       .append(showAdminButtons ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
+                       .append((message.Owned || showAdminButtons) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
+                       .append('<br />')
+                       .append($('<p class="message-content" style="display: inline;">')
+                         .text(message.MessageString)));
+        });
+
+        CheckPinnedMessage();
+      },
+      failure: () => {
+        console.log("Could not retreive messages. Try again later.");
       }
-
-      showAdminButtons = JSONData.isAdmin;
-
-      $('#pinned-message-delete-button').css('display', showAdminButtons ? 'block' : 'none');
-
-      $.parseJSON(data).messageData.forEach((message, i) => {
-        $('#chatbox').append($('<li style="position: relative;">').attr('id', message.MessageID)
-                     .append($('<i class="message-author" style="display: inline; color: #888;">')
-                       .text(message.AuthorDisplayName))
-                     .append($('<i class="message-timestamp" style="color: #888; float: right;">')
-                       .text(GetMessageTimestamp(message.Timestamp)))
-                     .append($('<div class="message-options-container">')
-                     .append(showAdminButtons ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
-                     .append((message.Owned || showAdminButtons) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
-                     .append('<br />')
-                     .append($('<p class="message-content" style="display: inline;">')
-                       .text(message.MessageString)));
-      });
-
-      $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
-    },
-    failure: () => {
-      console.log("Could not retreive messages. Try again later.");
-    }
+    })
+  ).then(() => {
+    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
   });
 }
 
@@ -73,6 +75,9 @@ function CheckPinnedMessage() {
 
         $('#pinned-message-label').text('Pinned message from ' + JSONData[0].AuthorDisplayName + ', sent ' + GetPinnedMessageTimestamp(JSONData[0].Timestamp) + '.');
         $('#pinned-message-text').text(JSONData[0].MessageString);
+
+        $('#chatbox li').removeClass('pinned');
+        $('#' + JSONData[0].MessageID).addClass('pinned');
       } else {
         $('#pinned-message-container').hide();
 
@@ -250,6 +255,13 @@ $(window).on("load", () => {
 
   socket.on('binned', (messageID) => {
     $('#' + messageID).remove();
+    CheckPinnedMessage(); // The deleted message may have been binned, so check and remove it, if necessary.
+
+    if ($('#chatbox li').length == 0) {
+      $('#chatbox-reminder').show();
+      $('#invite-prompt').show();
+      $('#chatbox-reminder').text('No messages yet');
+    }
   });
 
   $(document).on('click', '.message-pin-button', (event) => {
@@ -266,7 +278,13 @@ $(window).on("load", () => {
   });
 
   socket.on('pinned', (groupID) => {
-    if (groupID == activeServerID) CheckPinnedMessage();
+    if (groupID == activeServerID) {
+      let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
+
+      CheckPinnedMessage();
+
+      StickScroll(scrollOffset);
+    }
   });
 });
 

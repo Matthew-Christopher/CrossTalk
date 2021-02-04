@@ -367,6 +367,14 @@ input, button {
   border-radius: 5px;
 }
 
+#chat-container #chatbox li.pinned {
+  background: #93d9db !important;
+}
+
+#chat-container #chatbox li:first-child {
+  margin-top: 10px; /* Ensure the contextual message option buttons are fully displayed and not chopped because of this being the first message. */
+}
+
 #chat-container #chatbox li:hover {
    background: #f5f5f5;
 }
