@@ -69,6 +69,7 @@ function CheckPinnedMessage() {
     success: (data) => {
 
       let JSONData = $.parseJSON(data);
+      let mustAdjustScroll = $('#pinned-message-container').css('display') == 'none';
 
       if (JSONData.length > 0) {
         $('#pinned-message-container').css('display', 'flex');
@@ -78,11 +79,12 @@ function CheckPinnedMessage() {
 
         $('#chatbox li').removeClass('pinned');
         $('#' + JSONData[0].MessageID).addClass('pinned');
-      } else {
-        $('#pinned-message-container').hide();
 
-        $('#pinned-message-label').text();
-        $('#pinned-message-text').text();
+        if (mustAdjustScroll) $('#chatbox').scrollTop($('#chatbox').scrollTop() + $('#pinned-message-container').outerHeight());
+      } else {
+        if ($('#pinned-message-container').css('display') == 'flex') {
+          HandleUnpinInCurrentGroup();
+        }
       }
     },
     failure: () => {
@@ -279,11 +281,7 @@ $(window).on("load", () => {
 
   socket.on('pinned', (groupID) => {
     if (groupID == activeServerID) {
-      let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
-
       CheckPinnedMessage();
-
-      StickScroll(scrollOffset);
     }
   });
 
@@ -302,16 +300,9 @@ $(window).on("load", () => {
 
   socket.on('unpinned', (data) => {
     if (data.group == activeServerID) {
-      let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
-
-      $('#pinned-message-container').hide();
-
-      $('#pinned-message-label').text();
-      $('#pinned-message-text').text();
+      HandleUnpinInCurrentGroup();
 
       $('#' + data.message).removeClass('pinned');
-
-      StickScroll(scrollOffset);
     }
   });
 });
@@ -350,10 +341,10 @@ function GetPinnedMessageTimestamp(timestamp) {
   let atTimeString = ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
   if (date.getDate() == today.getDate()) {
     // The message was sent today, so we'll just say the time.
-    return atTimeString;
+    return 'today' + atTimeString;
   } else if (date.getDate() == today.getDate() - 1) {
     // The date is yesterday.
-    return 'yesterday ' + atTimeString;
+    return 'yesterday' + atTimeString;
   } else {
     // The message was before yesterday, so just say the day.
     return 'on ' + date.toLocaleDateString() + atTimeString;
@@ -364,6 +355,22 @@ function StickScroll(scrollOffset) {
   const pixelsStickScrollThreshold = 150;
 
   if (scrollOffset <= pixelsStickScrollThreshold) {
-    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight + 100); // View the most recent message, but only if we haven't already scrolled up to view something older (outside of a certain threshold).
+    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent message, but only if we haven't already scrolled up to view something older (outside of a certain threshold).
   }
+}
+
+function HandleUnpinInCurrentGroup() {
+  let beforeHideScrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
+
+  $('#pinned-message-container').hide();
+
+  // Ensure that, despite the chatbox changing dimensions, we keep the same scroll position relative to the bottom.
+  $('#chatbox').scrollTop(
+    $('#chatbox').scrollTop() -
+    (($('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight()) >= $('#pinned-message-container').height() ?
+    $('#pinned-message-container').outerHeight()
+    : beforeHideScrollOffset));
+
+  $('#pinned-message-label').text();
+  $('#pinned-message-text').text();
 }

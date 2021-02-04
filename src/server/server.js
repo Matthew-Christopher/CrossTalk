@@ -465,7 +465,6 @@ app.post('/api/UnpinMessage', (req, res) => {
       connection.query(mysql.format(checkValidQuery, [req.body.GroupID, req.session.UserID]), (error, result, fields) => {
         if (error) throw error;
 
-        log.info(result[0].Matches);
         if (result[0].Matches == 1) {
           if (error) throw error;
 

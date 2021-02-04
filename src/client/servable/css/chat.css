@@ -398,6 +398,15 @@ input, button {
   background: white;
 }
 
+#chat-container #chatbox li.pinned .message-pin-button {
+  display: none;
+}
+
+#chat-container #chatbox li.pinned .message-bin-button {
+  border-top-left-radius: 7px;
+  border-bottom-left-radius: 7px;
+}
+
 #chat-container #chatbox li .message-options-container:empty{
     border: none;
 }
