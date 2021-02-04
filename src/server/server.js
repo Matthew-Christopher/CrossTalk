@@ -471,7 +471,7 @@ app.post('/api/UnpinMessage', (req, res) => {
           let groupIDToUpdate = result[0].GroupID;
           let unpinnedMessageID = result[0].MessageID;
 
-          connection.query(mysql.format('UPDATE \`Group\` SET PinnedMessageID = NULL WHERE GroupID = ?;', [req.body.MessageID, groupIDToUpdate]), (error, result, fields) => {
+          connection.query(mysql.format('UPDATE \`Group\` SET PinnedMessageID = NULL WHERE GroupID = ?;', [groupIDToUpdate]), (error, result, fields) => {
             if (error) throw error;
 
             res.json(JSON.stringify({status: 'success'}));
