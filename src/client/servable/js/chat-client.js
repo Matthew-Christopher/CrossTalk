@@ -286,6 +286,34 @@ $(window).on("load", () => {
       StickScroll(scrollOffset);
     }
   });
+
+  $(document).on('click', '#pinned-message-delete-button', (event) => {
+    $.ajax({
+      type: "POST",
+      url: "/api/UnpinMessage",
+      data:  {
+        GroupID: activeServerID
+      },
+      failure: () => {
+        console.log("Could not retreive display name. Try again later.");
+      }
+    });
+  });
+
+  socket.on('unpinned', (data) => {
+    if (data.group == activeServerID) {
+      let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
+
+      $('#pinned-message-container').hide();
+
+      $('#pinned-message-label').text();
+      $('#pinned-message-text').text();
+
+      $('#' + data.message).removeClass('pinned');
+
+      StickScroll(scrollOffset);
+    }
+  });
 });
 
 function CloseCreateForm() {

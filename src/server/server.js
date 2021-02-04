@@ -426,10 +426,10 @@ app.delete('/api/DeleteMessage', (req, res, next) => {
   }
 });
 
-app.post('/api/PinMessage', (req, res, next) => {
+app.post('/api/PinMessage', (req, res) => {
   if (req.session.LoggedIn && req.body.MessageID) {
     pool.getConnection(async (err, connection) => {
-      let checkValidQuery = 'SELECT COUNT(*) AS Matches FROM Message JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE (Message.AuthorID = GroupMembership.UserID OR GroupMembership.Role > 0) AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
+      let checkValidQuery = 'SELECT COUNT(*) AS Matches FROM Message JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
       connection.query(mysql.format(checkValidQuery, [req.body.MessageID, req.session.UserID]), (error, result, fields) => {
         if (result[0].Matches == 1) {
           let getGroupQuery = "SELECT GroupID FROM Message WHERE MessageID = ?;";
@@ -445,6 +445,38 @@ app.post('/api/PinMessage', (req, res, next) => {
               res.json(JSON.stringify({status: 'success'}));
               chat.pin(groupIDToUpdate);
             });
+          });
+        } else {
+          res.json(JSON.stringify({status: 'invalid'}));
+        }
+
+        connection.release();
+      });
+    });
+  } else {
+    res.json(JSON.stringify({status: 'invalid'}));
+  }
+});
+
+app.post('/api/UnpinMessage', (req, res) => {
+  if (req.session.LoggedIn && req.body.GroupID) {
+    pool.getConnection(async (err, connection) => {
+      let checkValidQuery = 'SELECT COUNT(*) AS Matches, \`Group\`.GroupID, \`Group\`.PinnedMessageID AS MessageID FROM \`Group\` JOIN GroupMembership ON \`Group\`.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND \`Group\`.GroupID = ? AND GroupMembership.UserID = ?;';
+      connection.query(mysql.format(checkValidQuery, [req.body.GroupID, req.session.UserID]), (error, result, fields) => {
+        if (error) throw error;
+
+        log.info(result[0].Matches);
+        if (result[0].Matches == 1) {
+          if (error) throw error;
+
+          let groupIDToUpdate = result[0].GroupID;
+          let unpinnedMessageID = result[0].MessageID;
+
+          connection.query(mysql.format('UPDATE \`Group\` SET PinnedMessageID = NULL WHERE GroupID = ?;', [req.body.MessageID, groupIDToUpdate]), (error, result, fields) => {
+            if (error) throw error;
+
+            res.json(JSON.stringify({status: 'success'}));
+            chat.unpin(groupIDToUpdate, unpinnedMessageID);
           });
         } else {
           res.json(JSON.stringify({status: 'invalid'}));

@@ -69,5 +69,9 @@ module.exports.initialise = (instance) => {
     module.exports.pin = (groupID) => {
       io.sockets.in(groupID).emit('pinned', groupID);
     };
+
+    module.exports.unpin = (groupID, messageID) => {
+      io.sockets.in(groupID).emit('unpinned', { group: groupID, message: messageID });
+    };
   });
 };
