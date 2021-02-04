@@ -33,6 +33,8 @@ function SetActiveServerID(id) {
 
       showAdminButtons = JSONData.isAdmin;
 
+      $('#pinned-message-delete-button').css('display', showAdminButtons ? 'block' : 'none');
+
       $.parseJSON(data).messageData.forEach((message, i) => {
         $('#chatbox').append($('<li style="position: relative;">').attr('id', message.MessageID)
                      .append($('<i class="message-author" style="display: inline; color: #888;">')

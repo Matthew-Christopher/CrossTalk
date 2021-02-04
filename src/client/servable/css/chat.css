@@ -115,7 +115,7 @@ input, button {
   height: 100%;
 }
 
-#group-create-form-container #group-create-close-button {
+#group-create-form-container #group-create-close-button, #chat-container #pinned-message-container #pinned-message-delete-button {
   font-weight: 100;
   line-height: 0.65;
   font-size: 3.5em;
@@ -130,11 +130,11 @@ input, button {
   transition: all .2s ease-in-out;
 }
 
-#group-create-form-container #group-create-close-button:after {
+#group-create-form-container #group-create-close-button:after, #chat-container #pinned-message-container #pinned-message-delete-button:after {
   content: "\00d7"; /* Cross */
 }
 
-#group-create-form-container #group-create-close-button:hover {
+#group-create-form-container #group-create-close-button:hover, #chat-container #pinned-message-container #pinned-message-delete-button:hover {
   opacity: 1;
   transform: scale(1.1);
 }
@@ -319,6 +319,13 @@ input, button {
   padding: 10px;
   font-size: 1.1em;
   flex-flow: column;
+}
+
+#chat-container #pinned-message-container #pinned-message-delete-button {
+  display: none;
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }
 
 #chat-container #pinned-message-container #pinned-message-label {
