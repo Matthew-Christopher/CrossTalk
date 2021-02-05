@@ -62,8 +62,8 @@ module.exports.initialise = (instance) => {
       }
     });
 
-    module.exports.bin = (messageID) => {
-      io.emit('binned', messageID);
+    module.exports.bin = (groupID, messageID, newMessageString) => {
+      io.sockets.in(groupID).emit('binned', { group: groupID, message: messageID, newLatestMessage: newMessageString });
     };
 
     module.exports.pin = (groupID) => {

@@ -207,7 +207,8 @@ $(window).on("load", () => {
         }
       });
     }
-    $('#' + message.GroupID + ' .server-info-container i').text(message.MessageString);
+
+    SetRecentMessage(message.GroupID, message.MessageString);
   });
 
   $('#search').on('input', () => {
@@ -255,8 +256,8 @@ $(window).on("load", () => {
     });
   });
 
-  socket.on('binned', (messageID) => {
-    $('#' + messageID).remove();
+  socket.on('binned', (data) => {
+    $('#' + data.message).remove();
     CheckPinnedMessage(); // The deleted message may have been binned, so check and remove it, if necessary.
 
     if ($('#chatbox li').length == 0) {
@@ -264,6 +265,8 @@ $(window).on("load", () => {
       $('#invite-prompt').show();
       $('#chatbox-reminder').text('No messages yet');
     }
+
+    SetRecentMessage(data.group, data.newLatestMessage);
   });
 
   $(document).on('click', '.message-pin-button', (event) => {
@@ -373,4 +376,8 @@ function HandleUnpinInCurrentGroup() {
 
   $('#pinned-message-label').text();
   $('#pinned-message-text').text();
+}
+
+function SetRecentMessage(groupID, messageString) {
+  $('#' + groupID + ' .server-info-container i').text(messageString);
 }
