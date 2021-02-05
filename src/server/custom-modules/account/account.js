@@ -3,8 +3,10 @@
 const log = require('../logging');
 const cryptography = require('../cryptography');
 const mailer = require('../mailer');
+const db = require('../db');
 
 const mysql = require('mysql');
+const async = require('async');
 
 require('dotenv').config();
 
@@ -25,7 +27,7 @@ module.exports.Register = async (request, response) => {
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
 
-      let sql = `
+      let getQuery = `
       SELECT *
       FROM   (SELECT Count(*) AS DisplayNameDuplicates
         FROM   USER
@@ -35,10 +37,10 @@ module.exports.Register = async (request, response) => {
           WHERE  Lower(emailaddress) = LOWER(?)) AS T2
               ON true; `;
 
-      connection.query(mysql.format(sql, [request.body['display-name'], request.body.email]), (error, res, fields) => {
-        if (res[0].DisplayNameDuplicates > 0) {
+      db.query(connection, getQuery, [request.body['display-name'], request.body.email], (result, fields) => {
+        if (result[0].DisplayNameDuplicates > 0) {
           response.send('display');
-        } else if (res[0].EmailDuplicates > 0) {
+        } else if (result[0].EmailDuplicates > 0) {
           response.send('email');
         } else if (request.body.password.length < 8) {
           response.send('password');
@@ -47,11 +49,7 @@ module.exports.Register = async (request, response) => {
             sql = "INSERT INTO User (DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, False, ?);";
             let inserts = [request.body['display-name'], request.body.email, hash, verificationKey];
 
-            connection.query(mysql.format(sql, inserts), (error, res, fields) => {
-              connection.release();
-
-              if (error) throw error; // Handle post-release error.
-
+            db.query(connection, sql, inserts, (result, fields) => {
               mailer.SendVerification(request.body.email, verificationKey);
             });
           });
@@ -59,6 +57,8 @@ module.exports.Register = async (request, response) => {
           response.status(201).send("success");
         }
       });
+
+      connection.release();
     });
   }
 };
@@ -76,15 +76,14 @@ module.exports.Recover = (request, response) => {
         let expiryDate = new Date();
         expiryDate.setHours(expiryDate.getHours() + 24);
 
-        connection.query(mysql.format(sql, [recoveryKey, expiryDate.valueOf(), request.body.email]), (error, res, fields) => {
-          connection.release();
+        db.query(connection, sql, [recoveryKey, expiryDate.valueOf(), request.body.email], (result, fields) => {
 
-          if (error) throw error; // Handle post-release error.
-
-          if (res.affectedRows) {
+          if (result.affectedRows) {
             mailer.SendRecovery(request.body.email, recoveryKey);
           }
         });
+
+        connection.release();
       });
     });
 
@@ -103,34 +102,37 @@ module.exports.ChangePassword = async (request, response) => {
     pool.getConnection(async (err, connection) => {
       if (err) throw err;
 
-      let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE (RecoveryKey = ? AND RecoveryKeyExpires > ?) OR UserID = ?;";
+      let checkValidQuery = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE (RecoveryKey = ? AND RecoveryKeyExpires > ?) OR UserID = ?;";
 
-      connection.query(mysql.format(sql, [request.body.recoveryKey, new Date().getTime(), request.session.UserID]), (error, result, fields) => {
-        if (error) throw error;
-
+      db.query(connection, checkValidQuery, [request.body.recoveryKey, new Date().getTime(), request.session.UserID], (result, fields) => {
         if (result[0].NumberOfMatches != 1) {
-          connection.release();
           response.status(422).sendFile(path.join(__dirname + '/../client/hidden/invalid-recovery-key.html'));
         } else {
-          sql = "SELECT DisplayName, EmailAddress FROM User WHERE RecoveryKey = ? OR UserID = ?";
+          async.parallel({
+            nameAndEmail: function(callback) {
+              let getDisplayNameAndEmailQuery = 'SELECT DisplayName, EmailAddress FROM User WHERE RecoveryKey = ? OR UserID = ?';
 
-          connection.query(mysql.format(sql, [request.body.recoveryKey, request.session.UserID]), (error, firstResult, fields) => {
+              db.query(connection, getDisplayNameAndEmailQuery, [request.body.recoveryKey, request.session.UserID], (result, fields) => {
+                callback(null, result);
+              });
+            },
+            updatePassword: function(callback) {
+              let updatePasswordQuery = 'UPDATE User SET PasswordHash = ?, RecoveryKey = NULL, RecoveryKeyExpires = NULL WHERE RecoveryKey = ? OR UserID = ?;';
 
-            if (error) throw error;
+              db.query(connection, updatePasswordQuery, [newHash, request.body.recoveryKey, request.session.UserID], (result, fields) => {
+                callback(null, result);
+              });
+            }
+          }, (error, results) => {
+            mailer.SendChangeNotification(results.nameAndEmail[0].DisplayName, results.nameAndEmail[0].EmailAddress);
 
-            sql = "UPDATE User SET PasswordHash = ?, RecoveryKey = NULL, RecoveryKeyExpires = NULL WHERE RecoveryKey = ? OR UserID = ?;";
-
-            connection.query(mysql.format(sql, [newHash, request.body.recoveryKey, request.session.UserID]), (error, secondResult, fields) => {
-              connection.release();
-
-              mailer.SendChangeNotification(firstResult[0].DisplayName, firstResult[0].EmailAddress);
-
-              response.json(JSON.stringify({
-                outcome: 'change'
-              }));
-            });
+            response.json(JSON.stringify({
+              outcome: 'change'
+            }));
           });
         }
+
+        connection.release();
       });
     });
   }
@@ -143,11 +145,7 @@ module.exports.LogIn = async (request, response) => {
 
     var sql = "SELECT * FROM User WHERE EmailAddress = ?";
 
-    connection.query(mysql.format(sql, request.body.email), async (error, res, fields) => {
-      connection.release();
-
-      if (error) throw error; // Handle post-release error.
-
+    db.query(connection, sql, request.body.email, async (res, fields) => {
       if (res.length > 0 && await cryptography.CompareHashes(res[0].PasswordHash, request.body.password) && res[0].Verified) {
         // Authenticated.
 
@@ -167,35 +165,31 @@ module.exports.LogIn = async (request, response) => {
         // Incorrect credentials.
         response.send("fail");
       }
+
+      connection.release();
     });
   });
-}
+};
 
 module.exports.LogOut = async (request, response) => {
   request.session.destroy((err) => {
     response.redirect('/');
   });
-}
+};
 
 function GetRecoveryKey(connection, callback) {
   let duplicates = 0;
 
   do {
-    connection.query("SELECT LEFT(MD5(RAND()), 32) AS RecoveryKey;", (error, firstResult, fields) => {
-      if (error) throw error;
+    let recoveryKey = require('crypto').randomBytes(16).toString('hex');
 
-      let recoveryKey = firstResult[0].RecoveryKey;
+    db.query(connection, 'SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE RecoveryKey = ?;', recoveryKey, (result, fields) => {
 
-      connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE RecoveryKey = ?;", recoveryKey), (error, secondResult, fields) => {
+      duplicates = result[0].NumberOfDuplicates;
 
-        if (error) throw error;
-
-        duplicates = secondResult[0].NumberOfDuplicates;
-
-        if (duplicates == 0) {
-          return callback(recoveryKey); // Ensure callback is called after the async activity terminates, to prevent null errors.
-        }
-      });
+      if (duplicates == 0) {
+        return callback(recoveryKey); // Ensure callback is called after the async activity terminates, to prevent null errors.
+      }
     });
 
   } while (duplicates != 0);
@@ -208,9 +202,7 @@ function GetUserID(connection, callback) {
 
   do {
 
-    connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE VerificationKey = ?;", candidateID), (error, result, fields) => {
-      if (error) throw error;
-
+    db.query(connection, 'SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE VerificationKey = ?;', candidateID, (result, fields) => {
       duplicates = result[0].NumberOfDuplicates;
 
       if (duplicates == 0) {

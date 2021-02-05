@@ -8,6 +8,8 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 const mysql = require('mysql');
 
+const async = require('async');
+
 const pool = mysql.createPool({
   connectionLimit: process.env.DB_CONNECTIONLIMIT,
   host: process.env.DB_HOST,
@@ -56,6 +58,7 @@ const account = require('./custom-modules/account');
 const cryptography = require('./custom-modules/cryptography');
 const log = require('./custom-modules/logging');
 const chat = require('./custom-modules/chat');
+const db = require('./custom-modules/db');
 // END CUSTOM MODULES
 
 app.set('etag', false);
@@ -69,7 +72,6 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(bodyParser.json());
-
 
 app.get('(/login(.html)?)?', (req, res) => {
   if (req.session.LoggedIn) {
@@ -100,20 +102,17 @@ app.get('/verify', (req, res) => {
     res.redirect('/chat');
   } else {
     pool.getConnection(async (err, connection) => {
-      if (err) throw err;
+      let sql = 'UPDATE USER SET Verified = 1, VerificationKey = NULL WHERE VerificationKey = ?';
 
-      let sql = "UPDATE USER SET Verified = 1, VerificationKey = NULL WHERE VerificationKey = ?";
-
-      connection.query(mysql.format(sql, req.query.verificationKey), (error, result, fields) => {
-        connection.release();
-
-        if (error) throw error; // Handle post-release error.
+      db.query(connection, sql, req.query.verificationKey, (result, fields) => {
 
         if (result.affectedRows > 0) {
           res.status(201).sendFile(path.join(__dirname + '/../client/hidden/verified.html'));
         } else {
           res.status(422).send(path.join(__dirname + '/../client/hidden/invalid-verification-key.html'));
         }
+
+        connection.release();
       });
     });
   }
@@ -144,17 +143,12 @@ app.post('/JoinGroup', (req, res) => {
                   WHERE  UserID = ?
                          AND \`Group\`.InviteCode = ?) AS t2
                   ON TRUE;`;
-      connection.query(mysql.format(checkValid, [req.body.code, req.session.UserID, req.body.code]), (error, firstResult, fields) => {
-
-        if (error) throw error;
+      db.query(connection, checkValid, [req.body.code, req.session.UserID, req.body.code], (firstResult, fields) => {
 
         if (firstResult[0] && firstResult[0].JoinID && !firstResult[0].MembershipJoinID) {
           let joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
 
-          connection.query(mysql.format(joinGroup, [req.session.UserID, firstResult[0].JoinID]), (error, secondResult, fields) => {
-
-            if (error) throw error; // Handle post-release error.
-
+          db.query(connection, joinGroup, [req.session.UserID, firstResult[0].JoinID], (secondResult, fields) => {
             res.json(JSON.stringify({
               status: 'success',
               groupID: firstResult[0].JoinID
@@ -190,24 +184,19 @@ app.get('/account/change-password(.html)?', (req, res) => {
     let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE RecoveryKey = ? AND RecoveryKeyExpires > ?;";
 
     if (!(req.query.recoveryKey || req.session.LoggedIn)) {
-      connection.release();
-
       res.status(422).sendFile(path.join(__dirname + '/../client/hidden/invalid-recovery-key.html'));
     } else {
-      connection.query(mysql.format(sql, [req.query.recoveryKey, new Date().getTime()]), (error, result, fields) => {
-        if (error) throw error;
+      db.query(connection, sql, [req.query.recoveryKey, new Date().getTime()], (result, fields) => {
 
         if (result[0].NumberOfMatches != 1 && !req.session.LoggedIn) {
           res.status(422).sendFile(path.join(__dirname + '/../client/hidden/invalid-recovery-key.html'));
         } else {
           res.status(200).sendFile(path.join(__dirname + '/../client/servable/account/change-password.html'));
         }
-
-        connection.release();
-
-        if (error) throw error; // Handle post-release error.
       });
     }
+
+    connection.release();
   });
 });
 
@@ -221,32 +210,39 @@ app.post('/CreateGroup', (req, res) => {
   pool.getConnection(async (err, connection) => {
     if (err) throw err; // Connection failed.
 
-    GetNewGroupID(connection, (inviteCode) => {
-      let sql = "INSERT INTO \`Group\` (GroupName, InviteCode) VALUES (?, ?);";
-      let inserts = [req.body.group, inviteCode];
-
-      connection.query(mysql.format(sql, inserts), (error, firstResult, fields) => {
-        if (error) throw error;
-
-        connection.query(mysql.format("SELECT GroupID FROM \`Group\` WHERE InviteCode = ?;", inviteCode), (error, secondResult, fields) => {
-
-          if (error) throw error;
-
-          let sql = `INSERT INTO GroupMembership VALUES (?, ?, 2);`;
-
-          connection.query(mysql.format(sql, [req.session.UserID, secondResult[0].GroupID, inviteCode]), (error, thirdResult, fields) => {
-            if (error) throw error;
-
-            connection.release();
-
-            if (error) throw error; // Handle post-release error.
-
-            res.status(200).json(JSON.stringify([{
-              'GroupID': secondResult[0].GroupID
-            }]));
-          });
+    async.waterfall([
+      function GetID(callback) {
+        GetNewGroupID(connection, (inviteCode) => {
+          callback(null, inviteCode);
         });
-      });
+      },
+      function InsertID(inviteCode, callback) {
+        let idInsertionQuery = 'INSERT INTO \`Group\` (GroupName, InviteCode) VALUES (?, ?);';
+
+        db.query(connection, idInsertionQuery, [req.body.group, inviteCode], (result, fields) => {
+          callback(null, inviteCode, result);
+        });
+      },
+      function GetGroupID(inviteCode, firstResult, callback) {
+        let selectionQuery = 'SELECT GroupID FROM \`Group\` WHERE InviteCode = ?;';
+
+        db.query(connection, selectionQuery, inviteCode, (result, fields) => {
+          callback(null, inviteCode, firstResult, result);
+        });
+      },
+      function AddMembership(inviteCode, firstResult, secondResult, callback) {
+        let membershipInsertionQuery = 'INSERT INTO GroupMembership VALUES (?, ?, 2);';
+
+        db.query(connection, membershipInsertionQuery, [req.session.UserID, secondResult[0].GroupID], (result, fields) => {
+          callback(null, inviteCode, firstResult, secondResult, result);
+        });
+      }
+    ], (error, inviteCode, firstResult, secondResult, thirdResult) => {
+      res.status(200).json(JSON.stringify([{
+        'GroupID': secondResult[0].GroupID
+      }]));
+
+      connection.release();
     });
   });
 });
@@ -288,12 +284,11 @@ app.post('/api/GetMyGroups', (req, res, next) => {
       ORDER  BY MessageInfo.Timestamp DESC, GroupInfo.GroupName;
       `;
 
-      connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
-        connection.release();
-
-        if (error) throw error; // Handle post-release error.
+      db.query(connection, sql, req.session.UserID, (result, fields) => {
 
         res.json(JSON.stringify(result));
+
+        connection.release();
       });
     });
   } else {
@@ -306,12 +301,11 @@ app.post('/api/GetMyDisplayName', (req, res, next) => {
     pool.getConnection(async (err, connection) => {
       let sql = "SELECT DisplayName FROM User WHERE UserID = ?;";
 
-      connection.query(mysql.format(sql, req.session.UserID), (error, result, fields) => {
-        connection.release();
-
-        if (error) throw error; // Handle post-release error.
+      db.query(connection, sql, req.session.UserID, (result, fields) => {
 
         res.json(JSON.stringify(result));
+
+        connection.release();
       });
     });
   } else {
@@ -332,20 +326,28 @@ app.post('/api/GetMyUserID', (req, res, next) => {
 app.post('/api/GetMessages', (req, res, next) => {
   if (req.session.LoggedIn && req.body.GroupID) {
     pool.getConnection(async (err, connection) => {
-      connection.query(mysql.format('SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;', [req.session.UserID, req.body.GroupID]), (error, result, fields) => {
-        let isAdmin = result[0].Role > 0;
-        let sql = 'SELECT Message.MessageID, User.DisplayName AS AuthorDisplayName, Message.MessageString, Message.Timestamp, Message.AuthorID = ? AS Owned FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID JOIN User ON User.UserID = Message.AuthorID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
+      async.parallel({
+        adminStatus: function DetermineRole(callback) {
+          let determineRoleQuery = 'SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
 
-        connection.query(mysql.format(sql, [req.session.UserID, req.session.UserID, req.body.GroupID]), (error, result, fields) => {
-          connection.release();
+          db.query(connection, determineRoleQuery, [req.session.UserID, req.body.GroupID], (result, fields) => {
+            callback(null, result[0].Role > 0);
+          });
+        },
+        messages: function GetMessageData(callback) {
+          let getMessageDataQuery = 'SELECT Message.MessageID, User.DisplayName AS AuthorDisplayName, Message.MessageString, Message.Timestamp, Message.AuthorID = ? AS Owned FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID JOIN User ON User.UserID = Message.AuthorID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
 
-          if (error) throw error; // Handle post-release error.
+          db.query(connection, getMessageDataQuery, [req.session.UserID, req.session.UserID, req.body.GroupID], (result, fields) => {
+            callback(null, result);
+          });
+        }
+      }, (error, results) => {
+        res.json(JSON.stringify({
+          isAdmin: results.adminStatus, // Result of first function.
+          messageData: results.messages // Result of second function.
+        }));
 
-          res.json(JSON.stringify({
-            isAdmin: isAdmin,
-            messageData: result
-          }));
-        });
+        connection.release();
       });
     });
   } else {
@@ -369,12 +371,10 @@ app.post('/api/GetPinnedMessage', (req, res, next) => {
       WHERE  Groupmembership.UserID = ?
         AND \`group\`.GroupID = ?;`;
 
-      connection.query(mysql.format(sql, [req.session.UserID, req.body.GroupID]), (error, result, fields) => {
-        connection.release();
-
-        if (error) throw error; // Handle post-release error.
-
+      db.query(connection, sql, [req.session.UserID, req.body.GroupID], (result, fields) => {
         res.json(JSON.stringify(result));
+
+        connection.release();
       });
     });
   } else {
@@ -387,12 +387,10 @@ app.post('/api/GetInviteCode', (req, res, next) => {
     pool.getConnection(async (err, connection) => {
       let sql = "SELECT InviteCode FROM `Group` WHERE GroupID = ?;";
 
-      connection.query(mysql.format(sql, req.body.GroupID), (error, result, fields) => {
-        connection.release();
-
-        if (error) throw error; // Handle post-release error.
-
+      db.query(connection, sql, req.body.GroupID, (result, fields) => {
         res.json(JSON.stringify(result));
+
+        connection.release();
       });
     });
   } else {
@@ -404,21 +402,28 @@ app.delete('/api/DeleteMessage', (req, res, next) => {
   if (req.session.LoggedIn && req.body.MessageID) {
     pool.getConnection(async (err, connection) => {
       let checkValidQuery = 'SELECT COUNT(*) AS Matches, Message.GroupID FROM Message JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE (Message.AuthorID = GroupMembership.UserID OR GroupMembership.Role > 0) AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
-      connection.query(mysql.format(checkValidQuery, [req.body.MessageID, req.session.UserID]), (error, firstResult, fields) => {
-        if (error) throw error;
 
+      db.query(connection, checkValidQuery, [req.body.MessageID, req.session.UserID], (firstResult, fields) => {
         if (firstResult[0].Matches == 1) {
-          let deleteQuery = "DELETE FROM Message WHERE MessageID = ?;";
+          async.parallel({
+            secondResult: function(callback) {
+              let deleteQuery = "DELETE FROM Message WHERE MessageID = ?;";
 
-          connection.query(mysql.format(deleteQuery, req.body.MessageID), (error, secondResult, fields) => {
-            if (error) throw error;
+              db.query(connection, deleteQuery, req.body.MessageID, (result, fields) => {
+                callback(null, result);
+              });
+            },
+            thirdResult: function(callback) {
+              let getRecentMessageQuery = 'SELECT Message.MessageString AS LatestMessageString FROM Message WHERE Message.GroupID = ? ORDER BY Timestamp DESC LIMIT 1;';
 
-            connection.query(mysql.format('SELECT Message.MessageString AS LatestMessageString FROM Message WHERE Message.GroupID = ? ORDER BY Timestamp DESC LIMIT 1;', firstResult[0].GroupID), (error, thirdResult, fields) => {
-              if (error) throw error;
+              db.query(connection, getRecentMessageQuery, firstResult[0].GroupID, (result, fields) => {
+                callback(null, result);
+              });
+            }
+          }, (error, results) => {
+            res.json(JSON.stringify({status: 'success'}));
 
-              res.json(JSON.stringify({status: 'success'}));
-              chat.bin(firstResult[0].GroupID, req.body.MessageID, thirdResult[0].LatestMessageString);
-            });
+            chat.bin(firstResult[0].GroupID, req.body.MessageID, results.thirdResult[0].LatestMessageString);
           });
         } else {
           res.json(JSON.stringify({status: 'invalid'}));
@@ -436,21 +441,28 @@ app.post('/api/PinMessage', (req, res) => {
   if (req.session.LoggedIn && req.body.MessageID) {
     pool.getConnection(async (err, connection) => {
       let checkValidQuery = 'SELECT COUNT(*) AS Matches FROM Message JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
-      connection.query(mysql.format(checkValidQuery, [req.body.MessageID, req.session.UserID]), (error, result, fields) => {
+
+      db.query(connection, checkValidQuery, [req.body.MessageID, req.session.UserID], (result, fields) => {
         if (result[0].Matches == 1) {
-          let getGroupQuery = "SELECT GroupID FROM Message WHERE MessageID = ?;";
+          async.waterfall([
+            function(callback) {
+              let getGroupQuery = "SELECT GroupID FROM Message WHERE MessageID = ?;";
 
-          connection.query(mysql.format(getGroupQuery, req.body.MessageID), (error, result, fields) => {
-            if (error) throw error;
+              db.query(connection, getGroupQuery, req.body.MessageID, (result, fields) => {
+                callback(null, result[0].GroupID);
+              });
+            },
+            function(groupIDToUpdate, callback) {
+              let updateGroupQuery = 'UPDATE \`Group\` SET PinnedMessageID = ? WHERE GroupID = ?;';
 
-            let groupIDToUpdate = result[0].GroupID;
+              db.query(connection, updateGroupQuery, [req.body.MessageID, groupIDToUpdate], (result, fields) => {
+                callback(null, groupIDToUpdate);
+              });
+            }
+          ], (error, groupIDToUpdate) => {
+            res.json(JSON.stringify({status: 'success'}));
 
-            connection.query(mysql.format('UPDATE \`Group\` SET PinnedMessageID = ? WHERE GroupID = ?;', [req.body.MessageID, groupIDToUpdate]), (error, result, fields) => {
-              if (error) throw error;
-
-              res.json(JSON.stringify({status: 'success'}));
-              chat.pin(groupIDToUpdate);
-            });
+            chat.pin(groupIDToUpdate);
           });
         } else {
           res.json(JSON.stringify({status: 'invalid'}));
@@ -468,17 +480,13 @@ app.post('/api/UnpinMessage', (req, res) => {
   if (req.session.LoggedIn && req.body.GroupID) {
     pool.getConnection(async (err, connection) => {
       let checkValidQuery = 'SELECT COUNT(*) AS Matches, \`Group\`.GroupID, \`Group\`.PinnedMessageID AS MessageID FROM \`Group\` JOIN GroupMembership ON \`Group\`.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND \`Group\`.GroupID = ? AND GroupMembership.UserID = ?;';
-      connection.query(mysql.format(checkValidQuery, [req.body.GroupID, req.session.UserID]), (error, result, fields) => {
-        if (error) throw error;
-
+      db.query(connection, checkValidQuery, [req.body.GroupID, req.session.UserID], (result, fields) => {
         if (result[0].Matches == 1) {
-          if (error) throw error;
-
           let groupIDToUpdate = result[0].GroupID;
           let unpinnedMessageID = result[0].MessageID;
 
-          connection.query(mysql.format('UPDATE \`Group\` SET PinnedMessageID = NULL WHERE GroupID = ?;', [groupIDToUpdate]), (error, result, fields) => {
-            if (error) throw error;
+          let updateQuery = 'UPDATE \`Group\` SET PinnedMessageID = NULL WHERE GroupID = ?;';
+          db.query(connection, updateQuery, groupIDToUpdate, (result, fields) => {
 
             res.json(JSON.stringify({status: 'success'}));
             chat.unpin(groupIDToUpdate, unpinnedMessageID);
@@ -523,9 +531,7 @@ function GetNewGroupID(connection, callback) {
 
     let candidateID = require('crypto').randomBytes(6).toString('hex');
 
-    connection.query(mysql.format("SELECT COUNT(*) AS NumberOfDuplicates FROM `Group` WHERE InviteCode = ?;", candidateID), (error, result, fields) => {
-      if (error) throw error;
-
+    db.query(connection, 'SELECT COUNT(*) AS NumberOfDuplicates FROM `Group` WHERE InviteCode = ?;', candidateID, (result, fields) => {
       duplicates = result[0].NumberOfDuplicates;
 
       if (duplicates == 0) {

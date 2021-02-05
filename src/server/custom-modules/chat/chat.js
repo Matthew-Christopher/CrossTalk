@@ -1,10 +1,12 @@
 'use strict';
 
 const log = require('../logging');
+const db = require('../db');
 let io = require('socket.io');
 
 require('dotenv').config();
 const mysql = require('mysql');
+const async = require('async');
 
 const pool = mysql.createPool({
   connectionLimit: process.env.DB_CONNECTIONLIMIT,
@@ -21,9 +23,7 @@ module.exports.initialise = (instance) => {
     socket.on('join', (id) => {
       // Check the user is actually permitted to join first.
       pool.getConnection(async (err, connection) => {
-        connection.query(mysql.format('SELECT COUNT(*) AS Matches FROM GroupMembership WHERE UserID = ? AND GroupID = ?;', [socket.request.session.UserID, id]), (error, result, fields) => {
-          if (error) throw error;
-
+        db.query(connection, 'SELECT COUNT(*) AS Matches FROM GroupMembership WHERE UserID = ? AND GroupID = ?;', [socket.request.session.UserID, id], (result, fields) => {
           if (result[0].Matches == 1) {
             socket.join(id);
           }
@@ -37,26 +37,28 @@ module.exports.initialise = (instance) => {
       if (0 < message.MessageString.trim().length && message.MessageString.trim().length <= 2000) {
         pool.getConnection(async (err, connection) => {
 
-          connection.query(mysql.format('SELECT DisplayName FROM User WHERE UserID = ?;', socket.request.session.UserID), (error, result, fields) => {
-            if (error) throw error;
+          async.parallel({
+            getDisplayName: function(callback) {
+              let getDisplayNameQuery = 'SELECT DisplayName FROM User WHERE UserID = ?;';
 
-            message.AuthorDisplayName = result[0].DisplayName;
-            message.AuthorID = socket.request.session.UserID;
+              db.query(connection, getDisplayNameQuery, socket.request.session.UserID, (result, fields) => {
+                callback(null, result[0].DisplayName);
+              });
+            },
+            insertMessage: function(callback) {
+              let insertMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
 
-            // Message object format: (MessageID, GroupID, AuthorID, MessageString, Timestamp)
-            var sql = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
+              db.query(connection, insertMessageQuery, [message.GroupID, socket.request.session.UserID, message.MessageString, message.Timestamp], (result, fields) => {
+                callback(null, result);
+              });
+            }
+          }, (error, results) => {
+            message.AuthorDisplayName = results.getDisplayName;
+            message.MessageID = results.insertMessage.insertId;
 
-            connection.query(mysql.format(sql, [message.GroupID, socket.request.session.UserID, message.MessageString, message.Timestamp]), (error, result, fields) => {
-              if (error) throw error;
+            io.sockets.in(message.GroupID).emit('message return', message);
 
-              connection.release();
-
-              if (error) throw error; // Handle post-release error.
-
-              message.MessageID = result.insertId;
-
-              io.sockets.in(message.GroupID).emit('message return', message);
-            });
+            connection.release();
           });
         });
       }
