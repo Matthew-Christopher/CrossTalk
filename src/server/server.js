@@ -369,7 +369,7 @@ app.post('/api/GetPinnedMessage', (req, res, next) => {
         JOIN GroupMembership
           ON \`Group\`.GroupID = GroupMembership.GroupID
       WHERE  Groupmembership.UserID = ?
-        AND \`group\`.GroupID = ?;`;
+        AND \`Group\`.GroupID = ?;`;
 
       db.query(connection, sql, [req.session.UserID, req.body.GroupID], (result, fields) => {
         res.json(JSON.stringify(result));

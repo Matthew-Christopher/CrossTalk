@@ -20,8 +20,9 @@ const pool = mysql.createPool({
 
 module.exports.Register = async (request, response) => {
   let hash = await cryptography.Hash(request.body.password);
+  const emailCheckRegex = new RegExp('/^[a-z0-9!#$%&\'*+\\/=?^_`{|}~.-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/iD'); // (Regex DB, n.d.)
 
-  if (!request.body['display-name'].trim() || (request.body.email != request.body['confirm-email']) || !await cryptography.CompareHashes(hash, request.body['confirm-password'])) {
+  if (!!request.body['display-name'].trim() || !emailCheckRegex.test(request.body.email) || !request.body.password.trim() || (request.body.email != request.body['confirm-email']) || !await cryptography.CompareHashes(hash, request.body['confirm-password'])) {
     response.send("fail");
   } else {
     pool.getConnection(async (err, connection) => {
@@ -30,12 +31,12 @@ module.exports.Register = async (request, response) => {
       let getQuery = `
       SELECT *
       FROM   (SELECT Count(*) AS DisplayNameDuplicates
-        FROM   USER
-        WHERE  Lower(displayname) = LOWER(?)) AS T1
+        FROM   User
+        WHERE  LOWER(DisplayName) = LOWER(?)) AS T1
         LEFT JOIN (SELECT Count(*) AS EmailDuplicates
-          FROM   USER
-          WHERE  Lower(emailaddress) = LOWER(?)) AS T2
-              ON true; `;
+          FROM   User
+          WHERE  LOWER(EmailAddress) = LOWER(?)) AS T2
+              ON true;`;
 
       db.query(connection, getQuery, [request.body['display-name'], request.body.email], (result, fields) => {
         if (result[0].DisplayNameDuplicates > 0) {
@@ -46,7 +47,7 @@ module.exports.Register = async (request, response) => {
           response.send('password');
         } else {
           GetUserID(connection, (verificationKey) => {
-            sql = "INSERT INTO User (DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, False, ?);";
+            sql = 'INSERT INTO User (DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, False, ?);';
             let inserts = [request.body['display-name'], request.body.email, hash, verificationKey];
 
             db.query(connection, sql, inserts, (result, fields) => {
