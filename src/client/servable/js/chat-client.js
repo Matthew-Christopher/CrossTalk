@@ -222,10 +222,10 @@ $(window).on("load", () => {
 
   $(document).click((event) => {
     // Handle click events. We should hide the nav container if it's visible and we click outside of it.
-
-    if ($('#group-create-container').css('display') == 'block' && $('#group-create-container').css('opacity') == 1 && !$(event.target).is('.popup') && !$(event.target).is('.popup *') && !$(event.target).is('.popup-close-button') ) {
+console.log(event.target);
+    if ($('#group-create-container').css('display') == 'block' && $('#group-create-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
       CloseCreateForm();
-    } else if ($('#member-list-container').css('display') == 'block' && $('#member-list-container').css('opacity') == 1 && !$(event.target).is('.popup') && !$(event.target).is('.popup *') && !$(event.target).is('.popup-close-button') ) {
+    } else if ($('#member-list-container').css('display') == 'block' && $('#member-list-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
       CloseMemberList();
     }
   });

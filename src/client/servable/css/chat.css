@@ -812,5 +812,5 @@ input, button {
 #member-list-container #member-list ul:empty:before {
   margin-left: 10px;
   font-weight: bold;
-  content: 'Nothing here, yet!';
+  content: 'No one\'s here, yet!';
 }
