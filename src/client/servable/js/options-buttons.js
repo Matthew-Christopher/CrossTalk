@@ -18,13 +18,13 @@ $(window).on("load", () => {
     } else if ($(event.target).is('#show-invite-code')) {
       if ($('#invite-code-display').css('display') == 'none') {
         $('#invite-code-display').css('display', 'flex');
-        if (!showAdminButtons) {
+        if (!(role > 0)) {
           $('#show-invite-code').closest('li').removeClass('round-bottom');
           $('#invite-code-display').addClass('round-bottom');
         }
       } else {
         $('#invite-code-display').css('display', 'none');
-        if (!showAdminButtons) {
+        if (!(role > 0)) {
           $('#invite-code-display').removeClass('round-bottom');
           $('#show-invite-code').closest('li').addClass('round-bottom');
         }

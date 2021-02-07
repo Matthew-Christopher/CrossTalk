@@ -1,4 +1,4 @@
-let activeServerID, showAdminButtons;
+let activeServerID, role;
 const socket = io.connect('/');
 
 function SetActiveServerID(id) {
@@ -30,9 +30,9 @@ function SetActiveServerID(id) {
           $('#chatbox-reminder').text('No messages yet');
         }
 
-        showAdminButtons = JSONData.isAdmin;
+        role = JSONData.role;
 
-        if (showAdminButtons) {
+        if (role > 0) {
           $('#pinned-message-delete-button').css('display', 'block');
           $('#group-info-admin-button').css('display', 'list-item');
           $('#group-info-admin-button').addClass('round-bottom');
@@ -51,8 +51,8 @@ function SetActiveServerID(id) {
                        .append($('<i class="message-timestamp" style="color: #888; float: right;">')
                          .text(GetMessageTimestamp(message.Timestamp)))
                        .append($('<div class="message-options-container">')
-                       .append(showAdminButtons ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
-                       .append((message.Owned || showAdminButtons) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
+                       .append(role > 0 ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
+                       .append((message.Owned || role > 0) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
                        .append('<br />')
                        .append($('<p class="message-content" style="display: inline;">')
                          .text(message.MessageString)));
@@ -174,42 +174,12 @@ $(window).on("load", () => {
   });
 
   $('#view-members').click(() => {
-    $('#member-list #owner, #member-list #admins, #member-list #members').empty();
+    ToggleVisiblity('#options-nav-container');
 
     $('#member-list-container').fadeIn(200); // Take 200ms to fade.
     $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)'); // Blur background.
 
-    // Get the user's display name from their session cookie and the database.
-    $.ajax({
-      type: "GET",
-      url: "/api/GetGroupMemberList",
-      data: {
-        GroupID: activeServerID
-      },
-      success: (data) => {
-        let memberList = $.parseJSON(data);
-
-        for (let i = 0; i < memberList.length; ++i) {
-          switch(memberList[i].Role) {
-            case 2:
-              // Owner.
-              $('#member-list #owner').append($('<li>').text(memberList[i].DisplayName));
-              break;
-            case 1:
-              // Admin.
-              $('#member-list #admins').append($('<li>').text(memberList[i].DisplayName));
-              break;
-            default:
-              // Member.
-              $('#member-list #members').append($('<li>').text(memberList[i].DisplayName));
-              break;
-          }
-        }
-      },
-      failure: () => {
-        console.error("Could not retreive members. Try again later.");
-      }
-    });
+    FetchMemberList();
   });
 
   $('#group-create-close-button').click(() => {
@@ -222,7 +192,6 @@ $(window).on("load", () => {
 
   $(document).click((event) => {
     // Handle click events. We should hide the nav container if it's visible and we click outside of it.
-console.log(event.target);
     if ($('#group-create-container').css('display') == 'block' && $('#group-create-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
       CloseCreateForm();
     } else if ($('#member-list-container').css('display') == 'block' && $('#member-list-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
@@ -249,8 +218,8 @@ console.log(event.target);
                        .append($('<i class="message-timestamp" style="color: #888; float: right;">')
                          .text(GetMessageTimestamp(message.Timestamp)))
                        .append($('<div class="message-options-container">')
-                       .append(showAdminButtons ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
-                       .append((message.AuthorID == $.parseJSON(data)[0].UserID || showAdminButtons) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
+                       .append(role > 0 ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
+                       .append((message.AuthorID == $.parseJSON(data)[0].UserID || role > 0) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
                        .append('<br />')
                        .append($('<p class="message-content" style="display: inline;">')
                          .text(message.MessageString)));
@@ -444,4 +413,40 @@ function HandleUnpinInCurrentGroup() {
 
 function SetRecentMessage(groupID, messageString) {
   $('#' + groupID + ' .server-info-container i').text(messageString);
+}
+
+function FetchMemberList() {
+  // Get the user's display name from their session cookie and the database.
+  $.ajax({
+    type: "GET",
+    url: "/api/GetGroupMemberList",
+    data: {
+      GroupID: activeServerID
+    },
+    success: (data) => {
+      $('#member-list #owner, #member-list #admins, #member-list #members').empty(); // Empty before we append to avoid any duplicates.
+
+      let memberList = $.parseJSON(data);
+
+      for (let i = 0; i < memberList.length; ++i) {
+        switch(memberList[i].Role) {
+          case 2:
+            // Owner.
+            $('#member-list #owners').append($('<li>').append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName)));
+            break;
+          case 1:
+            // Admin.
+            $('#member-list #admins').append($('<li>').append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName)));
+            break;
+          default:
+            // Member.
+            $('#member-list #members').append($('<li>').append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName)));
+            break;
+        }
+      }
+    },
+    failure: () => {
+      console.error("Could not retreive members. Try again later.");
+    }
+  });
 }

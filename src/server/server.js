@@ -331,7 +331,7 @@ app.post('/api/GetMessages', (req, res, next) => {
           let determineRoleQuery = 'SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
 
           db.query(connection, determineRoleQuery, [req.session.UserID, req.body.GroupID], (result, fields) => {
-            callback(null, result[0].Role > 0);
+            callback(null, result[0].Role);
           });
         },
         messages: function GetMessageData(callback) {
@@ -343,7 +343,7 @@ app.post('/api/GetMessages', (req, res, next) => {
         }
       }, (error, results) => {
         res.json(JSON.stringify({
-          isAdmin: results.adminStatus, // Result of first function.
+          role: results.adminStatus, // Result of first function.
           messageData: results.messages // Result of second function.
         }));
 
