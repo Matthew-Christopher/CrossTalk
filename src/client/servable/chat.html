@@ -22,8 +22,8 @@
 </head>
 <body>
   <div id="group-create-container" class="overlay blur-exclude">
-    <div id="group-create-form-container">
-      <button id="group-create-close-button"></button>
+    <div class="popup-container">
+      <button id="group-create-close-button" class="popup-close-button"></button>
       <h1>Create a new group</h1>
 
       <p style="text-align: center;">Let's get started. Then your friends or team members can join with the invite code, available in the group settings page.</p>
@@ -43,6 +43,28 @@
         </div>
 
       </form>
+    </div>
+  </div>
+
+  <div id="member-list-container" class="overlay blur-exclude">
+    <div id="member-list-popup" class="popup-container">
+      <button id="member-list-close-button" class="popup-close-button"></button>
+      <h1 id="member-list-title">Testing Group</h1>
+
+      <p style="text-align: center;">A list of all members in the group. You can also start a private messaging conversation from here.</p>
+
+      <div id="members-scrollbox">
+        <ul id="member-list">
+          <li class="title">Owner</li>
+          <ul id="owner" class="member-section"></ul>
+
+          <li class="title">Admins</li>
+          <ul id="admins" class="member-section"></ul>
+
+          <li class="title">Members</li>
+          <ul id="members" class="member-section"></ul>
+        </ul>
+      </div>
     </div>
   </div>
 
@@ -85,7 +107,7 @@
     <ul id="profile-options">
       <li><p id="profile-options-name-label"></p></li>
       <li><a href="#under-development">Profile Settings</a></li>
-      <li><a href="/logout">Log Out</a></li>
+      <li class="round-bottom"><a href="/logout">Log Out</a></li>
     </ul>
   </div>
 
@@ -94,6 +116,7 @@
     <ul id="options">
       <li><p id="group-options-label"></p></li>
       <li><input type="text" id="search" autocomplete="off" placeholder="Search messages..."></li>
+      <li><button id="view-members" style="cursor: pointer; background: none; border: none; outline: none;">View members</button></li>
       <li><a id="show-invite-code">Get invite code</a></li>
       <li id="invite-code-display">
         <div id="invite-code-container">
@@ -101,8 +124,7 @@
           <button id="invite-code-copy" value="Copy">Copy</button>
         </div>
       </li>
-      <li><a href="#under-development">See group statistics</a></li>
-      <li><a href="#under-development">Change nickname</a></li>
+      <li id="group-info-admin-button" style="display: none;"><button style="cursor: pointer; background: none; border: none; outline: none;">View group info</button></li>
     </ul>
   </div>
 

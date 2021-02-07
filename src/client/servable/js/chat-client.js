@@ -32,7 +32,17 @@ function SetActiveServerID(id) {
 
         showAdminButtons = JSONData.isAdmin;
 
-        $('#pinned-message-delete-button').css('display', showAdminButtons ? 'block' : 'none');
+        if (showAdminButtons) {
+          $('#pinned-message-delete-button').css('display', 'block');
+          $('#group-info-admin-button').css('display', 'list-item');
+          $('#group-info-admin-button').addClass('round-bottom');
+          $('#show-invite-code').closest('li').removeClass('round-bottom');
+        } else {
+          $('#pinned-message-delete-button').css('display', 'none');
+          $('#group-info-admin-button').css('display', 'none');
+          $('#group-info-admin-button').removeClass('round-bottom');
+          $('#show-invite-code').closest('li').addClass('round-bottom');
+        }
 
         $.parseJSON(data).messageData.forEach((message, i) => {
           $('#chatbox').append($('<li style="position: relative;">').attr('id', message.MessageID)
@@ -51,7 +61,7 @@ function SetActiveServerID(id) {
         CheckPinnedMessage();
       },
       failure: () => {
-        console.log("Could not retreive messages. Try again later.");
+        console.error("Could not retreive messages. Try again later.");
       }
     })
   ).then(() => {
@@ -88,7 +98,7 @@ function CheckPinnedMessage() {
       }
     },
     failure: () => {
-      console.log("Could not retreive messages. Try again later.");
+      console.error("Could not retreive messages. Try again later.");
     }
   });
 }
@@ -104,7 +114,7 @@ $(window).on("load", () => {
       $('#profile-options-name-label').text($.parseJSON(data)[0].DisplayName);
     },
     failure: () => {
-      console.log("Could not retreive display name. Try again later.");
+      console.error("Could not retreive display name. Try again later.");
     }
   });
 
@@ -154,7 +164,7 @@ $(window).on("load", () => {
     $('#group-create').addClass('active-button');
 
     $('#group-create-container').fadeIn(200); // Take 200ms to fade.
-    $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)');
+    $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)'); // Blur background.
     $('input[name="group"]').focus();
 
     if($('#group-join').hasClass('active-button')) {
@@ -163,17 +173,62 @@ $(window).on("load", () => {
     }
   });
 
-  $(document).click((event) => {
-    // Handle click events. We should hide the nav container if it's visible and we click outside of it.
+  $('#view-members').click(() => {
+    $('#member-list #owner, #member-list #admins, #member-list #members').empty();
 
-    if ($('#group-create-container').css('display') == 'block' && $('#group-create-container').css('opacity') == 1 && !$(event.target).is('#group-create-form-container') && !$(event.target).is('#group-create-form-container *') && !$(event.target).is('#group-create-close-button') ) {
-      CloseCreateForm();
-    }
+    $('#member-list-container').fadeIn(200); // Take 200ms to fade.
+    $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)'); // Blur background.
+
+    // Get the user's display name from their session cookie and the database.
+    $.ajax({
+      type: "GET",
+      url: "/api/GetGroupMemberList",
+      data: {
+        GroupID: activeServerID
+      },
+      success: (data) => {
+        let memberList = $.parseJSON(data);
+
+        for (let i = 0; i < memberList.length; ++i) {
+          switch(memberList[i].Role) {
+            case 2:
+              // Owner.
+              $('#member-list #owner').append($('<li>').text(memberList[i].DisplayName));
+              break;
+            case 1:
+              // Admin.
+              $('#member-list #admins').append($('<li>').text(memberList[i].DisplayName));
+              break;
+            default:
+              // Member.
+              $('#member-list #members').append($('<li>').text(memberList[i].DisplayName));
+              break;
+          }
+        }
+      },
+      failure: () => {
+        console.error("Could not retreive members. Try again later.");
+      }
+    });
   });
 
   $('#group-create-close-button').click(() => {
     CloseCreateForm();
-  })
+  });
+
+  $('#member-list-close-button').click(() => {
+    CloseMemberList();
+  });
+
+  $(document).click((event) => {
+    // Handle click events. We should hide the nav container if it's visible and we click outside of it.
+
+    if ($('#group-create-container').css('display') == 'block' && $('#group-create-container').css('opacity') == 1 && !$(event.target).is('.popup') && !$(event.target).is('.popup *') && !$(event.target).is('.popup-close-button') ) {
+      CloseCreateForm();
+    } else if ($('#member-list-container').css('display') == 'block' && $('#member-list-container').css('opacity') == 1 && !$(event.target).is('.popup') && !$(event.target).is('.popup *') && !$(event.target).is('.popup-close-button') ) {
+      CloseMemberList();
+    }
+  });
 
   socket.on('message return', (message) => {
     // Only render the message if we are on its group.
@@ -203,7 +258,7 @@ $(window).on("load", () => {
           StickScroll(scrollOffset);
         },
         failure: () => {
-          console.log("Could not retreive display name. Try again later.");
+          console.error("Could not retreive ID. Try again later.");
         }
       });
     }
@@ -251,7 +306,7 @@ $(window).on("load", () => {
         MessageID: $(event.target).closest('li').attr('id')
       },
       failure: () => {
-        console.log("Could not retreive display name. Try again later.");
+        console.error("Could not delete message. Try again later.");
       }
     });
   });
@@ -277,7 +332,7 @@ $(window).on("load", () => {
         MessageID: $(event.target).closest('li').attr('id')
       },
       failure: () => {
-        console.log("Could not retreive display name. Try again later.");
+        console.error("Could pin message. Try again later.");
       }
     });
   });
@@ -296,7 +351,7 @@ $(window).on("load", () => {
         GroupID: activeServerID
       },
       failure: () => {
-        console.log("Could not retreive display name. Try again later.");
+        console.error("Could not unpin message. Try again later.");
       }
     });
   });
@@ -311,11 +366,20 @@ $(window).on("load", () => {
 });
 
 function CloseCreateForm() {
-  $('#message').focus();
-
   $('#group-create').removeClass('active-button');
-
   $('#group-create-container').fadeOut(200); // Take 200ms to fade.
+
+  UnhidePopup();
+}
+
+function CloseMemberList() {
+  $('#member-list-container').fadeOut(200); // Take 200ms to fade.
+
+  UnhidePopup();
+}
+
+function UnhidePopup() {
+  $('#message').focus();
   $('body *:not(.blur-exclude)').css('-webkit-filter', '');
 }
 

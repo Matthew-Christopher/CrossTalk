@@ -18,7 +18,7 @@ input, button {
   font-family: 'Work Sans', sans-serif;
 }
 
-#group-create-container {
+#group-create-container, #member-list-container {
   position: fixed;
   left: 0;
   top: 0;
@@ -28,11 +28,11 @@ input, button {
   display: none;
 }
 
-#group-create-container *:not(label) {
+#group-create-container *:not(label), #member-list-container * {
   z-index: 5;
 }
 
-#group-create-container.overlay::after {
+#group-create-container.overlay::after, #member-list-container.overlay::after {
   opacity: 0.4;
   background: black;
   content: '';
@@ -45,7 +45,7 @@ input, button {
   box-sizing: border-box;
 }
 
-#group-create-form-container {
+.popup-container {
   position: relative;
   left: 50%;
   top: 50%;
@@ -61,23 +61,23 @@ input, button {
   align-items: center;
 }
 
-#group-create-form-container p, #group-create-form-container form {
+.popup-container p, .popup-container form {
   margin-top: 50px;
 }
 
-#group-create-form-container .input-field-container {
+.popup-container .input-field-container {
   height: 50px;
   position: relative;
   margin-bottom: 50px;
   display: inline-block;
 }
 
-#group-create-form-container .input-submit-container {
+.popup-container .input-submit-container {
   width: 100%;
   height: 50px;
 }
 
-#group-create-form-container input[type="submit"] {
+.popup-container input[type="submit"] {
   border-radius: 10px;
   background: transparent;
   outline: none;
@@ -96,12 +96,12 @@ input, button {
   transform: translate3d(0, 0, 0);
 }
 
-#group-create-form-container input[type="submit"]:hover {
+.popup-container input[type="submit"]:hover {
   background: #8ffd9f;
   transform: translate3d(0, 0, 0) scale(1.03);
 }
 
-#group-create-form-container input:not([type="submit"]) {
+.popup-container input:not([type="submit"]) {
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
   outline: none;
@@ -115,7 +115,7 @@ input, button {
   height: 100%;
 }
 
-#group-create-form-container #group-create-close-button, #chat-container #pinned-message-container #pinned-message-delete-button {
+.popup-container .popup-close-button, #chat-container #pinned-message-container #pinned-message-delete-button {
   font-weight: 100;
   line-height: 0.65;
   font-size: 3.5em;
@@ -130,11 +130,11 @@ input, button {
   transition: all .2s ease-in-out;
 }
 
-#group-create-form-container #group-create-close-button:after, #chat-container #pinned-message-container #pinned-message-delete-button:after {
+.popup-container .popup-close-button:after, #chat-container #pinned-message-container #pinned-message-delete-button:after {
   content: "\00d7"; /* Cross */
 }
 
-#group-create-form-container #group-create-close-button:hover, #chat-container #pinned-message-container #pinned-message-delete-button:hover {
+.popup-container .popup-close-button:hover, #chat-container #pinned-message-container #pinned-message-delete-button:hover {
   opacity: 1;
   transform: scale(1.1);
 }
@@ -475,11 +475,14 @@ input, button {
   text-align: center;
 }
 
-#message-form .input-field-container {
+#message-form {
   width: 100%;
-  height: 50px;
   position: absolute;
   bottom: 0;
+}
+
+#message-form .input-field-container {
+  height: 50px;
 }
 
 #message-form #message-send-tick * {
@@ -746,11 +749,13 @@ input, button {
 	content: 'Options for ';
 }
 
-.options-box li:not(:first-child) {
-	border-top: 1px solid #888;
+.options-box li.round-bottom {
+  border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
 }
 
 .options-box li:not(:first-child) {
+	border-top: 1px solid #888;
   background: #fff;
 }
 
@@ -759,14 +764,47 @@ input, button {
 	border-top-right-radius: 10px;
 }
 
-.options-box li:last-child {
-  border-bottom-left-radius: 10px;
-	border-bottom-right-radius: 10px;
-}
-
 .options-box li a {
 	text-decoration: none;
 	color: #000;
 	cursor: pointer;
 	z-index: 4;
+}
+
+#member-list-container #member-list-popup {
+  max-height: 80vh;
+  width: 50%;
+  box-sizing: border-box;
+  display: flex;
+  flex-flow: column;
+}
+
+#member-list-container #member-list-title::before {
+ content: "Members of ";
+}
+
+#member-list-container #members-scrollbox {
+  margin-top: 25px;
+  overflow-y: auto;
+  align-items: stretch;
+  width: 80%;
+}
+
+#member-list-container #member-list li {
+  text-decoration: none;
+}
+
+#member-list-container #member-list .member-section:not(:last-child), #member-list-container #member-list li:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+#member-list-container #member-list li.title {
+  color: #444;
+  font-style: italic;
+  font-weight: 200;
+  font-size: 1.3em;
+}
+
+#member-list-container #member-list li:not(.title) {
+  margin-left: 10px;
 }

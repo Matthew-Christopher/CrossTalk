@@ -16,7 +16,19 @@ $(window).on("load", () => {
 
       ToggleVisiblity('#options-nav-container');
     } else if ($(event.target).is('#show-invite-code')) {
-      $('#invite-code-display').css('display', ($('#invite-code-display').css('display') == 'none') ? 'flex' : 'none');
+      if ($('#invite-code-display').css('display') == 'none') {
+        $('#invite-code-display').css('display', 'flex');
+        if (!showAdminButtons) {
+          $('#show-invite-code').closest('li').removeClass('round-bottom');
+          $('#invite-code-display').addClass('round-bottom');
+        }
+      } else {
+        $('#invite-code-display').css('display', 'none');
+        if (!showAdminButtons) {
+          $('#invite-code-display').removeClass('round-bottom');
+          $('#show-invite-code').closest('li').addClass('round-bottom');
+        }
+      }
     } else if ($(event.target).is('#invite-code-copy')) {
       CopyInviteCode();
 
@@ -90,5 +102,6 @@ function HideInviteCode() {
   $('#invite-code-copy').text('Copy');
 
   $('#invite-code-display').css('display', 'none');
+  $('#invite-code-display').removeClass('round-bottom');
   $('#invite-code').text('');
 }

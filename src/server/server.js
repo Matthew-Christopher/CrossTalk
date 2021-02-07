@@ -503,6 +503,28 @@ app.post('/api/UnpinMessage', (req, res) => {
   }
 });
 
+app.get('/api/GetGroupMemberList', (req, res, next) => {
+  if (req.session.LoggedIn && req.query.GroupID) {
+    pool.getConnection(async (err, connection) => {
+      let checkPermissibleRequest = 'SELECT COUNT(*) AS Matches FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
+
+      db.query(connection, checkPermissibleRequest, [req.session.UserID, req.query.GroupID], (result, fields) => {
+        if (result[0].Matches == 1) {
+          let getMemberList = 'SELECT User.DisplayName, GroupMembership.Role FROM GroupMembership JOIN User ON User.UserID = GroupMembership.UserID WHERE GroupMembership.GroupID = ? ORDER BY User.DisplayName;';
+
+          db.query(connection, getMemberList, req.query.GroupID, (result, fields) => {
+            res.json(JSON.stringify(result));
+
+            connection.release();
+          });
+        }
+      });
+    });
+  } else {
+    next();
+  }
+});
+
 app.use(express.static('../client/servable', {
   extensions: ['html', 'htm']
 }));
