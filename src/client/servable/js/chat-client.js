@@ -432,7 +432,7 @@ function FetchMemberList() {
         switch(memberList[i].Role) {
           case 2:
             // Owner.
-            $('#member-list #owners').append($('<li>').append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName)));
+            $('#member-list #owner').append($('<li>').append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName)));
             break;
           case 1:
             // Admin.
