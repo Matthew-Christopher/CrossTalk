@@ -50,7 +50,7 @@
 
 
 <!-- TABLE OF CONTENTS -->
-<details open="open">
+<details>
   <summary><h2 style="display: inline-block">Table of Contents</h2></summary>
   <ol>
     <li>
@@ -80,12 +80,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
-Here's a blank template to get started:
-**To avoid retyping too much info. Do a search and replace with your text editor for the following:**
-`github_username`, `repo_name`, `twitter_handle`, `email`, `project_title`, `project_description`
-
+[![Product Name Screen Shot][product-screenshot]]
 
 ### Built With
 
@@ -98,7 +93,7 @@ Here's a blank template to get started:
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To get a local copy up and running follow these simple steps.
+To get a local copy up and running follow these simple steps. The code assumes that these steps have been completed correctly and is not likely to function without you doing so.
 
 ### Prerequisites
 
@@ -112,7 +107,7 @@ This is an example of how to list things you need to use the software and how to
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   git clone https://github.com/Matthew-Christopher/Crosstalk.git
    ```
 2. Install NPM packages
    ```sh
@@ -133,14 +128,14 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Roadmap
 
-See the [open issues](https://github.com/Matthew-Christopher/Crosstalk/issues) for a list of proposed features (and known issues).
+See the [open issues](https://github.com/Matthew-Christopher/Crosstalk/issues) for a list of known issues and requested features.
 
 
 
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+To propose changes:
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -153,13 +148,14 @@ Contributions are what make the open source community such an amazing place to b
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the GPLv3 License. See `LICENSE` for more information.
 
 
 
 <!-- CONTACT -->
 ## Contact
 
+My GitHub Profile: [https://github.com/Matthew-Christopher](https://github.com/Matthew-Christopher)
 Project Link: [https://github.com/Matthew-Christopher/Crosstalk](https://github.com/Matthew-Christopher/Crosstalk)
 
 
