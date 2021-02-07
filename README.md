@@ -41,7 +41,6 @@
   <p align="center">
     A web-based instant messaging platform built with Node.js and Socket.IO
     <br />
-    <br />    ·
     <br />
     <a href="https://github.com/Matthew-Christopher/Crosstalk/issues">Report Bug</a>
     ·
@@ -135,7 +134,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Roadmap
 
-See the [open issues](https://github.com/github_username/repo_name/issues) for a list of proposed features (and known issues).
+See the [open issues](https://github.com/Matthew-Christopher/Crosstalk/issues) for a list of proposed features (and known issues).
 
 
 
@@ -179,8 +178,8 @@ Project Link: [https://github.com/Matthew-Christopher/Crosstalk](https://github.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo.svg?style=for-the-badge
-[contributors-url]: https://github.com/github_username/repo/graphs/contributors
+[contributors-shield]: https://img.shields.io/github/contributors/Matthew-Christopher/Crosstalk.svg?style=for-the-badge
+[contributors-url]: https://github.com/Matthew-Christopher/Crosstalk/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/github_username/repo.svg?style=for-the-badge
 [forks-url]: https://github.com/github_username/repo/network/members
 [stars-shield]: https://img.shields.io/github/stars/github_username/repo.svg?style=for-the-badge
