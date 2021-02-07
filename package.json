@@ -28,7 +28,7 @@
     "url": "git+https://github.com/Matthew-Christopher/Crosstalk.git"
   },
   "author": "Matthew Christopher",
-  "license": "",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/Matthew-Christopher/Crosstalk/issues"
   },
