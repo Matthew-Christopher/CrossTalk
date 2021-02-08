@@ -135,13 +135,13 @@ app.post('/JoinGroup', (req, res) => {
       SELECT *
       FROM   (SELECT \`Group\`.GroupID AS JoinID
         FROM   \`Group\`
-        WHERE  InviteCode = ?) AS t1
+        WHERE  InviteCode = ?) AS firstDerivedTable
         LEFT JOIN (SELECT GroupMembership.GroupID AS MembershipJoinID
                   FROM   GroupMembership
                          JOIN \`Group\`
                          ON GroupMembership.GroupID = \`Group\`.GroupID
                   WHERE  UserID = ?
-                         AND \`Group\`.InviteCode = ?) AS t2
+                         AND \`Group\`.InviteCode = ?) AS secondDerivedTable
                   ON TRUE;`;
       db.query(connection, checkValid, [req.body.code, req.session.UserID, req.body.code], (firstResult, fields) => {
 

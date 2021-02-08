@@ -32,11 +32,11 @@ module.exports.Register = async (request, response) => {
       SELECT *
       FROM   (SELECT Count(*) AS DisplayNameDuplicates
         FROM   User
-        WHERE  LOWER(DisplayName) = LOWER(?)) AS T1
+        WHERE  LOWER(DisplayName) = LOWER(?)) AS firstDerivedTable
         LEFT JOIN (SELECT Count(*) AS EmailDuplicates
           FROM   User
-          WHERE  LOWER(EmailAddress) = LOWER(?)) AS T2
-              ON true;`;
+          WHERE  LOWER(EmailAddress) = LOWER(?)) AS secondDerivedTable
+              ON True;`;
 
       db.query(connection, getQuery, [request.body['display-name'], request.body.email], (result, fields) => {
         if (result[0].DisplayNameDuplicates > 0) {
