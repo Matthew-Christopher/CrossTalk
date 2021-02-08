@@ -81,17 +81,17 @@ A screenshot of the project chat screen.
 ### Built With
 
 * [Node.js](https://nodejs.org/en/)
-* [argon2](https://www.npmjs.com/package/argon2)
-* [async](https://www.npmjs.com/package/async)
+* [Argon2](https://www.npmjs.com/package/argon2)
+* [Async](https://www.npmjs.com/package/async)
 * [body-parser](https://www.npmjs.com/package/body-parser)
 * [dotenv](https://www.npmjs.com/package/dotenv)
-* [express](https://www.npmjs.com/package/express)
+* [Express](https://www.npmjs.com/package/express)
 * [express-mysql-session](https://www.npmjs.com/package/express-mysql-session)
 * [express-session](https://www.npmjs.com/package/express-session)
 * [log4js](https://www.npmjs.com/package/log4js)
-* [mysql](https://www.npmjs.com/package/mysql)
-* [nodemailer](https://www.npmjs.com/package/nodemailer)
-* [socket.io](https://www.npmjs.com/package/socket.io)
+* [MySQL](https://www.npmjs.com/package/mysql)
+* [Nodemailer](https://www.npmjs.com/package/nodemailer)
+* [Socket.IO](https://www.npmjs.com/package/socket.io)
 
 <!-- GETTING STARTED -->
 ## Getting Started
