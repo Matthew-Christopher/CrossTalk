@@ -170,11 +170,22 @@ input, button {
   overflow-y: auto; /* Only show the scroll bar when necessary */
 }
 
+#server-container #chat-type-toggle-container {
+  box-sizing: border-box;
+  width: 100%;
+  border-bottom: 1px solid black;
+}
+
+#server-container #chat-type-toggle-container #chat-type-toggle {
+  box-sizing: border-box;
+  width: 0;
+  height: 0;
+  visibility: none;
+}
+
 #server-container #server-buttons-container {
   box-sizing: border-box;
   width: 100%;
-  position: relative;
-  top: 0;
 }
 
 #server-container #server-buttons-container .group-action-button {

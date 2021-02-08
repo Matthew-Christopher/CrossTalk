@@ -24,7 +24,7 @@ const MySQLStore = require('express-mysql-session')(session); // Persist user se
 const sessionStore = new MySQLStore({
   clearExpired: true,
   createDatabaseTable: true,
-  expiration: 86400000, // 24 hours.
+  expiration: 172800000, // Expire after 48 hours.
   endConnectionOnClose: true,
   schema: {
     tableName: 'UserSession',
