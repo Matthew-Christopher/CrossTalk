@@ -70,7 +70,12 @@
 
   <div id="server-container">
     <div id="chat-type-toggle-container">
-      <input id="chat-type-toggle" type="checkbox">
+      <label id="toggle-box"> <!-- Wrap in a label so a click toggles the checkbox -->
+        <p style="position: absolute; left: 0; padding: 5px;">Groups</p>
+        <input id="chat-type-toggle" type="checkbox">
+        <span id="chat-type-toggle-slider-visual"></span>
+        <p style="position: absolute; right: 0; padding: 5px; z-index: -1;">Friends</p>
+      </label>
     </div>
     <div id="server-buttons-container">
       <button id="group-join" class="group-action-button" type="button" value="Join">Join Group</button>

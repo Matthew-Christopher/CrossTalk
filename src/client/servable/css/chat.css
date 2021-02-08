@@ -173,15 +173,56 @@ input, button {
 #server-container #chat-type-toggle-container {
   box-sizing: border-box;
   width: 100%;
-  border-bottom: 1px solid black;
+}
+
+#server-container #chat-type-toggle-container #toggle-box {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 49px;
+  position: relative;
 }
 
 #server-container #chat-type-toggle-container #chat-type-toggle {
-  box-sizing: border-box;
   width: 0;
   height: 0;
   visibility: none;
 }
+
+/* SOURCE: https://www.w3schools.com/howto/howto_css_switch.asp [Accessed 08/02/2021] */
+#server-container #chat-type-toggle-container #chat-type-toggle-slider-visual {
+  position: relative;
+  transition: background 0.3s linear;
+  background: #62cbe4;
+  cursor: pointer;
+  width: 30%;
+  height: 36px;
+  border-radius: 18px; /* Half the height, so the ends are semi-circular. */
+}
+
+/* The white circle that we will slide. */
+#server-container #chat-type-toggle-container #chat-type-toggle-slider-visual::after {
+  content: '';
+  position: absolute;
+  transition: left 0.2s linear;
+  background: white;
+  display: block;
+  height: 24px;
+  width: 24px;
+  top: 6px; /* To center: half of the difference between my height and the container's. */
+  left: 6px;
+  border-radius: 50%; /* Half of the width and height, to get a circle. */
+}
+
+#chat-type-toggle:checked + #chat-type-toggle-slider-visual {
+  background: #62f577 !important; /* Override the unchecked colour. */
+}
+
+#chat-type-toggle:checked + #chat-type-toggle-slider-visual::after {
+  left: calc(100% - (24px + 6px)) !important; /* 24px is our width, 6px is the desired right so that it matches the initial left. */
+}
+/* END SOURCE */
 
 #server-container #server-buttons-container {
   box-sizing: border-box;
@@ -199,6 +240,7 @@ input, button {
   box-sizing: border-box;
   float: left;
   transition: background 0.2s linear;
+  border-top: 1px solid black;
   border-bottom: 1px solid black;
 }
 
