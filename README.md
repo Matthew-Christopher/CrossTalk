@@ -93,6 +93,9 @@ A screenshot of the project chat screen.
 * [Nodemailer](https://www.npmjs.com/package/nodemailer)
 * [Socket.IO](https://www.npmjs.com/package/socket.io)
 
+* [particles.js](https://vincentgarreau.com/particles.js/)
+* [Chart.js](https://www.chartjs.org/)
+
 <!-- GETTING STARTED -->
 ## Getting Started
 
