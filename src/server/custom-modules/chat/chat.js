@@ -56,10 +56,11 @@ module.exports.initialise = (instance) => {
               });
             }
           }, (error, results) => {
+            message.AuthorID = socket.request.session.UserID;
             message.AuthorDisplayName = results.getDisplayName;
             message.MessageID = results.insertMessage.insertId;
 
-            io.sockets.in(message.GroupID).emit('message return', message);
+            io.sockets.in(message.GroupID.toString()).emit('message return', message);
 
             connection.release();
           });
@@ -67,20 +68,20 @@ module.exports.initialise = (instance) => {
       }
     });
 
-    module.exports.bin = function bin(groupID, messageID, newMessageString) {
-      io.sockets.in(groupID).emit('binned', { group: groupID, message: messageID, newLatestMessage: newMessageString });
+    module.exports.bin = (groupID, messageID, newMessageString) => {
+      io.sockets.in(groupID.toString()).emit('binned', { group: groupID, message: messageID, newLatestMessage: newMessageString });
     };
 
-    module.exports.pin = function pin(groupID) {
-      io.sockets.in(groupID).emit('pinned', groupID);
+    module.exports.pin = (groupID) => {
+      io.sockets.in(groupID.toString()).emit('pinned', groupID);
     };
 
-    module.exports.unpin = function unpin(groupID, messageID) {
-      io.sockets.in(groupID).emit('unpinned', { group: groupID, message: messageID });
+    module.exports.unpin = (groupID, messageID) => {
+      io.sockets.in(groupID.toString()).emit('unpinned', { group: groupID, message: messageID });
     };
   });
 
-  module.exports.getClients = function getClients(allUserIDs, groupID) {
+  module.exports.getClients = function getClients(allUserIDs, groupID, requestingUserID) {
     let currentRoom = io.sockets.adapter.rooms.get(groupID);
     if (currentRoom) var clientSocketIDArray = Array.from(currentRoom); // Socket IDs for open connections in the group room.
     let connectedClientIDs = []; // User IDs from connected sockets.
@@ -96,7 +97,9 @@ module.exports.initialise = (instance) => {
     for (let i = 0; i < allUserIDs.length; ++i) {
       let currentIDToCheck = allUserIDs[i];
 
-      result.push(connectedClientIDs.includes(currentIDToCheck));
+      result.push(
+        currentIDToCheck == requestingUserID ? true // Ensure the user that is making the request is always marked as online, as they may not have the chat window open in the background.
+        : connectedClientIDs.includes(currentIDToCheck));
     }
 
     return result;

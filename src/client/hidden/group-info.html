@@ -14,16 +14,31 @@
 </head>
 <body>
   <div id="data-container">
-    <h1 class="title">Dev To-Do List</h1>
+    <h1 class="title"></h1>
 
-    <!-- <div id="data-selector">
-      <ul>
-        <li><button id="member-statistics-button" class="active-button">Member Statistics</button></li>
-        <li><button id="message-statistics-button">Message Statistics</button></li>
-      </ul>
-    </div> -->
+    <div id="stats-container">
+      <div id="numbers">
+        <div id="users">
+          <h3 id="users-title" class="title">Users</h3>
+          <h2 id="users-readout"></h2>
+        </div>
+
+        <div id="online-users">
+          <h3 id="online-users-title" class="title">Online Users</h3>
+          <h2 id="online-users-readout"></h2>
+        </div>
+
+        <div id="messages-sent">
+          <h3 id="messages-sent-title" class="title">Messages Sent (All Time)</h3>
+          <h2 id="messages-sent-readout"></h2>
+        </div>
+      </div>
+
+      <canvas id="messages-over-time-chart"></canvas>
+    </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="js/data-client.js"></script>
 

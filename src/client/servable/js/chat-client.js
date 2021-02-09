@@ -89,7 +89,6 @@ $(window).on("load", () => {
   });
 
   $('#group-info-admin-button').click(() => {
-    console.log('test');
     window.location.href = "/group-info?GroupID=" + activeServerID;
   });
 

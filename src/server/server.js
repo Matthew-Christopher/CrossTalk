@@ -353,8 +353,8 @@ app.post('/api/GetMessages', (req, res, next) => {
         }
       }, (error, results) => {
         res.json(JSON.stringify({
-          role: results.adminStatus, // Result of first function.
-          messageData: results.messages // Result of second function.
+          role: results.adminStatus, // Result of the first function.
+          messageData: results.messages // Result of the second function.
         }));
 
         connection.release();
@@ -555,7 +555,9 @@ app.get('/group-info', (req, res, next) => {
       if (err) throw err; // Connection failed.
 
       db.query(connection, checkMemberQuery, [req.session.UserID, req.query.GroupID], (result, fields) => {
-        if (result[0].Matches == 1) {
+        connection.release();
+
+        if (result[0].Matches == 1 && result[0].Role > 0) {
           res.status(200).sendFile(path.join(__dirname + '/../client/hidden/group-info.html'));
         } else {
           next();
@@ -578,6 +580,12 @@ app.post('/api/GetGroupData', (req, res) => {
         if (result[0].Matches == 1) {
 
           async.parallel({
+            groupName: function GetGroupName(callback) {
+              let getGroupNameQuery = 'SELECT GroupName FROM \`Group\` WHERE GroupID = ?;';
+              db.query(connection, getGroupNameQuery, req.body.GroupID, (result, fields) => {
+                callback(null, result);
+              });
+            },
             members: function GetMemberData(callback) {
               let getMemberListQuery = 'SELECT User.UserID, User.DisplayName, GroupMembership.Role FROM GroupMembership JOIN User ON User.UserID = GroupMembership.UserID WHERE GroupMembership.GroupID = ? ORDER BY User.DisplayName;';
               db.query(connection, getMemberListQuery, req.body.GroupID, (result, fields) => {
@@ -593,12 +601,14 @@ app.post('/api/GetGroupData', (req, res) => {
             }
           }, (error, results) => {
             res.json(JSON.stringify({
+              groupName: results.groupName[0].GroupName, // Result of the first function.
               members: results.members.map((obj, index) => ({
                 ...obj, // Don't affect the database return.
-                Online: // Add the online data from the sockets.
-                  chat.getClients(results.members.map(element => element.UserID), req.body.GroupID)[index] // Reuse the same index because we preserved the order of elements.
-              })), // Result of first function.
-              messages: results.messages // Result of second function.
+                Online: // Add the online data from the sockets
+                  chat.getClients(results.members.map(element => element.UserID), req.body.GroupID, req.session.UserID)[index] // Reuse the same index because we preserved the order of elements.
+              })), // Result of the second function.
+              messages: results.messages, // Result of the third function.
+              currentServerDate: new Date().setHours(0, 0, 0, 0)
             }));
 
             connection.release();

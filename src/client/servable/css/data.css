@@ -17,6 +17,7 @@ input, button {
 #data-container {
   position: relative;
   left: 50%;
+  top: 50%;
   transform: translateX(-50%);
   margin: 100px 0;
   padding: 50px;
@@ -26,65 +27,57 @@ input, button {
   border-radius: 30px;
   border: 1px solid #555;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
 }
 
-#data-container .title::before {
+#data-container > .title::before {
   content: 'Group Info for ';
 }
 
 #data-container .title {
   font-weight: 200;
   font-size: 2.5em;
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-#data-container #data-selector {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-  border-radius: 0 15px 15px 0;
-  border: 2px solid black;
-  border-left: none;
+#data-container #stats-container {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
 }
 
-#data-container #data-selector ul {
-  list-style-type: none;
+#data-container #stats-container #numbers {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
 }
 
-#data-container #data-selector ul li {
-  width: 100%;
+#data-container #stats-container #numbers .title {
+  color: #555;
+  font-weight: normal;
+  font-size: 1.5em;
+  margin-bottom: 20px;
   box-sizing: border-box;
 }
 
-#data-container #data-selector ul li button {
-  cursor: pointer;
-  transition: background 0.2s linear;
-  outline: none;
-  border: none;
-  width: 100%;
-  height: 100%;
-  padding: 20px 10px;
-  z-index: -1;
-  background: white;
+#data-container #stats-container #numbers * {
+  width: 300px;
+  text-align: center;
 }
 
-#data-container #data-selector ul li button:not(.active-button):hover {
-  background: #eee !important;
+#data-container #stats-container * {
+  display: inline-block;
 }
 
-.active-button {
-  background: #6dd5ed !important;
-}
-
-#data-container #data-selector ul li:first-child button {
-  border-top-right-radius: 15px;
-}
-
-#data-container #data-selector ul li:last-child button {
-  border-bottom-right-radius: 15px;
-}
-
-#data-container #data-selector ul li:not(:last-child) {
-  border-bottom: 2px solid black;
+#data-container #stats-container #messages-over-time-chart {
+  position: relative;
+  box-sizing: border-box;
+  margin: 50px 0;
+  flex: 1 1 auto;
 }
