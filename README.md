@@ -84,6 +84,7 @@ A screenshot of the project chat screen.
 * [Argon2](https://www.npmjs.com/package/argon2)
 * [Async](https://www.npmjs.com/package/async)
 * [body-parser](https://www.npmjs.com/package/body-parser)
+* [Chart.js](https://www.chartjs.org/)
 * [dotenv](https://www.npmjs.com/package/dotenv)
 * [Express](https://www.npmjs.com/package/express)
 * [express-mysql-session](https://www.npmjs.com/package/express-mysql-session)
@@ -91,9 +92,8 @@ A screenshot of the project chat screen.
 * [log4js](https://www.npmjs.com/package/log4js)
 * [MySQL](https://www.npmjs.com/package/mysql)
 * [Nodemailer](https://www.npmjs.com/package/nodemailer)
-* [Socket.IO](https://www.npmjs.com/package/socket.io)
 * [particles.js](https://github.com/VincentGarreau/particles.js/)
-* [Chart.js](https://www.chartjs.org/)
+* [Socket.IO](https://www.npmjs.com/package/socket.io)
 
 <!-- GETTING STARTED -->
 ## Getting Started
