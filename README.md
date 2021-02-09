@@ -92,7 +92,7 @@ A screenshot of the project chat screen.
 * [MySQL](https://www.npmjs.com/package/mysql)
 * [Nodemailer](https://www.npmjs.com/package/nodemailer)
 * [Socket.IO](https://www.npmjs.com/package/socket.io)
-* [particles.js](https://vincentgarreau.com/particles.js/)
+* [particles.js](https://github.com/VincentGarreau/particles.js/)
 * [Chart.js](https://www.chartjs.org/)
 
 <!-- GETTING STARTED -->
