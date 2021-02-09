@@ -132,7 +132,7 @@
           <button id="invite-code-copy" value="Copy">Copy</button>
         </div>
       </li>
-      <li id="group-info-admin-button" style="display: none;"><button style="cursor: pointer; background: none; border: none; outline: none;">View group info</button></li>
+      <li id="group-info-admin-button-item" style="display: none;"><button id="group-info-admin-button" style="cursor: pointer; background: none; border: none; outline: none;">View group info</button></li>
     </ul>
   </div>
 
@@ -171,5 +171,6 @@
   <script src="js/chat-client.js"></script>
   <script src="js/empty-input.js"></script>
 
+  <!-- Temporary fix for https://bugs.chromium.org/p/chromium/issues/detail?id=332189 due to applied background transitions. -->
 </body>
 </html>

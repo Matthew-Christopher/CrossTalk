@@ -101,7 +101,7 @@ module.exports.ChangePassword = async (request, response) => {
     }));
   } else {
     pool.getConnection(async (err, connection) => {
-      if (err) throw err;
+      if (err) throw err; // Connection failed.
 
       let checkValidQuery = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE (RecoveryKey = ? AND RecoveryKeyExpires > ?) OR UserID = ?;";
 
@@ -142,7 +142,7 @@ module.exports.ChangePassword = async (request, response) => {
 module.exports.LogIn = async (request, response) => {
 
   pool.getConnection(async (err, connection) => {
-    if (err) throw err;
+    if (err) throw err; // Connection failed.
 
     var sql = "SELECT * FROM User WHERE EmailAddress = ?";
 

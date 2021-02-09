@@ -205,7 +205,7 @@ input, button {
 #server-container #chat-type-toggle-container #chat-type-toggle-slider-visual::after {
   content: '';
   position: absolute;
-  transition: left 0.2s linear;
+  transition: left 0.2s ease-in-out;
   background: white;
   display: block;
   height: 24px;

@@ -1,108 +1,6 @@
 let activeServerID, role;
 const socket = io.connect('/');
 
-function SetActiveServerID(id) {
-  activeServerID = id;
-
-  $('.requires-group-selection').show();
-
-  $('#message').focus();
-
-  $.when(
-    $.ajax({
-      type: "POST",
-      url: "/api/GetMessages",
-      data:  {
-        GroupID: activeServerID
-      },
-      success: (data) => {
-
-        $('#chatbox').empty();
-
-        let JSONData = $.parseJSON(data);
-
-        if (JSONData.messageData.length > 0) {
-          $('#chatbox-reminder').hide();
-          $('#invite-prompt').hide();
-        } else {
-          $('#chatbox-reminder').show();
-          $('#invite-prompt').show();
-          $('#chatbox-reminder').text('No messages yet');
-        }
-
-        role = JSONData.role;
-
-        if (role > 0) {
-          $('#pinned-message-delete-button').css('display', 'block');
-          $('#group-info-admin-button').css('display', 'list-item');
-          $('#group-info-admin-button').addClass('round-bottom');
-          $('#show-invite-code').closest('li').removeClass('round-bottom');
-        } else {
-          $('#pinned-message-delete-button').css('display', 'none');
-          $('#group-info-admin-button').css('display', 'none');
-          $('#group-info-admin-button').removeClass('round-bottom');
-          $('#show-invite-code').closest('li').addClass('round-bottom');
-        }
-
-        $.parseJSON(data).messageData.forEach((message, i) => {
-          $('#chatbox').append($('<li style="position: relative;">').attr('id', message.MessageID)
-                       .append($('<i class="message-author" style="display: inline; color: #888;">')
-                         .text(message.AuthorDisplayName))
-                       .append($('<i class="message-timestamp" style="color: #888; float: right;">')
-                         .text(GetMessageTimestamp(message.Timestamp)))
-                       .append($('<div class="message-options-container">')
-                       .append(role > 0 ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
-                       .append((message.Owned || role > 0) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
-                       .append('<br />')
-                       .append($('<p class="message-content" style="display: inline;">')
-                         .text(message.MessageString)));
-        });
-
-        CheckPinnedMessage();
-      },
-      failure: () => {
-        console.error("Could not retreive messages. Try again later.");
-      }
-    })
-  ).then(() => {
-    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
-  });
-}
-
-function CheckPinnedMessage() {
-  $.ajax({
-    type: "POST",
-    url: "/api/GetPinnedMessage",
-    data:  {
-      GroupID: activeServerID
-    },
-    success: (data) => {
-
-      let JSONData = $.parseJSON(data);
-      let mustAdjustScroll = $('#pinned-message-container').css('display') == 'none';
-
-      if (JSONData.length > 0) {
-        $('#pinned-message-container').css('display', 'flex');
-
-        $('#pinned-message-label').text('Pinned message from ' + JSONData[0].AuthorDisplayName + ', sent ' + GetPinnedMessageTimestamp(JSONData[0].Timestamp) + '.');
-        $('#pinned-message-text').text(JSONData[0].MessageString);
-
-        $('#chatbox li').removeClass('pinned');
-        $('#' + JSONData[0].MessageID).addClass('pinned');
-
-        if (mustAdjustScroll) $('#chatbox').scrollTop($('#chatbox').scrollTop() + $('#pinned-message-container').outerHeight());
-      } else {
-        if ($('#pinned-message-container').css('display') == 'flex') {
-          HandleUnpinInCurrentGroup();
-        }
-      }
-    },
-    failure: () => {
-      console.error("Could not retreive messages. Try again later.");
-    }
-  });
-}
-
 $(window).on("load", () => {
 
   // Get the user's display name from their session cookie and the database.
@@ -188,6 +86,11 @@ $(window).on("load", () => {
 
   $('#member-list-close-button').click(() => {
     CloseMemberList();
+  });
+
+  $('#group-info-admin-button').click(() => {
+    console.log('test');
+    window.location.href = "/group-info?GroupID=" + activeServerID;
   });
 
   $(document).click((event) => {
@@ -334,6 +237,108 @@ $(window).on("load", () => {
   });
 });
 
+function SetActiveServerID(id) {
+  activeServerID = id;
+
+  $('.requires-group-selection').show();
+
+  $('#message').focus();
+
+  $.when(
+    $.ajax({
+      type: "POST",
+      url: "/api/GetMessages",
+      data:  {
+        GroupID: activeServerID
+      },
+      success: (data) => {
+
+        $('#chatbox').empty();
+
+        let JSONData = $.parseJSON(data);
+
+        if (JSONData.messageData.length > 0) {
+          $('#chatbox-reminder').hide();
+          $('#invite-prompt').hide();
+        } else {
+          $('#chatbox-reminder').show();
+          $('#invite-prompt').show();
+          $('#chatbox-reminder').text('No messages yet');
+        }
+
+        role = JSONData.role;
+
+        if (role > 0) {
+          $('#pinned-message-delete-button').css('display', 'block');
+          $('#group-info-admin-button-item').css('display', 'list-item');
+          $('#group-info-admin-button-item').addClass('round-bottom');
+          $('#show-invite-code').closest('li').removeClass('round-bottom');
+        } else {
+          $('#pinned-message-delete-button').css('display', 'none');
+          $('#group-info-admin-button-item').css('display', 'none');
+          $('#group-info-admin-button-item').removeClass('round-bottom');
+          $('#show-invite-code').closest('li').addClass('round-bottom');
+        }
+
+        $.parseJSON(data).messageData.forEach((message, i) => {
+          $('#chatbox').append($('<li style="position: relative;">').attr('id', message.MessageID)
+                       .append($('<i class="message-author" style="display: inline; color: #888;">')
+                         .text(message.AuthorDisplayName))
+                       .append($('<i class="message-timestamp" style="color: #888; float: right;">')
+                         .text(GetMessageTimestamp(message.Timestamp)))
+                       .append($('<div class="message-options-container">')
+                       .append(role > 0 ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
+                       .append((message.Owned || role > 0) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
+                       .append('<br />')
+                       .append($('<p class="message-content" style="display: inline;">')
+                         .text(message.MessageString)));
+        });
+
+        CheckPinnedMessage();
+      },
+      failure: () => {
+        console.error("Could not retreive messages. Try again later.");
+      }
+    })
+  ).then(() => {
+    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
+  });
+}
+
+function CheckPinnedMessage() {
+  $.ajax({
+    type: "POST",
+    url: "/api/GetPinnedMessage",
+    data:  {
+      GroupID: activeServerID
+    },
+    success: (data) => {
+
+      let JSONData = $.parseJSON(data);
+      let mustAdjustScroll = $('#pinned-message-container').css('display') == 'none';
+
+      if (JSONData.length > 0) {
+        $('#pinned-message-container').css('display', 'flex');
+
+        $('#pinned-message-label').text('Pinned message from ' + JSONData[0].AuthorDisplayName + ', sent ' + GetPinnedMessageTimestamp(JSONData[0].Timestamp) + '.');
+        $('#pinned-message-text').text(JSONData[0].MessageString);
+
+        $('#chatbox li').removeClass('pinned');
+        $('#' + JSONData[0].MessageID).addClass('pinned');
+
+        if (mustAdjustScroll) $('#chatbox').scrollTop($('#chatbox').scrollTop() + $('#pinned-message-container').outerHeight());
+      } else {
+        if ($('#pinned-message-container').css('display') == 'flex') {
+          HandleUnpinInCurrentGroup();
+        }
+      }
+    },
+    failure: () => {
+      console.error("Could not retreive messages. Try again later.");
+    }
+  });
+}
+
 function CloseCreateForm() {
   $('#group-create').removeClass('active-button');
   $('#group-create-container').fadeOut(200); // Take 200ms to fade.
@@ -418,7 +423,7 @@ function SetRecentMessage(groupID, messageString) {
 function FetchMemberList() {
   // Get the user's display name from their session cookie and the database.
   $.ajax({
-    type: "GET",
+    type: "POST",
     url: "/api/GetGroupMemberList",
     data: {
       GroupID: activeServerID

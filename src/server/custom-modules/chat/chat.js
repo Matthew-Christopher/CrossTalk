@@ -2,7 +2,7 @@
 
 const log = require('../logging');
 const db = require('../db');
-let io = require('socket.io');
+let io;
 
 require('dotenv').config();
 const mysql = require('mysql');
@@ -23,9 +23,11 @@ module.exports.initialise = (instance) => {
     socket.on('join', (id) => {
       // Check the user is actually permitted to join first.
       pool.getConnection(async (err, connection) => {
+        if (err) throw err; // Connection failed.
+
         db.query(connection, 'SELECT COUNT(*) AS Matches FROM GroupMembership WHERE UserID = ? AND GroupID = ?;', [socket.request.session.UserID, id], (result, fields) => {
           if (result[0].Matches == 1) {
-            socket.join(id);
+            socket.join(id.toString());
           }
 
           connection.release();
@@ -36,6 +38,7 @@ module.exports.initialise = (instance) => {
     socket.on('chat', (message) => {
       if (0 < message.MessageString.trim().length && message.MessageString.trim().length <= 2000) {
         pool.getConnection(async (err, connection) => {
+          if (err) throw err; // Connection failed.
 
           async.parallel({
             getDisplayName: function(callback) {
@@ -64,16 +67,38 @@ module.exports.initialise = (instance) => {
       }
     });
 
-    module.exports.bin = (groupID, messageID, newMessageString) => {
+    module.exports.bin = function bin(groupID, messageID, newMessageString) {
       io.sockets.in(groupID).emit('binned', { group: groupID, message: messageID, newLatestMessage: newMessageString });
     };
 
-    module.exports.pin = (groupID) => {
+    module.exports.pin = function pin(groupID) {
       io.sockets.in(groupID).emit('pinned', groupID);
     };
 
-    module.exports.unpin = (groupID, messageID) => {
+    module.exports.unpin = function unpin(groupID, messageID) {
       io.sockets.in(groupID).emit('unpinned', { group: groupID, message: messageID });
     };
   });
+
+  module.exports.getClients = function getClients(allUserIDs, groupID) {
+    let currentRoom = io.sockets.adapter.rooms.get(groupID);
+    if (currentRoom) var clientSocketIDArray = Array.from(currentRoom); // Socket IDs for open connections in the group room.
+    let connectedClientIDs = []; // User IDs from connected sockets.
+
+    let result = []; // List of all UserIDs and whether or not they are connected.
+
+    if (clientSocketIDArray) {
+      for (let i = 0; i < clientSocketIDArray.length; ++i) {
+        connectedClientIDs.push(io.sockets.sockets.get(clientSocketIDArray[i]).request.session.UserID);
+      }
+    }
+
+    for (let i = 0; i < allUserIDs.length; ++i) {
+      let currentIDToCheck = allUserIDs[i];
+
+      result.push(connectedClientIDs.includes(currentIDToCheck));
+    }
+
+    return result;
+  };
 };

@@ -102,6 +102,8 @@ app.get('/verify', (req, res) => {
     res.redirect('/chat');
   } else {
     pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
       let sql = 'UPDATE USER SET Verified = 1, VerificationKey = NULL WHERE VerificationKey = ?';
 
       db.query(connection, sql, req.query.verificationKey, (result, fields) => {
@@ -131,6 +133,8 @@ app.post('/JoinGroup', (req, res) => {
     res.json(JSON.stringify({status: 'invalid'}));
   } else {
     pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
       let checkValid = `
       SELECT *
       FROM   (SELECT \`Group\`.GroupID AS JoinID
@@ -179,7 +183,7 @@ app.post('/recover-account', async (req, res) => {
 
 app.get('/account/change-password(.html)?', (req, res) => {
   pool.getConnection(async (err, connection) => {
-    if (err) throw err;
+    if (err) throw err; // Connection failed.
 
     let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE RecoveryKey = ? AND RecoveryKeyExpires > ?;";
 
@@ -260,6 +264,8 @@ app.post('/api/GetMyGroups', (req, res, next) => {
     let servers = [];
 
     pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
       let sql = `
       SELECT GroupInfo.GroupID,
         GroupInfo.GroupName,
@@ -299,6 +305,8 @@ app.post('/api/GetMyGroups', (req, res, next) => {
 app.post('/api/GetMyDisplayName', (req, res, next) => {
   if (req.session.LoggedIn) {
     pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
       let sql = "SELECT DisplayName FROM User WHERE UserID = ?;";
 
       db.query(connection, sql, req.session.UserID, (result, fields) => {
@@ -326,6 +334,8 @@ app.post('/api/GetMyUserID', (req, res, next) => {
 app.post('/api/GetMessages', (req, res, next) => {
   if (req.session.LoggedIn && req.body.GroupID) {
     pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
       async.parallel({
         adminStatus: function DetermineRole(callback) {
           let determineRoleQuery = 'SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
@@ -358,6 +368,8 @@ app.post('/api/GetMessages', (req, res, next) => {
 app.post('/api/GetPinnedMessage', (req, res, next) => {
   if (req.session.LoggedIn && req.body.GroupID) {
     pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
       let sql = `
       SELECT Message.MessageID, User.DisplayName AS AuthorDisplayName,
         Message.MessageString, Message.Timestamp
@@ -385,6 +397,8 @@ app.post('/api/GetPinnedMessage', (req, res, next) => {
 app.post('/api/GetInviteCode', (req, res, next) => {
   if (req.session.LoggedIn && req.body.GroupID) {
     pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
       let sql = "SELECT InviteCode FROM `Group` WHERE GroupID = ?;";
 
       db.query(connection, sql, req.body.GroupID, (result, fields) => {
@@ -401,6 +415,8 @@ app.post('/api/GetInviteCode', (req, res, next) => {
 app.delete('/api/DeleteMessage', (req, res, next) => {
   if (req.session.LoggedIn && req.body.MessageID) {
     pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
       let checkValidQuery = 'SELECT COUNT(*) AS Matches, Message.GroupID FROM Message JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE (Message.AuthorID = GroupMembership.UserID OR GroupMembership.Role > 0) AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
 
       db.query(connection, checkValidQuery, [req.body.MessageID, req.session.UserID], (firstResult, fields) => {
@@ -440,6 +456,8 @@ app.delete('/api/DeleteMessage', (req, res, next) => {
 app.post('/api/PinMessage', (req, res) => {
   if (req.session.LoggedIn && req.body.MessageID) {
     pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
       let checkValidQuery = 'SELECT COUNT(*) AS Matches FROM Message JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
 
       db.query(connection, checkValidQuery, [req.body.MessageID, req.session.UserID], (result, fields) => {
@@ -479,6 +497,8 @@ app.post('/api/PinMessage', (req, res) => {
 app.post('/api/UnpinMessage', (req, res) => {
   if (req.session.LoggedIn && req.body.GroupID) {
     pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
       let checkValidQuery = 'SELECT COUNT(*) AS Matches, \`Group\`.GroupID, \`Group\`.PinnedMessageID AS MessageID FROM \`Group\` JOIN GroupMembership ON \`Group\`.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND \`Group\`.GroupID = ? AND GroupMembership.UserID = ?;';
       db.query(connection, checkValidQuery, [req.body.GroupID, req.session.UserID], (result, fields) => {
         if (result[0].Matches == 1) {
@@ -503,18 +523,20 @@ app.post('/api/UnpinMessage', (req, res) => {
   }
 });
 
-app.get('/api/GetGroupMemberList', (req, res, next) => {
-  if (req.session.LoggedIn && req.query.GroupID) {
+app.post('/api/GetGroupMemberList', (req, res, next) => {
+  if (req.session.LoggedIn && req.body.GroupID) {
     pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
       let checkPermissibleRequest = 'SELECT COUNT(*) AS Matches FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
 
-      db.query(connection, checkPermissibleRequest, [req.session.UserID, req.query.GroupID], (result, fields) => {
+      db.query(connection, checkPermissibleRequest, [req.session.UserID, req.body.GroupID], (result, fields) => {
         if (result[0].Matches == 1) {
-          let getMemberList = 'SELECT User.DisplayName, GroupMembership.Role FROM GroupMembership JOIN User ON User.UserID = GroupMembership.UserID WHERE GroupMembership.GroupID = ? ORDER BY User.DisplayName;';
 
-          db.query(connection, getMemberList, req.query.GroupID, (result, fields) => {
+          let getMemberListQuery = 'SELECT User.DisplayName, GroupMembership.Role FROM GroupMembership JOIN User ON User.UserID = GroupMembership.UserID WHERE GroupMembership.GroupID = ? ORDER BY User.DisplayName;';
+
+          db.query(connection, getMemberListQuery, req.body.GroupID, (result, fields) => {
             res.json(JSON.stringify(result));
-
             connection.release();
           });
         }
@@ -522,6 +544,72 @@ app.get('/api/GetGroupMemberList', (req, res, next) => {
     });
   } else {
     next();
+  }
+});
+
+app.get('/group-info', (req, res, next) => {
+  if (req.session.LoggedIn && req.query.GroupID) {
+    let checkMemberQuery = 'SELECT COUNT(*) AS Matches, Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
+
+    pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
+      db.query(connection, checkMemberQuery, [req.session.UserID, req.query.GroupID], (result, fields) => {
+        if (result[0].Matches == 1) {
+          res.status(200).sendFile(path.join(__dirname + '/../client/hidden/group-info.html'));
+        } else {
+          next();
+        }
+      });
+    });
+  } else {
+    next();
+  }
+});
+
+app.post('/api/GetGroupData', (req, res) => {
+  if (req.session.LoggedIn && req.body.GroupID) {
+    let checkMemberQuery = 'SELECT COUNT(*) AS Matches, Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
+
+    pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
+      db.query(connection, checkMemberQuery, [req.session.UserID, req.body.GroupID], (result, fields) => {
+        if (result[0].Matches == 1) {
+
+          async.parallel({
+            members: function GetMemberData(callback) {
+              let getMemberListQuery = 'SELECT User.UserID, User.DisplayName, GroupMembership.Role FROM GroupMembership JOIN User ON User.UserID = GroupMembership.UserID WHERE GroupMembership.GroupID = ? ORDER BY User.DisplayName;';
+              db.query(connection, getMemberListQuery, req.body.GroupID, (result, fields) => {
+                callback(null, result);
+              });
+            },
+            messages: function GetMessageData(callback) {
+              // Get raw message statistics
+              let getMessagesStatisticsQuery = 'SELECT COUNT(*) AS MessagesToday, DATE(FROM_UNIXTIME(Timestamp / 1000)) AS MessageBlockDay FROM Message WHERE GroupID = ? GROUP BY MessageBlockDay;';
+              db.query(connection, getMessagesStatisticsQuery, req.body.GroupID, (result, fields) => {
+                callback(null, result);
+              });
+            }
+          }, (error, results) => {
+            res.json(JSON.stringify({
+              members: results.members.map((obj, index) => ({
+                ...obj, // Don't affect the database return.
+                Online: // Add the online data from the sockets.
+                  chat.getClients(results.members.map(element => element.UserID), req.body.GroupID)[index] // Reuse the same index because we preserved the order of elements.
+              })), // Result of first function.
+              messages: results.messages // Result of second function.
+            }));
+
+            connection.release();
+          });
+        } else {
+          res.json(JSON.stringify({status: 'invalid'}));
+        }
+      });
+    });
+  } else {
+    res.json(JSON.stringify({status: 'invalid'}));
   }
 });
 
