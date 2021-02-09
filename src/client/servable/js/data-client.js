@@ -38,7 +38,8 @@ $(window).on("load", () => {
             }]
           },
           options: {
-            responsive: false,
+            responsive: true,
+            maintainAspectRatio: false,
             title: {
               display: true,
               text: 'Message Activity Over the Previous 7 Days',
@@ -48,6 +49,7 @@ $(window).on("load", () => {
             tooltips: {
               mode: 'index',
               intersect: false,
+              titleFontStyle: 'normal'
             },
             hover: {
               mode: 'nearest',

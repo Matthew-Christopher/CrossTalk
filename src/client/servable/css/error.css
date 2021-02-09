@@ -33,7 +33,7 @@ button {
   top: 0;
   height: 100%;
   width: 100%;
-  z-index: -1;
+  z-index: 0;
 }
 
 #landing-container > div {
@@ -47,6 +47,7 @@ button {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  z-index: 1;
 }
 
 #info-container #title {
