@@ -68,6 +68,44 @@ module.exports.initialise = (instance) => {
       }
     });
 
+    socket.on('role change', (requestData) => {
+      pool.getConnection(async (err, connection) => {
+        if (err) throw err; // Connection failed.
+
+        async.parallel({
+          checkInGroup: function(callback) {
+            let checkInGroupQuery = 'SELECT COUNT(*) AS Matches, Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
+
+            db.query(connection, checkInGroupQuery, [socket.request.session.UserID, requestData.GroupID], (result, fields) => {
+              callback(null, result[0].Matches, result[0].Role);
+            });
+          },
+          actingOnRole: function(callback) {
+            let confirmAuthorityQuery = 'SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
+
+            db.query(connection, confirmAuthorityQuery, [requestData.UserToChange, requestData.GroupID], (result, fields) => {
+              callback(null, result[0].Role);
+            });
+          }
+        }, (error, results) => {
+          if (results.checkInGroup[0] == 1 && results.checkInGroup[1] > results.actingOnRole && results.checkInGroup[1] > (requestData.TargetRole == 'admin' ? 1 : null)) {
+            // Operation is permitted, update the user's role.
+            let updateRoleQuery = 'UPDATE GroupMembership SET Role = ? WHERE UserID = ? AND GroupID = ?;';
+
+            db.query(connection, updateRoleQuery, [requestData.TargetRole == 'admin' ? 1 : null, requestData.UserToChange, requestData.GroupID], (result, fields) => {
+              io.sockets.in(requestData.GroupID.toString()).emit('role update', {
+                InGroup: requestData.GroupID,
+                AffectsUser: requestData.UserToChange,
+                NewRole: requestData.TargetRole == 'admin' ? 1 : null
+              });
+            });
+          }
+
+          connection.release();
+        });
+      });
+    });
+
     module.exports.bin = (groupID, messageID, newMessageString) => {
       io.sockets.in(groupID.toString()).emit('binned', { group: groupID, message: messageID, newLatestMessage: newMessageString });
     };

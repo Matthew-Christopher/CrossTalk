@@ -420,6 +420,14 @@ input, button {
   border-radius: 5px;
 }
 
+#chat-container #chatbox li .message-options-container button {
+  display: none;
+}
+
+#chat-container #chatbox li.owned:hover .message-options-container .message-bin-button {
+  display: inline-block !important;
+}
+
 #chat-container #chatbox li.pinned {
   background: #93d9db !important;
 }
@@ -432,10 +440,6 @@ input, button {
    background: #f5f5f5;
 }
 
-#chat-container #chatbox li:hover .message-options-container {
-   display: block;
-}
-
 #chat-container #chatbox li .message-timestamp {
    padding-right: inherit;
 }
@@ -446,9 +450,13 @@ input, button {
   height: 30px;
   margin-top: -20px;
   margin-right: 10px;
-  border: 1px solid black;
   border-radius: 7px;
   background: white;
+  border: 1px solid black;
+}
+
+#chat-container #chatbox li:hover .message-options-container {
+   display: block;
 }
 
 #chat-container #chatbox li.pinned .message-pin-button {
@@ -458,10 +466,6 @@ input, button {
 #chat-container #chatbox li.pinned .message-bin-button {
   border-top-left-radius: 7px;
   border-bottom-left-radius: 7px;
-}
-
-#chat-container #chatbox li .message-options-container:empty{
-    border: none;
 }
 
 #chat-container #chatbox li .message-options-container button {
@@ -825,7 +829,7 @@ input, button {
 }
 
 #member-list-container #member-list-popup {
-  max-height: 80vh;
+  max-height: 80%;
   width: 50%;
   box-sizing: border-box;
   display: flex;
@@ -839,12 +843,17 @@ input, button {
 #member-list-container #members-scrollbox {
   margin-top: 25px;
   overflow-y: auto;
-  align-items: stretch;
   width: 80%;
 }
 
 #member-list-container #member-list li {
   text-decoration: none;
+  border-radius: 5px;
+  padding: 3px;
+}
+
+#member-list-container #member-list li:not(.title):hover {
+  background: #eee;
 }
 
 #member-list-container #member-list .member-section:not(:last-child), #member-list-container #member-list li:not(:last-child) {
@@ -866,4 +875,53 @@ input, button {
   margin-left: 10px;
   font-weight: bold;
   content: 'No one\'s here, yet!';
+}
+
+#member-list-container #member-list li .member-options-container {
+  display: none;
+  float: right;
+  height: 30px;
+  background: white;
+  margin-top: -38px;
+  border: thin solid black;
+  border-radius: 7px;
+}
+
+#member-list-container #member-list li:hover .member-options-container {
+  display: block;
+}
+
+#member-list-container #member-list li .member-options-container button {
+  cursor: pointer;
+  background: none;
+  outline: none;
+  border: none;
+  height: 100%;
+  padding: 5px;
+  -webkit-transition: background .1s linear;
+	-o-transition: background .1s linear;
+	transition: background .1s linear;
+  box-sizing: border-box;
+}
+
+#member-list-container #member-list li .member-options-container button:first-child {
+  border-top-left-radius: 7px;
+  border-bottom-left-radius: 7px;
+}
+
+#member-list-container #member-list li .member-options-container button:last-child {
+  border-top-right-radius: 7px;
+  border-bottom-right-radius: 7px;
+}
+
+#member-list-container #member-list li .member-options-container button:hover {
+  background: #ddd;
+}
+
+#member-list-container #member-list li .member-options-container button:not(:last-child) {
+  border-right: thin solid black;
+}
+
+#member-list-container #member-list li .member-options-container:empty{
+    border: none;
 }

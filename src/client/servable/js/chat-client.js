@@ -1,4 +1,4 @@
-let activeServerID, role;
+let activeServerID, role, id;
 const socket = io.connect('/');
 
 $(window).on("load", () => {
@@ -15,6 +15,8 @@ $(window).on("load", () => {
       console.error("Could not retreive display name. Try again later.");
     }
   });
+
+  SetUserID();
 
   $("#message-form").submit((event) => {
     event.preventDefault(); // Don't refresh, we want a smooth experience.
@@ -109,29 +111,19 @@ $(window).on("load", () => {
 
       let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
 
-      // Get the user's ID from their session cookie.
-      $.ajax({
-        type: "POST",
-        url: "/api/GetMyUserID",
-        success: (data) => {
-          $('#chatbox').append($('<li style="position: relative;">').attr('id', message.MessageID)
-                       .append($('<i class="message-author" style="display: inline; color: #888;">')
-                         .text(message.AuthorDisplayName))
-                       .append($('<i class="message-timestamp" style="color: #888; float: right;">')
-                         .text(GetMessageTimestamp(message.Timestamp)))
-                       .append($('<div class="message-options-container">')
-                       .append(role > 0 ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
-                       .append((message.AuthorID == $.parseJSON(data)[0].UserID || role > 0) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
-                       .append('<br />')
-                       .append($('<p class="message-content" style="display: inline;">')
-                         .text(message.MessageString)));
+      $('#chatbox').append($('<li ' + (message.AuthorID == id ? 'class="owned" ' : '') + 'style="position: relative;">').attr('id', message.MessageID)
+                   .append($('<i class="message-author" style="display: inline; color: #888;">')
+                     .text(message.AuthorDisplayName))
+                   .append($('<i class="message-timestamp" style="color: #888; float: right;">')
+                     .text(GetMessageTimestamp(message.Timestamp)))
+                   .append($('<div class="message-options-container">')
+                   .append($('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
+                   .append($('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">'))))
+                   .append('<br />')
+                   .append($('<p class="message-content" style="display: inline;">')
+                     .text(message.MessageString)));
 
-          StickScroll(scrollOffset);
-        },
-        failure: () => {
-          console.error("Could not retreive ID. Try again later.");
-        }
-      });
+      StickScroll(scrollOffset);
     }
 
     SetRecentMessage(message.GroupID, message.MessageString);
@@ -234,6 +226,36 @@ $(window).on("load", () => {
       $('#' + data.message).removeClass('pinned');
     }
   });
+
+  $(document).on('click', '.role-button', (event) => {
+    socket.emit('role change', {
+      GroupID: activeServerID,
+      UserToChange: $(event.target).closest('li').attr('id'),
+      TargetRole: $(event.target).attr('value')
+    });
+  });
+
+  socket.on('role update', (data) => {
+    if (data.InGroup == activeServerID) {
+      if (data.NewRole == 1) {
+        // Change the text first, then move to the new list.
+        $('#' + data.AffectsUser).find('.role-button').attr('value', 'member').text('Make member');
+
+        $('#member-list #admins').append($('#' + data.AffectsUser).remove());
+      } else {
+        // Change the text first, then move to the new list.
+        $('#' + data.AffectsUser).find('.role-button').attr('value', 'admin').text('Make admin');
+
+        $('#member-list #members').append($('#' + data.AffectsUser).remove());
+      }
+    }
+
+    if (data.AffectsUser == id) {
+      role = data.NewRole;
+
+      RefreshAdminContentDisplay();
+    }
+  });
 });
 
 function SetActiveServerID(id) {
@@ -267,27 +289,17 @@ function SetActiveServerID(id) {
 
         role = JSONData.role;
 
-        if (role > 0) {
-          $('#pinned-message-delete-button').css('display', 'block');
-          $('#group-info-admin-button-item').css('display', 'list-item');
-          $('#group-info-admin-button-item').addClass('round-bottom');
-          $('#show-invite-code').closest('li').removeClass('round-bottom');
-        } else {
-          $('#pinned-message-delete-button').css('display', 'none');
-          $('#group-info-admin-button-item').css('display', 'none');
-          $('#group-info-admin-button-item').removeClass('round-bottom');
-          $('#show-invite-code').closest('li').addClass('round-bottom');
-        }
+        SetGroupOptionButtonVisibility();
 
         $.parseJSON(data).messageData.forEach((message, i) => {
-          $('#chatbox').append($('<li style="position: relative;">').attr('id', message.MessageID)
+          $('#chatbox').append($('<li ' + (message.Owned ? 'class="owned" ' : '') + 'style="position: relative;">').attr('id', message.MessageID)
                        .append($('<i class="message-author" style="display: inline; color: #888;">')
                          .text(message.AuthorDisplayName))
                        .append($('<i class="message-timestamp" style="color: #888; float: right;">')
                          .text(GetMessageTimestamp(message.Timestamp)))
                        .append($('<div class="message-options-container">')
-                       .append(role > 0 ? $('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')) : null)
-                       .append((message.Owned || role > 0) ? $('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')) : null))
+                       .append($('<button class="message-pin-button" style="display: ' + (role > 0 ? 'inline-block' : 'none')  + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
+                       .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? 'inline-block' : 'none') + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">'))))
                        .append('<br />')
                        .append($('<p class="message-content" style="display: inline;">')
                          .text(message.MessageString)));
@@ -433,18 +445,31 @@ function FetchMemberList() {
       let memberList = $.parseJSON(data);
 
       for (let i = 0; i < memberList.length; ++i) {
+
+        let roleButtonAction;
+        if (memberList[i].Role == 1) {
+          roleButtonAction = 'member';
+        } else if (memberList[i].Role != 2) {
+          roleButtonAction = 'admin';
+        }
+
+        let newNameRow = $('<li id="' + memberList[i].UserID + '">')
+                        .append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName))
+                        .append($('<div class="member-options-container">')
+                        .append(role > memberList[i].Role && roleButtonAction ? $('<button class="role-button" value="' + roleButtonAction + '">').text('Make ' + roleButtonAction) : null)
+                        .append(!memberList[i].IsAFriend ? $('<button class="friend-button">').text('Add friend ') : null));
         switch(memberList[i].Role) {
           case 2:
             // Owner.
-            $('#member-list #owner').append($('<li>').append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName)));
+            $('#member-list #owner').append(newNameRow);
             break;
           case 1:
             // Admin.
-            $('#member-list #admins').append($('<li>').append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName)));
+            $('#member-list #admins').append(newNameRow);
             break;
           default:
             // Member.
-            $('#member-list #members').append($('<li>').append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName)));
+            $('#member-list #members').append(newNameRow);
             break;
         }
       }
@@ -453,4 +478,44 @@ function FetchMemberList() {
       console.error("Could not retreive members. Try again later.");
     }
   });
+}
+
+function SetUserID() {
+  // Get the user's ID from their session cookie.
+  $.ajax({
+    type: "POST",
+    url: "/api/GetMyUserID",
+    success: (data) => {
+      id = $.parseJSON(data)[0].UserID;
+    },
+    failure: () => {
+      console.error("Could not retreive ID. Try again later.");
+    }
+  });
+}
+
+function RefreshAdminContentDisplay() {
+  $('#chatbox li:not(.owned)').each(function() {
+    $(this).find('.message-options-container button').css('display', role > 0 ? 'inline-block' : 'none');
+  });
+
+  $('#chatbox li.owned').each(function() {
+    $(this).find('.message-options-container .message-pin-button').css('display', role > 0 ? 'inline-block' : 'none');
+  });
+
+  SetGroupOptionButtonVisibility();
+}
+
+function SetGroupOptionButtonVisibility() {
+  if (role > 0) {
+    $('#pinned-message-delete-button').css('display', 'block');
+    $('#group-info-admin-button-item').css('display', 'list-item');
+    $('#group-info-admin-button-item').addClass('round-bottom');
+    $('#show-invite-code').closest('li').removeClass('round-bottom');
+  } else {
+    $('#pinned-message-delete-button').css('display', 'none');
+    $('#group-info-admin-button-item').css('display', 'none');
+    $('#group-info-admin-button-item').removeClass('round-bottom');
+    $('#show-invite-code').closest('li').addClass('round-bottom');
+  }
 }
