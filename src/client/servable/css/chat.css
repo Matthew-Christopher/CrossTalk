@@ -920,8 +920,8 @@ input, button {
   background: #ddd;
 }
 
-#member-list-container #member-list li .member-options-container button:not(:last-child) {
-  border-right: thin solid black;
+#member-list-container #member-list li .member-options-container button:not(:first-child) {
+  border-left: thin solid black;
 }
 
 .empty {

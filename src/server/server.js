@@ -139,13 +139,13 @@ app.post('/JoinGroup', (req, res) => {
       SELECT *
       FROM   (SELECT \`Group\`.GroupID AS JoinID
         FROM   \`Group\`
-        WHERE  InviteCode = ?) AS firstDerivedTable
+        WHERE  InviteCode = ?) AS FirstDerivedTable
         LEFT JOIN (SELECT GroupMembership.GroupID AS MembershipJoinID
                   FROM   GroupMembership
                          JOIN \`Group\`
                          ON GroupMembership.GroupID = \`Group\`.GroupID
                   WHERE  UserID = ?
-                         AND \`Group\`.InviteCode = ?) AS secondDerivedTable
+                         AND \`Group\`.InviteCode = ?) AS SecondDerivedTable
                   ON TRUE;`;
       db.query(connection, checkValid, [req.body.code, req.session.UserID, req.body.code], (firstResult, fields) => {
 
@@ -352,6 +352,8 @@ app.post('/api/GetMessages', (req, res, next) => {
           });
         }
       }, (error, results) => {
+        if (error) throw error;
+
         res.json(JSON.stringify({
           role: results.adminStatus, // Result of the first function.
           messageData: results.messages // Result of the second function.
@@ -507,6 +509,8 @@ app.post('/api/GetGroupData', (req, res) => {
               });
             }
           }, (error, results) => {
+            if (error) throw error;
+
             res.json(JSON.stringify({
               groupName: results.groupName[0].GroupName, // Result of the first function.
               members: results.members.map((obj, index) => ({

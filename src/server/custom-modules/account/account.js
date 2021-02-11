@@ -32,10 +32,10 @@ module.exports.Register = async (request, response) => {
       SELECT *
       FROM   (SELECT Count(*) AS DisplayNameDuplicates
         FROM   User
-        WHERE  LOWER(DisplayName) = LOWER(?)) AS firstDerivedTable
+        WHERE  LOWER(DisplayName) = LOWER(?)) AS FirstDerivedTable
         LEFT JOIN (SELECT Count(*) AS EmailDuplicates
           FROM   User
-          WHERE  LOWER(EmailAddress) = LOWER(?)) AS secondDerivedTable
+          WHERE  LOWER(EmailAddress) = LOWER(?)) AS SecondDerivedTable
               ON True;`;
 
       db.query(connection, getQuery, [request.body['display-name'], request.body.email], (result, fields) => {
@@ -125,6 +125,8 @@ module.exports.ChangePassword = async (request, response) => {
               });
             }
           }, (error, results) => {
+            if (error) throw error;
+
             mailer.SendChangeNotification(results.nameAndEmail[0].DisplayName, results.nameAndEmail[0].EmailAddress);
 
             response.json(JSON.stringify({

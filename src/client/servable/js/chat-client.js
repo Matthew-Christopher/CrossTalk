@@ -246,6 +246,25 @@ $(window).on("load", () => {
     }
   });
 
+  $(document).on('click', '.friend-button', (event) => {
+    socket.emit('friend add', {
+      ReferringGroup: activeServerID,
+      NewFriend: $(event.target).closest('li').attr('id')
+    });
+  });
+
+  socket.on('friend requested', (toUser) => {
+    let friendButton = $('#' + toUser).find('.friend-button')
+    friendButton.text('Request sent!').css('background', '#8ffd9f');
+
+    // Wait for a bit and then remove this button.
+    setTimeout(() => {
+      friendButton.css('display', 'none');
+
+      // May now need to set member options to empty, check for that.
+    }, 1500);
+  });
+
   function CloseCreateForm() {
     $('#group-create').removeClass('active-button');
     $('#group-create-container').fadeOut(200); // Take 200ms to fade.

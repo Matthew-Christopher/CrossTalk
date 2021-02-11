@@ -56,6 +56,8 @@ module.exports.initialise = (instance) => {
               });
             }
           }, (error, results) => {
+            if (error) throw error;
+
             message.AuthorID = socket.request.session.UserID;
             message.AuthorDisplayName = results.getDisplayName;
             message.MessageID = results.insertMessage.insertId;
@@ -88,6 +90,8 @@ module.exports.initialise = (instance) => {
             });
           }
         }, (error, results) => {
+          if (error) throw error;
+
           if (results.checkInGroup[0] == 1 && results.checkInGroup[1] > results.actingOnRole && results.checkInGroup[1] > (requestData.TargetRole == 'admin' ? 1 : null)) {
             // Operation is permitted, update the user's role.
             let updateRoleQuery = 'UPDATE GroupMembership SET Role = ? WHERE UserID = ? AND GroupID = ?;';
@@ -131,6 +135,8 @@ module.exports.initialise = (instance) => {
                   });
                 }
               }, (error, results) => {
+                if (error) throw error;
+
                 io.sockets.in(firstResult[0].GroupID.toString()).emit('binned', { // Send out the information to clients so they can remove the message.
                   group: firstResult[0].GroupID,
                   message: messageID,
@@ -195,6 +201,76 @@ module.exports.initialise = (instance) => {
               db.query(connection, updateQuery, groupIDToUpdate, (result, fields) => {
 
                 io.sockets.in(groupIDToUpdate.toString()).emit('unpinned', { group: groupIDToUpdate, message: unpinnedMessageID });
+              });
+            }
+
+            connection.release();
+          });
+        });
+      }
+    });
+
+    socket.on('friend add', (data) => {
+      if (socket.request.session.LoggedIn && data) {
+        pool.getConnection(async (err, connection) => {
+          if (err) throw err; // Connection failed.
+
+          // First we check that the user and their target friend are in a group together, so the friend request is valid.
+          let checkCommonGroupQuery = `
+          SELECT * FROM
+            (SELECT COUNT(*) AS RequestingUserMatches FROM GroupMembership WHERE UserID = ? AND GroupID = ?)
+              AS FirstDerivedTable
+              LEFT JOIN
+            (SELECT COUNT(*) AS TargetingUserMatches FROM GroupMembership WHERE UserID = ? AND GroupID = ?)
+              AS SecondDerivedTable
+              ON TRUE
+              LEFT JOIN
+            (SELECT COUNT(*) AS AlreadyFriendMatches FROM UserFriend
+              JOIN (SELECT * FROM UserFriend WHERE UserInFriendship = ?)
+                AS FourthDerivedTable
+                ON FourthDerivedTable.FriendshipID = UserFriend.FriendshipID
+                WHERE UserFriend.UserInFriendship != ?)
+              AS ThirdDerivedTable
+              ON TRUE;`;
+
+          db.query(connection, checkCommonGroupQuery, [socket.request.session.UserID, data.ReferringGroup, data.NewFriend, data.ReferringGroup, socket.request.session.UserID, socket.request.session.UserID], (result, fields) => {
+            if (result[0].RequestingUserMatches == 1 && result[0].TargetingUserMatches == 1 && result[0].AlreadyFriendMatches == 0) {
+              // Everything is valid and the user's aren't already friends. Let's sent the request.
+
+              async.waterfall([
+                function AddPendingFriendship(callback) {
+                  let addPendingFriendshipQuery = 'INSERT INTO Friendship (Status) VALUES (DEFAULT);';
+
+                  db.query(connection, addPendingFriendshipQuery, [], (result, fields) => {
+                    callback(null, result.insertId); // The new FriendshipID.
+                  });
+                },
+                function AddUsersToFriendship(friendshipID, callback) {
+                  async.parallel({
+                    insertRequestingUser: function(callback) {
+                      let insertRequestingUserQuery = 'INSERT INTO UserFriend VALUES (?, ?, True)';
+
+                      db.query(connection, insertRequestingUserQuery, [friendshipID, socket.request.session.UserID], (fields, result) => {
+                        callback(null);
+                      });
+                    },
+                    insertRequestedUser: function(callback) {
+                      let insertRequestedUserQuery = 'INSERT INTO UserFriend (FriendshipID, UserInFriendship) VALUES (?, ?)';
+
+                      db.query(connection, insertRequestedUserQuery, [friendshipID, data.NewFriend], (fields, result) => {
+                        callback(null);
+                      });
+                    }
+                  }, (error, results) => {
+                    if (error) throw error;
+
+                    callback(null);
+                  });
+                }
+              ], (error, results) => {
+                if (error) throw error;
+
+                io.sockets.in(data.ReferringGroup.toString()).emit('friend requested', data.NewFriend);
               });
             }
 
