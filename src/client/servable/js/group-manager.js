@@ -9,8 +9,6 @@ $(window).on("load", () => {
   $('#group-join-form').submit((e) => {
     e.preventDefault();
 
-    $('#group-join-button').css('background', '#8ffd9f');
-
     $.ajax({
       type: "POST",
       url: "/JoinGroup",
@@ -41,7 +39,7 @@ $(window).on("load", () => {
           $('#group-join-code').val('');
           $('#group-join').removeClass('active-button');
           $('#server-container #group-join-form').css('display', 'none');
-          $('#group-join-button').css('background', 'transparent');
+          $('#group-join-button').css('background', '');
         } else {
           $('#group-join-code').val('').focus();
           $('#group-join-button').text('Invalid');
