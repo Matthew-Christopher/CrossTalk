@@ -830,7 +830,7 @@ input, button {
 
 #member-list-container #member-list-popup {
   max-height: 80%;
-  width: 50%;
+  width: 70%;
   box-sizing: border-box;
   display: flex;
   flex-flow: column;
@@ -922,6 +922,6 @@ input, button {
   border-right: thin solid black;
 }
 
-#member-list-container #member-list li .member-options-container:empty{
-    border: none;
+.empty {
+  border: none !important;
 }

@@ -221,6 +221,22 @@ $(window).on("load", () => {
 
         $('#member-list #members').append($('#' + data.AffectsUser).remove());
       }
+
+      if (data.NewRole < role) {
+        if (data.NewRole < role) {
+          $('#' + data.AffectsUser).find('.role-button').css('display', 'inline-block');
+
+          $('#' + data.AffectsUser).find('.member-options-container').removeClass('empty');
+        } else {
+          $('#' + data.AffectsUser).find('.role-button').css('display', 'none');
+
+          if ($('#' + data.AffectsUser).find('.friend-button').css('display') == 'none') {
+            $('#' + data.AffectsUser).find('.member-options-container').addClass('empty');
+          } else {
+            $('#' + data.AffectsUser).find('.member-options-container').removeClass('empty');
+          }
+        }
+      }
     }
 
     if (data.AffectsUser == id) {
@@ -283,7 +299,7 @@ function SetActiveServerID(id) {
                          .text(message.AuthorDisplayName))
                        .append($('<i class="message-timestamp" style="color: #888; float: right;">')
                          .text(GetMessageTimestamp(message.Timestamp)))
-                       .append($('<div class="message-options-container">')
+                       .append($('<div class="message-options-container' + (!(role > 0 || message.Owned) ? ' empty' : '') + '">')
                        .append($('<button class="message-pin-button" style="display: ' + (role > 0 ? 'inline-block' : 'none')  + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
                        .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? 'inline-block' : 'none') + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">'))))
                        .append('<br />')
@@ -428,9 +444,9 @@ function FetchMemberList() {
 
         let newNameRow = $('<li id="' + memberList[i].UserID + '">')
                         .append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName))
-                        .append($('<div class="member-options-container">')
-                        .append(role > memberList[i].Role && roleButtonAction ? $('<button class="role-button" value="' + roleButtonAction + '">').text('Make ' + roleButtonAction) : null)
-                        .append(!memberList[i].IsAFriend ? $('<button class="friend-button">').text('Add friend ') : null));
+                        .append($('<div class="member-options-container' + (!(role > memberList[i].Role) && memberList[i].IsAFriend ? ' empty' : '') + '">')
+                        .append($('<button class="role-button" style="display: ' + (role > memberList[i].Role && roleButtonAction ? 'inline-block' : 'none') + ';" value="' + roleButtonAction + '">').text('Make ' + roleButtonAction))
+                        .append($('<button class="friend-button" style="display: ' + (!memberList[i].IsAFriend ? 'inline-block' : 'none') + ';">').text('Add friend ')));
         switch(memberList[i].Role) {
           case 2:
             // Owner.
@@ -469,7 +485,14 @@ function SetUserID() {
 
 function RefreshAdminContentDisplay() {
   $('#chatbox li:not(.owned)').each(function() {
-    $(this).find('.message-options-container button').css('display', role > 0 ? 'inline-block' : 'none');
+    let toAlter = $(this).find('.message-options-container button');
+    if (role > 0) {
+      toAlter.css('display', 'inline-block');
+      $(this).find('.message-options-container').removeClass('empty');
+    } else {
+      toAlter.css('display', 'none');
+      $(this).find('.message-options-container').addClass('empty');
+    }
   });
 
   $('#chatbox li.owned').each(function() {
