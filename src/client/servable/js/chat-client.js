@@ -162,16 +162,7 @@ $(window).on("load", () => {
   });
 
   $(document).on('click', '.message-bin-button', (event) => {
-    $.ajax({
-      type: "DELETE",
-      url: "/api/DeleteMessage",
-      data:  {
-        MessageID: $(event.target).closest('li').attr('id')
-      },
-      failure: () => {
-        console.error("Could not delete message. Try again later.");
-      }
-    });
+    socket.emit('message delete', $(event.target).closest('li').attr('id'));
   });
 
   socket.on('binned', (data) => {
@@ -188,16 +179,7 @@ $(window).on("load", () => {
   });
 
   $(document).on('click', '.message-pin-button', (event) => {
-    $.ajax({
-      type: "POST",
-      url: "/api/PinMessage",
-      data:  {
-        MessageID: $(event.target).closest('li').attr('id')
-      },
-      failure: () => {
-        console.error("Could pin message. Try again later.");
-      }
-    });
+    socket.emit('message pin', $(event.target).closest('li').attr('id'));
   });
 
   socket.on('pinned', (groupID) => {
@@ -207,16 +189,7 @@ $(window).on("load", () => {
   });
 
   $(document).on('click', '#pinned-message-delete-button', (event) => {
-    $.ajax({
-      type: "POST",
-      url: "/api/UnpinMessage",
-      data:  {
-        GroupID: activeServerID
-      },
-      failure: () => {
-        console.error("Could not unpin message. Try again later.");
-      }
-    });
+    socket.emit('message unpin', activeServerID);
   });
 
   socket.on('unpinned', (data) => {
@@ -256,6 +229,19 @@ $(window).on("load", () => {
       RefreshAdminContentDisplay();
     }
   });
+
+  function CloseCreateForm() {
+    $('#group-create').removeClass('active-button');
+    $('#group-create-container').fadeOut(200); // Take 200ms to fade.
+
+    UnhidePopup();
+  }
+
+  function CloseMemberList() {
+    $('#member-list-container').fadeOut(200); // Take 200ms to fade.
+
+    UnhidePopup();
+  }
 });
 
 function SetActiveServerID(id) {
@@ -348,19 +334,6 @@ function CheckPinnedMessage() {
       console.error("Could not retreive messages. Try again later.");
     }
   });
-}
-
-function CloseCreateForm() {
-  $('#group-create').removeClass('active-button');
-  $('#group-create-container').fadeOut(200); // Take 200ms to fade.
-
-  UnhidePopup();
-}
-
-function CloseMemberList() {
-  $('#member-list-container').fadeOut(200); // Take 200ms to fade.
-
-  UnhidePopup();
 }
 
 function UnhidePopup() {

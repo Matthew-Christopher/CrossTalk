@@ -106,17 +106,103 @@ module.exports.initialise = (instance) => {
       });
     });
 
-    module.exports.bin = (groupID, messageID, newMessageString) => {
-      io.sockets.in(groupID.toString()).emit('binned', { group: groupID, message: messageID, newLatestMessage: newMessageString });
-    };
+    socket.on('message delete', (messageID) => {
+      if (socket.request.session.LoggedIn && messageID) {
+        pool.getConnection(async (err, connection) => {
+          if (err) throw err; // Connection failed.
 
-    module.exports.pin = (groupID) => {
-      io.sockets.in(groupID.toString()).emit('pinned', groupID);
-    };
+          let checkValidQuery = 'SELECT COUNT(*) AS Matches, Message.GroupID FROM Message JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE (Message.AuthorID = GroupMembership.UserID OR GroupMembership.Role > 0) AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
 
-    module.exports.unpin = (groupID, messageID) => {
-      io.sockets.in(groupID.toString()).emit('unpinned', { group: groupID, message: messageID });
-    };
+          db.query(connection, checkValidQuery, [messageID, socket.request.session.UserID], (firstResult, fields) => {
+            if (firstResult[0].Matches == 1) {
+              async.parallel({
+                secondResult: function(callback) { // Wipe the message from the database.
+                  let deleteQuery = "DELETE FROM Message WHERE MessageID = ?;";
+
+                  db.query(connection, deleteQuery, messageID, (result, fields) => {
+                    callback(null, result);
+                  });
+                },
+                thirdResult: function(callback) {
+                  let getRecentMessageQuery = 'SELECT Message.MessageString AS LatestMessageString FROM Message WHERE Message.GroupID = ? ORDER BY Timestamp DESC LIMIT 1;'; // Get the message that is now the most recent in the group.
+
+                  db.query(connection, getRecentMessageQuery, firstResult[0].GroupID, (result, fields) => {
+                    callback(null, result);
+                  });
+                }
+              }, (error, results) => {
+                io.sockets.in(firstResult[0].GroupID.toString()).emit('binned', { // Send out the information to clients so they can remove the message.
+                  group: firstResult[0].GroupID,
+                  message: messageID,
+                  newLatestMessage: results.thirdResult[0].LatestMessageString
+                });
+              });
+            }
+
+            connection.release();
+          });
+        });
+      }
+    });
+
+    socket.on('message pin', (messageID) => {
+      if (socket.request.session.LoggedIn && messageID) {
+        pool.getConnection(async (err, connection) => {
+          if (err) throw err; // Connection failed.
+
+          let checkValidQuery = 'SELECT COUNT(*) AS Matches FROM Message JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
+
+          db.query(connection, checkValidQuery, [messageID, socket.request.session.UserID], (result, fields) => {
+            if (result[0].Matches == 1) {
+              async.waterfall([
+                function(callback) {
+                  let getGroupQuery = "SELECT GroupID FROM Message WHERE MessageID = ?;";
+
+                  db.query(connection, getGroupQuery, messageID, (result, fields) => {
+                    callback(null, result[0].GroupID);
+                  });
+                },
+                function(groupIDToUpdate, callback) {
+                  let updateGroupQuery = 'UPDATE \`Group\` SET PinnedMessageID = ? WHERE GroupID = ?;';
+
+                  db.query(connection, updateGroupQuery, [messageID, groupIDToUpdate], (result, fields) => {
+                    callback(null, groupIDToUpdate);
+                  });
+                }
+              ], (error, groupIDToUpdate) => {
+                io.sockets.in(groupIDToUpdate.toString()).emit('pinned', groupIDToUpdate);
+              });
+            }
+
+            connection.release();
+          });
+        });
+      }
+    });
+
+    socket.on('message unpin', (groupID) => {
+      if (socket.request.session.LoggedIn && groupID) {
+        pool.getConnection(async (err, connection) => {
+          if (err) throw err; // Connection failed.
+
+          let checkValidQuery = 'SELECT COUNT(*) AS Matches, \`Group\`.GroupID, \`Group\`.PinnedMessageID AS MessageID FROM \`Group\` JOIN GroupMembership ON \`Group\`.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND \`Group\`.GroupID = ? AND GroupMembership.UserID = ?;';
+          db.query(connection, checkValidQuery, [groupID, socket.request.session.UserID], (result, fields) => {
+            if (result[0].Matches == 1) {
+              let groupIDToUpdate = result[0].GroupID;
+              let unpinnedMessageID = result[0].MessageID;
+
+              let updateQuery = 'UPDATE \`Group\` SET PinnedMessageID = NULL WHERE GroupID = ?;';
+              db.query(connection, updateQuery, groupIDToUpdate, (result, fields) => {
+
+                io.sockets.in(groupIDToUpdate.toString()).emit('unpinned', { group: groupIDToUpdate, message: unpinnedMessageID });
+              });
+            }
+
+            connection.release();
+          });
+        });
+      }
+    });
   });
 
   module.exports.getClients = function getClients(allUserIDs, groupID, requestingUserID) {
