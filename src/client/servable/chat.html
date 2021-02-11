@@ -49,7 +49,7 @@
   <div id="member-list-container" class="overlay blur-exclude">
     <div id="member-list-popup" class="popup-container">
       <button id="member-list-close-button" class="popup-close-button"></button>
-      <h1 id="member-list-title">Testing Group</h1>
+      <h1 id="member-list-title"></h1>
 
       <p style="text-align: center;">A list of all members in the group. You can also start a private messaging conversation from here by sending any user a friend request.</p>
 
@@ -96,7 +96,9 @@
       </form>
     </div>
 
-    <p id="group-prompt">No groups yet. Join or create one.</p>
+    <div id="group-prompt-container">
+      <p id="group-prompt">No groups yet. Join or create one.</p>
+    </div>
 
     <div id="server-selector"></div>
   </div>
@@ -114,7 +116,7 @@
     <div class="arrow-up"></div>
     <ul id="profile-options">
       <li><p id="profile-options-name-label"></p></li>
-      <li><a href="#under-development">Profile Settings</a></li>
+      <li><a href="/account/change-password.html">Change Password</a></li>
       <li class="round-bottom"><a href="/logout">Log Out</a></li>
     </ul>
   </div>

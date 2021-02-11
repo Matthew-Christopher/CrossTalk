@@ -130,9 +130,9 @@ $(window).on("load", () => {
         JSONData = $.parseJSON(data);
 
         if (JSONData.length > 0) {
-          $('#group-prompt').hide();
+          $('#group-prompt-container').css('display', 'none');
         } else {
-          $('#group-prompt').show();
+          $('#group-prompt-container').css('display', 'block');
         }
 
         // Then we can populate the container dynamically.

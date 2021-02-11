@@ -151,6 +151,10 @@ input, button {
   box-shadow: 2px 0 5px -2px black;
 }
 
+#server-container #group-prompt-container {
+  flex: 1 1 auto;
+}
+
 #server-container #group-prompt {
   font-weight: 200;
   position: relative;
@@ -160,7 +164,6 @@ input, button {
   text-align: center;
   padding: 10px;
   font-size: 1.5em;
-  display: none;
 }
 
 #server-container #server-selector {

@@ -140,7 +140,7 @@ module.exports.initialise = (instance) => {
                 io.sockets.in(firstResult[0].GroupID.toString()).emit('binned', { // Send out the information to clients so they can remove the message.
                   group: firstResult[0].GroupID,
                   message: messageID,
-                  newLatestMessage: results.thirdResult[0].LatestMessageString
+                  newLatestMessage: results.thirdResult[0] ? results.thirdResult[0].LatestMessageString : 'No messages yet.'
                 });
               });
             }

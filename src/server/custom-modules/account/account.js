@@ -20,9 +20,9 @@ const pool = mysql.createPool({
 
 module.exports.Register = async (request, response) => {
   let hash = await cryptography.Hash(request.body.password);
-  const emailCheckRegex = new RegExp('/^[a-z0-9!#$%&\'*+\\/=?^_`{|}~.-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/iD'); // (Regex DB, n.d.)
+  const emailCheckRegex = /^[a-z0-9!#$%&\'*+\/=?^_`{|}~.-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i; // (Regex DB, n.d.)
 
-  if (!!request.body['display-name'].trim() || !emailCheckRegex.test(request.body.email) || !request.body.password.trim() || (request.body.email != request.body['confirm-email']) || !await cryptography.CompareHashes(hash, request.body['confirm-password'])) {
+  if (!request.body['display-name'].trim() || emailCheckRegex.exec(request.body.email) === null || !request.body.password.trim() || (request.body.email != request.body['confirm-email']) || !await cryptography.CompareHashes(hash, request.body['confirm-password'])) {
     response.send("fail");
   } else {
     pool.getConnection(async (err, connection) => {
@@ -47,7 +47,7 @@ module.exports.Register = async (request, response) => {
           response.send('password');
         } else {
           GetUserID(connection, (verificationKey) => {
-            sql = 'INSERT INTO User (DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, False, ?);';
+            let sql = 'INSERT INTO User (DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, False, ?);';
             let inserts = [request.body['display-name'], request.body.email, hash, verificationKey];
 
             db.query(connection, sql, inserts, (result, fields) => {

@@ -116,7 +116,7 @@ $(window).on("load", () => {
                      .text(message.AuthorDisplayName))
                    .append($('<i class="message-timestamp" style="color: #888; float: right;">')
                      .text(GetMessageTimestamp(message.Timestamp)))
-                   .append($('<div class="message-options-container">')
+                   .append($('<div class="message-options-container' + (!(role > 0 || message.AuthorID == id) ? ' empty' : '') + '">')
                    .append($('<button class="message-pin-button" style="display: ' + (role > 0 ? 'inline-block' : 'none')  + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
                    .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? 'inline-block' : 'none') + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">'))))
                    .append('<br />')
@@ -155,7 +155,7 @@ $(window).on("load", () => {
     StickScroll(scrollOffsetBeforeFilter);
 
     if (nothingFound) {
-      $('#chatbox-reminder').css('display', 'block').text('No messages found');
+      $('#chatbox-reminder').css('display', 'block').text('No messages ' + (listItems.length > 0 ? 'found' : 'yet'));
     } else {
       $('#chatbox-reminder').css('display', 'none');
     }
@@ -449,6 +449,7 @@ function FetchMemberList() {
     },
     success: (data) => {
       $('#member-list #owner, #member-list #admins, #member-list #members').empty(); // Empty before we append to avoid any duplicates.
+      $('#member-list-title').text($('#' + activeServerID + ' .server-info-container h1').text()); // Set the title of the dialogue to the group name.
 
       let memberList = $.parseJSON(data);
 
