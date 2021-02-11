@@ -71,7 +71,8 @@ $(window).on("load", () => {
                 display: true,
                 ticks: {
                   beginAtZero: true,
-                  fontSize: 14
+                  fontSize: 14,
+                  precision: 0 // Don't show any decimal points on the y-axis.
                 },
                 scaleLabel: {
                   display: true,
