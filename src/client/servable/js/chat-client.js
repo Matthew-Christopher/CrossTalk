@@ -117,8 +117,8 @@ $(window).on("load", () => {
                    .append($('<i class="message-timestamp" style="color: #888; float: right;">')
                      .text(GetMessageTimestamp(message.Timestamp)))
                    .append($('<div class="message-options-container">')
-                   .append($('<button class="message-pin-button" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
-                   .append($('<button class="message-bin-button" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">'))))
+                   .append($('<button class="message-pin-button" style="display: ' + (role > 0 ? 'inline-block' : 'none')  + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
+                   .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? 'inline-block' : 'none') + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">'))))
                    .append('<br />')
                    .append($('<p class="message-content" style="display: inline;">')
                      .text(message.MessageString)));
