@@ -453,6 +453,7 @@ input, button {
   border-radius: 7px;
   background: white;
   border: 1px solid black;
+  overflow: hidden;
 }
 
 #chat-container #chatbox li:hover .message-options-container {
@@ -889,6 +890,7 @@ input, button {
 
 #member-list-container #member-list li:hover .member-options-container {
   display: block;
+  overflow: hidden;
 }
 
 #member-list-container #member-list li .member-options-container button {
