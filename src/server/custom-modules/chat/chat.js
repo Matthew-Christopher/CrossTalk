@@ -235,7 +235,7 @@ module.exports.initialise = (instance) => {
 
           db.query(connection, checkCommonGroupQuery, [socket.request.session.UserID, data.ReferringGroup, data.NewFriend, data.ReferringGroup, socket.request.session.UserID, socket.request.session.UserID], (result, fields) => {
             if (result[0].RequestingUserMatches == 1 && result[0].TargetingUserMatches == 1 && result[0].AlreadyFriendMatches == 0) {
-              // Everything is valid and the user's aren't already friends. Let's sent the request.
+              // Everything is valid and the users aren't already friends. Let's sent the request.
 
               async.waterfall([
                 function AddPendingFriendship(callback) {
