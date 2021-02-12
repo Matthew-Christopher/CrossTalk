@@ -1,8 +1,14 @@
 $(window).on("load", () => {
 
-  let JSONData;
+  let JSONData = {};
 
-  FetchGroups();
+  FetchGroups(); // Initially loaded on groups view, so get the groups.
+
+  $('#chat-type-toggle').change(function(event) {
+    if (!event.target.checked) { // Groups view.
+      FetchGroups(); // Fetch groups when changing from friends back to groups view.
+    }
+  });
 
   // Now the server selector is populated, we can manage the server states.
 
@@ -132,6 +138,7 @@ $(window).on("load", () => {
         if (JSONData.length > 0) {
           $('#group-prompt-container').css('display', 'none');
         } else {
+          $('#group-prompt').text('No groups yet. Join or create one.');
           $('#group-prompt-container').css('display', 'block');
         }
 
@@ -153,7 +160,7 @@ $(window).on("load", () => {
         if (callback) callback();
       },
       failure: () => {
-        console.log("Could not retreive messaging groups. Try again later.");
+        console.error("Could not retreive messaging groups. Try again later.");
       }
     });
   }

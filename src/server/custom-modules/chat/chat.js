@@ -225,15 +225,16 @@ module.exports.initialise = (instance) => {
               AS SecondDerivedTable
               ON TRUE
               LEFT JOIN
-            (SELECT COUNT(*) AS AlreadyFriendMatches FROM UserFriend
-              JOIN (SELECT * FROM UserFriend WHERE UserInFriendship = ?)
-                AS FourthDerivedTable
-                ON FourthDerivedTable.FriendshipID = UserFriend.FriendshipID
-                WHERE UserFriend.UserInFriendship != ?)
-              AS ThirdDerivedTable
+            (SELECT COUNT(*) AS AlreadyFriendMatches FROM
+              (SELECT FriendshipID FROM UserFriend WHERE UserInFriendship = ?) AS ThirdDerivedTable
+              JOIN UserFriend
+                ON ThirdDerivedTable.FriendshipID = UserFriend.FriendshipID
+              WHERE UserInFriendship = ?)
+              AS FourthDerivedTable
               ON TRUE;`;
 
-          db.query(connection, checkCommonGroupQuery, [socket.request.session.UserID, data.ReferringGroup, data.NewFriend, data.ReferringGroup, socket.request.session.UserID, socket.request.session.UserID], (result, fields) => {
+          db.query(connection, checkCommonGroupQuery, [socket.request.session.UserID, data.ReferringGroup, data.NewFriend, data.ReferringGroup, socket.request.session.UserID, data.NewFriend], (result, fields) => {
+            log.info(result[0]);
             if (result[0].RequestingUserMatches == 1 && result[0].TargetingUserMatches == 1 && result[0].AlreadyFriendMatches == 0) {
               // Everything is valid and the users aren't already friends. Let's sent the request.
 
@@ -279,6 +280,10 @@ module.exports.initialise = (instance) => {
         });
       }
     });
+
+    module.exports.JoinVerified = (id) => {
+      socket.join(id);
+    };
   });
 
   module.exports.getClients = function getClients(allUserIDs, groupID, requestingUserID) {

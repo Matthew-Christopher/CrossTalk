@@ -265,6 +265,22 @@ $(window).on("load", () => {
     }, 1500);
   });
 
+  $('#chat-type-toggle').change(function(event) {
+    if (event.target.checked) { // Friends view.
+      $('#server-selector').empty();
+      $('#server-buttons-container').css('display', 'none');
+
+      $('#friend-requests-toggle').css('display', 'block');
+    } else { // Groups view.
+      $('#friend-requests-container .active-button').removeClass('active-button');
+      $('#friend-requests-container .expanded').removeClass('expanded');
+
+      $('#server-buttons-container').css('display', 'block');
+
+      $('#friend-requests-toggle').css('display', 'none');
+    }
+  });
+
   function CloseCreateForm() {
     $('#group-create').removeClass('active-button');
     $('#group-create-container').fadeOut(200); // Take 200ms to fade.

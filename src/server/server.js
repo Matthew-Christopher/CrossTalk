@@ -292,6 +292,8 @@ app.post('/api/GetMyGroups', (req, res, next) => {
 
       db.query(connection, sql, req.session.UserID, (result, fields) => {
 
+        result.forEach(element => chat.JoinVerified(element.GroupID.toString())); // Join each group that we are a member of.
+
         res.json(JSON.stringify(result));
 
         connection.release();
@@ -531,6 +533,41 @@ app.post('/api/GetGroupData', (req, res) => {
     });
   } else {
     res.json(JSON.stringify({status: 'invalid'}));
+  }
+});
+
+app.post('/api/GetMyFriends', (req, res, next) => {
+  if (req.session.LoggedIn) {
+    pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
+      let getFriendsQuery = `
+      SELECT MyFriendships.FriendshipID, User.DisplayName, MyFriendships.UserSentRequest AS SentRequest, Friendship.Status
+      FROM (SELECT * FROM UserFriend WHERE UserInFriendship = ?) AS MyFriendships
+        JOIN UserFriend
+          ON MyFriendships.FriendshipID = UserFriend.FriendshipID
+        JOIN Friendship
+          ON MyFriendships.FriendshipID = Friendship.FriendshipID
+        JOIN User
+          ON UserFriend.UserInFriendship = User.UserID
+      WHERE UserFriend.UserInFriendship != ?
+      ORDER BY User.DisplayName;`;
+
+      db.query(connection, getFriendsQuery, [req.session.UserID, req.session.UserID], (result, fields) => {
+        res.json(JSON.stringify({
+          // Status: null or 0 - pending,
+          //                 1 - rejected,
+          //                 2 - accepted and active.
+          sentPending: result.filter(element => element.SentRequest == true && !(element.Status > 0)), // Just get the elements where we sent the request and are still waiting for a reply.
+          notSentPending: result.filter(element => element.SentRequest != true && !(element.Status > 0)), // Just get the elements were we didn't sent the request and we need to accept or reject it.
+          active: result.filter(element => element.Status == 2) // Just get all of the active friendships.
+        }));
+
+        connection.release();
+      });
+    });
+  } else {
+    next();
   }
 });
 

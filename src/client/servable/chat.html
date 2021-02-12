@@ -77,6 +77,15 @@
         <p style="position: absolute; right: 0; padding: 5px; z-index: -1;">Friends</p>
       </label>
     </div>
+    <div id="friend-requests-container">
+      <button id="friend-requests-toggle" type="button" value="Friend Requests">
+        <img src="img/ExpansionLo.png" alt="Expand" style="vertical-align: middle; height: 1em; width: 1em; margin-top: -2px; margin-right: 10px;">
+        Friend Requests
+        <img id="alert" src="img/AlertLo.png" alt="New Requests">
+      </button>
+
+      <div id="friend-requests" class="slide-back"></div>
+    </div>
     <div id="server-buttons-container">
       <button id="group-join" class="group-action-button" type="button" value="Join">Join Group</button>
 
@@ -116,7 +125,7 @@
     <div class="arrow-up"></div>
     <ul id="profile-options">
       <li><p id="profile-options-name-label"></p></li>
-      <li><a href="/account/change-password.html">Change Password</a></li>
+      <li><a href="/account/change-password">Change Password</a></li>
       <li class="round-bottom"><a href="/logout">Log Out</a></li>
     </ul>
   </div>
@@ -152,7 +161,7 @@
     <form id="message-form" action="">
       <div class="input-field-container">
         <input type="text" id="message" class="effect-20" autocomplete="off" placeholder="Type a message...">
-        <button id="message-send-tick" type="submit" form="message-form" value="Submit"><img src="img/Tick.png" alt="Send"></button>
+        <button id="message-send-tick" type="submit" form="message-form" value="Submit"><img src="img/TickLo.png" alt="Send"></button>
         <span class="focus-border">
           <i></i>
         </span>
@@ -167,6 +176,7 @@
   <script src="js/options-buttons.js"></script>
 
   <script src="js/group-manager.js"></script>
+  <script src="js/friend-manager.js"></script>
 
   <script src="/socket.io/socket.io.js"></script> <!-- Automatically served by the API, if we are listening correctly. -->
   <script src="js/Message.js"></script>
