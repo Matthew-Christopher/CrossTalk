@@ -292,8 +292,6 @@ app.post('/api/GetMyGroups', (req, res, next) => {
 
       db.query(connection, sql, req.session.UserID, (result, fields) => {
 
-        result.forEach(element => chat.JoinVerified(element.GroupID.toString())); // Join each group that we are a member of.
-
         res.json(JSON.stringify(result));
 
         connection.release();

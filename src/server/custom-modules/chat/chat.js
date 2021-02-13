@@ -280,10 +280,6 @@ module.exports.initialise = (instance) => {
         });
       }
     });
-
-    module.exports.JoinVerified = (id) => {
-      socket.join(id);
-    };
   });
 
   module.exports.getClients = function getClients(allUserIDs, groupID, requestingUserID) {
