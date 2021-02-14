@@ -230,7 +230,7 @@ $(window).on("load", () => {
         } else {
           $('#' + data.AffectsUser).find('.role-button').css('display', 'none');
 
-          if ($('#' + data.AffectsUser).find('.friend-button').css('display') == 'none') {
+          if ($('#' + data.AffectsUser).find('.friend-add-button').css('display') == 'none') {
             $('#' + data.AffectsUser).find('.member-options-container').addClass('empty');
           } else {
             $('#' + data.AffectsUser).find('.member-options-container').removeClass('empty');
@@ -246,15 +246,19 @@ $(window).on("load", () => {
     }
   });
 
-  $(document).on('click', '.friend-button', (event) => {
+  $(document).on('click', '.friend-add-button', (event) => {
     socket.emit('friend add', {
       ReferringGroup: activeServerID,
       NewFriend: $(event.target).closest('li').attr('id')
     });
   });
 
+  socket.on('friend update', (data) => {
+    OneOfMyFriendsUpdated(data);
+  });
+
   socket.on('friend requested', (toUser) => {
-    let friendButton = $('#' + toUser).find('.friend-button')
+    let friendButton = $('#' + toUser).find('.friend-add-button')
     friendButton.text('Request sent!').css('background', '#8ffd9f');
 
     // Wait for a bit and then remove this button.
@@ -482,7 +486,7 @@ function FetchMemberList() {
                         .append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName))
                         .append($('<div class="member-options-container' + (!(role > memberList[i].Role) && memberList[i].IsAFriend ? ' empty' : '') + '">')
                         .append($('<button class="role-button" style="display: ' + (role > memberList[i].Role && roleButtonAction ? 'inline-block' : 'none') + ';" value="' + roleButtonAction + '">').text('Make ' + roleButtonAction))
-                        .append($('<button class="friend-button" style="display: ' + (!memberList[i].IsAFriend ? 'inline-block' : 'none') + ';">').text('Add friend ')));
+                        .append($('<button class="friend-add-button" style="display: ' + (!memberList[i].IsAFriend ? 'inline-block' : 'none') + ';">').text('Add friend ')));
         switch(memberList[i].Role) {
           case 2:
             // Owner.

@@ -234,7 +234,6 @@ module.exports.initialise = (instance) => {
               ON TRUE;`;
 
           db.query(connection, checkCommonGroupQuery, [socket.request.session.UserID, data.ReferringGroup, data.NewFriend, data.ReferringGroup, socket.request.session.UserID, data.NewFriend], (result, fields) => {
-            log.info(result[0]);
             if (result[0].RequestingUserMatches == 1 && result[0].TargetingUserMatches == 1 && result[0].AlreadyFriendMatches == 0) {
               // Everything is valid and the users aren't already friends. Let's sent the request.
 
@@ -280,7 +279,62 @@ module.exports.initialise = (instance) => {
         });
       }
     });
+
+    socket.on('friend update request', (data) => {
+      if (socket.request.session.LoggedIn && data) {
+        pool.getConnection(async (err, connection) => {
+          if (err) throw err; // Connection failed.
+
+          // First we check that there is an existing friend request to update.
+          let checkValidQuery = `
+          SELECT Friendship.FriendshipID, Friendship.Status, FirstDerivedTable.OtherUserID
+          FROM Friendship
+            JOIN (SELECT UF1.FriendshipID, UF2.UserInFriendship AS OtherUserID FROM UserFriend UF1
+                    INNER JOIN UserFriend UF2
+                      ON UF1.FriendshipID = UF2.FriendshipID AND UF1.UserInFriendship != UF2.UserInFriendship
+                    WHERE UF1.UserInFriendship = ? AND UF1.FriendshipID = ?)
+                    AS FirstDerivedTable
+              ON Friendship.FriendshipID = FirstDerivedTable.FriendshipID;`; // Perform a self join on UserFriend.
+
+          db.query(connection, checkValidQuery, [socket.request.session.UserID, data.FriendshipID], (result, fields) => {
+
+            let otherUserID = result[0].OtherUserID;
+
+            if (result.length == 1) {
+              // Everything is valid, update the record.
+
+              // let updateFriendshipQuery = 'UPDATE Friendship SET Status = ? WHERE FriendshipID = ? AND (Status IS NULL OR Status = 0);'; // Don't do anything if the status is already set.
+let updateFriendshipQuery = 'SELECT NULL FROM User;';
+              db.query(connection, updateFriendshipQuery, [data.IsAccepting ? 2 : 1, result[0].FriendshipID], (result, fields) => {
+                let newFriendshipData = {
+                  FriendshipID: data.FriendshipID,
+                  Status: data.IsAccepting ? 2 : 1
+                };
+
+                io.to(socket.id).emit('friend update', newFriendshipData);
+
+                let otherUserConnectedSocket;
+
+                io.sockets.sockets.forEach((item) => {
+                  if (item.request.session.UserID == otherUserID) {
+                    otherUserConnectedSocket = item;
+                  }
+                });
+
+                if (otherUserConnectedSocket) {
+                  io.to(otherUserConnectedSocket.id).emit('friend update', newFriendshipData); // The other user in the friendship.
+                }
+              });
+            }
+          });
+
+          connection.release();
+        });
+      }
+    });
   });
+
+
 
   module.exports.getClients = function getClients(allUserIDs, groupID, requestingUserID) {
     let currentRoom = io.sockets.adapter.rooms.get(groupID);

@@ -414,7 +414,7 @@ input, button {
   background: #8ffd9f;
 }
 
-#server-selector .server-button {
+#server-selector .server-button, #server-selector .friend-button {
   transition: background 0.1s linear;
   outline: none;
   background: transparent;
@@ -428,7 +428,7 @@ input, button {
   border-bottom: solid 1px #555;
 }
 
-#server-selector .server-button:not(.active-button):hover {
+#server-selector .server-button:not(.active-button):hover, #server-selector .friend-button:not(.active-button):hover {
   background: #eee;
 }
 
@@ -436,7 +436,7 @@ input, button {
   background: #6dd5ed !important;
 }
 
-#server-selector .server-button .server-info-container * {
+#server-selector .server-button .server-info-container *, #server-selector .friend-button .friend-info-container * {
   padding: 0 10px;
   box-sizing: border-box;
   overflow: hidden;
@@ -451,7 +451,7 @@ input, button {
   position: relative;
 }
 
-#server-selector .server-button .server-info-container h1 {
+#server-selector .server-button .server-info-container h1, #server-selector .friend-button .friend-info-container h1 {
   color: #555;
   font-size: 1.5em;
 }
