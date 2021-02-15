@@ -84,7 +84,7 @@ $(window).on("load", () => {
       $(document).on('click', '.friend-button', (event) => {
         if ($(event.target).closest('.friend-button').attr('id') != activeServerID) { // Only do something if we are not clicking the currently active button.
           // If the event target is the text in the button, we actually want the parent button.
-          // Match by just the GroupID property.
+
           let friendshipID = $(event.target).closest('.friend-button').attr('id');
 
           groupIsPrivate = true;
