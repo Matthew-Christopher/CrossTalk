@@ -17,9 +17,9 @@ $(window).on("load", () => {
 
         $('#users-readout').text(stats.members.length);
         $('#online-users-readout').text(stats.members.filter(element => element.Online).length);
-        $('#messages-sent-readout').text(CountMessages(stats.messages));
+        $('#messages-sent-readout').text(countMessages(stats.messages));
 
-        let sevenDayActivity = GetPrevious7DayMessages(stats.messages, stats.currentServerDate);
+        let sevenDayActivity = getPrevious7DayMessages(stats.messages, stats.currentServerDate);
 
         let messageChartContext = $('#messages-over-time-chart')[0].getContext('2d');
 
@@ -97,7 +97,7 @@ $(window).on("load", () => {
   }
 });
 
-function CountMessages(messages) {
+function countMessages(messages) {
   let result = 0;
 
   for (let i = 0; i < messages.length; ++i) {
@@ -107,7 +107,7 @@ function CountMessages(messages) {
   return result;
 }
 
-function GetPrevious7DayMessages(messages, today) {
+function getPrevious7DayMessages(messages, today) {
   let result = [];
 
   let providedMessagesToday = messages.map(element => element.MessagesToday) // Extract just the number of messages per day that we are given by the server.

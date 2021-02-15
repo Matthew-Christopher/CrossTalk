@@ -1,11 +1,17 @@
 $(window).on("load", () => {
 
+  const chatboxReminder = 'Select or join a group first.';
+
+  $('#chatbox-reminder').text(chatboxReminder); // Set chatbox reminder text for group view.
+
   let JSONData = {};
 
   FetchGroups(); // Initially loaded on groups view, so get the groups.
 
   $('#chat-type-toggle').change(function(event) {
     if (!event.target.checked) { // Groups view.
+      $('#chatbox-reminder').text(chatboxReminder); // Update the chatbox reminder to show text relevant to groups.
+
       FetchGroups(); // Fetch groups when changing from friends back to groups view.
     }
   });
@@ -105,22 +111,26 @@ $(window).on("load", () => {
   });
 
   $(document).on('click', '.server-button', (event) => {
-    // If the event target is the text in the button, we actually want the parent button.
-    // Match by just the GroupID property.
-    targetIndex = JSONData.findIndex(x => x.GroupID == $(event.target).closest('button').attr('id'));
+    if ($(event.target).closest('.server-button').attr('id') != activeServerID) { // Only do something if we are not clicking the currently active button.
+      // If the event target is the text in the button, we actually want the parent button.
+      // Match by just the GroupID property.
+      targetIndex = JSONData.findIndex(x => x.GroupID == $(event.target).closest('button').attr('id'));
 
-    $('#' + JSONData[targetIndex].GroupID).addClass('active-button');
+      $('#' + JSONData[targetIndex].GroupID).addClass('active-button');
 
-    JSONData.forEach((item, i) => {
-      if (i != targetIndex) {
-        $('#' + item.GroupID).removeClass('active-button');
-      }
-    });
+      groupIsPrivate = false;
 
-    SetActiveServerID(JSONData[targetIndex].GroupID);
+      JSONData.forEach((item, i) => {
+        if (i != targetIndex) {
+          $('#' + item.GroupID).removeClass('active-button');
+        }
+      });
 
-    $('#server-name-display').text(JSONData[targetIndex].GroupName);
-    $('#group-options-label').text(JSONData[targetIndex].GroupName);
+      setActiveServerID(JSONData[targetIndex].GroupID);
+
+      $('#server-name-display').text(JSONData[targetIndex].GroupName);
+      $('#group-options-label').text(JSONData[targetIndex].GroupName);
+    }
   });
 
   function FetchGroups(callback) {

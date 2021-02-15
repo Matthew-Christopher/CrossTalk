@@ -3,18 +3,18 @@ $(window).on("load", () => {
     // Handle click events. We should hide the nav container if it's visible and we click outside of it.
 
     if ($('#profile-options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#profile-options-nav-container') && !$(event.target).is('#profile-options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *') || $(event.target).is('#options-button') || $(event.target).is('#options-button *'))) {
-      ToggleVisiblity('#profile-options-nav-container');
+      toggleVisiblity('#profile-options-nav-container');
 
     } else if ($('#options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#options-nav-container') && !$(event.target).is('#options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *') || $(event.target).is('#options-button') || $(event.target).is('#options-button *'))) {
-      ToggleVisiblity('#options-nav-container');
+      toggleVisiblity('#options-nav-container');
 
       HideInviteCode();
     } else if ($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *')) {
-      ToggleVisiblity('#profile-options-nav-container');
+      toggleVisiblity('#profile-options-nav-container');
     } else if ($(event.target).is('#options-button') || $(event.target).is('#options-button *')) {
-      if ($('#options-nav-container').css('visibility') == 'hidden') GetInviteCode();
+      if ($('#options-nav-container').css('visibility') == 'hidden') getInviteCode();
 
-      ToggleVisiblity('#options-nav-container');
+      toggleVisiblity('#options-nav-container');
     } else if ($(event.target).is('#show-invite-code')) {
       if ($('#invite-code-display').css('display') == 'none') {
         $('#invite-code-display').css('display', 'flex');
@@ -30,7 +30,7 @@ $(window).on("load", () => {
         }
       }
     } else if ($(event.target).is('#invite-code-copy')) {
-      CopyInviteCode();
+      copyInviteCode();
 
       $('#invite-code-display').css('background', '#d7fadc');
       $('#invite-code-copy').css('background', '#8ffd9f');
@@ -46,7 +46,7 @@ $(window).on("load", () => {
   });
 });
 
-function ToggleVisiblity (name) {
+function toggleVisiblity (name) {
   // If I'm visible, hide me.
   // If I need to be shown, show me, and if the other nav item is visible then hide it too.
 
@@ -54,7 +54,7 @@ function ToggleVisiblity (name) {
     $(name).css('visibility', 'hidden');
 
     if (name == "#options-nav-container") {
-      HideInviteCode();
+      hideInviteCode();
       $('#search').val('').trigger('input');
     }
   } else {
@@ -69,7 +69,7 @@ function ToggleVisiblity (name) {
 }
 
 // SOURCE:https://codepen.io/shaikmaqsood/pen/XmydxJ [Accessed 04/01/2021]
-function CopyInviteCode() {
+function copyInviteCode() {
   // Create a temporary element so we can copy the code, then delete it again.
 
   let $temp = $('<input>')
@@ -80,7 +80,7 @@ function CopyInviteCode() {
 }
 // END SOURCE
 
-function GetInviteCode() {
+function getInviteCode() {
   $.ajax({
     type: "POST",
     url: "/api/GetInviteCode",
@@ -96,7 +96,7 @@ function GetInviteCode() {
   });
 }
 
-function HideInviteCode() {
+function hideInviteCode() {
   $('#invite-code-display').css('background', '');
   $('#invite-code-copy').css('background', '');
   $('#invite-code-copy').text('Copy');

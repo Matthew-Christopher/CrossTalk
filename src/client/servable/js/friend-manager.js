@@ -1,5 +1,7 @@
 $(window).on("load", () => {
 
+  const chatBoxReminder = 'Select or add a friend first.';
+
   $('#friend-requests-toggle').click(function(event) {
     $(event.target).closest('#friend-requests-toggle').toggleClass('active-button');
     $(event.target).closest('#friend-requests-toggle').find('img').toggleClass('expanded');
@@ -7,8 +9,16 @@ $(window).on("load", () => {
   });
 
   $('#chat-type-toggle').change(function(event) {
+    $('#group-prompt').text('No friends yet.'); // Update the selector prompt to be friend-specific.
+    $('#chatbox-reminder').text(chatBoxReminder); // Update the chatbox reminder to show text relevant to friends.
+
+    $('#chatbox-reminder').css('display', 'block');
+
+    $('#invite-prompt').hide(); // Users cannot invite to a private message and so we should hide this prompt.
+
     if (event.target.checked) { // Friends view.
       $('#friend-requests').empty(); // Clear out any old data.
+      $('#pinned-message-container').hide(); // Don't show old pinned messages.
 
       // Call the server's API to get our friends and requests.
       $.ajax({
@@ -26,7 +36,6 @@ $(window).on("load", () => {
           if (friends.active.length > 0) {
             $('#group-prompt-container').css('display', 'none');
           } else {
-            $('#group-prompt').text('No friends yet.');
             $('#group-prompt-container').css('display', 'block');
           }
 
@@ -54,6 +63,9 @@ $(window).on("load", () => {
                 .append($("<i></i>").text(item.LatestMessageString ? item.LatestMessageString : "No messages yet.")));
 
             $('#server-selector').append(newGroup);
+
+            socket.emit('join private', item.FriendshipID);
+            console.log(item.FriendshipID);
           });
         },
         failure: () => {
@@ -68,10 +80,31 @@ $(window).on("load", () => {
       $(document).on('click', '.reject-button', function(event) {
         AlterFriendState($(event.target).closest('.friend-request-display').attr('id'), false);
       });
+
+      $(document).on('click', '.friend-button', (event) => {
+        if ($(event.target).closest('.friend-button').attr('id') != activeServerID) { // Only do something if we are not clicking the currently active button.
+          // If the event target is the text in the button, we actually want the parent button.
+          // Match by just the GroupID property.
+          let friendshipID = $(event.target).closest('.friend-button').attr('id');
+
+          groupIsPrivate = true;
+
+          setActiveFriendID(friendshipID);
+
+          $('#server-name-display').text('Private Message: ' + $('#' + friendshipID).find('h1').text()); // Set the title.
+          $('#group-options-label').text($('#' + friendshipID).find('h1').text()); // Set group options title.
+
+          $('#server-selector .friend-button').each(function() {
+            $(this).removeClass('active-button');
+          });
+
+          $('#' + friendshipID).addClass('active-button');
+        }
+      });
     }
   });
 
-  function AlterFriendState(friendshipID, isAccepting) {
+  function alterFriendState(friendshipID, isAccepting) {
     socket.emit('friend update request', {
       FriendshipID: friendshipID,
       IsAccepting: isAccepting
@@ -79,7 +112,7 @@ $(window).on("load", () => {
   }
 });
 
-function OneOfMyFriendsUpdated(data) {
+function oneOfMyFriendsUpdated(data) {
   if (data.Status == 1) {
     $('#' + data.FriendshipID).remove();
   } else if (data.Status == 2) {

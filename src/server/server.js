@@ -333,6 +333,7 @@ app.post('/api/GetMyUserID', (req, res, next) => {
 
 app.post('/api/GetMessages', (req, res, next) => {
   if (req.session.LoggedIn && req.body.GroupID) {
+
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
 
@@ -345,7 +346,19 @@ app.post('/api/GetMessages', (req, res, next) => {
           });
         },
         messages: function GetMessageData(callback) {
-          let getMessageDataQuery = 'SELECT Message.MessageID, User.DisplayName AS AuthorDisplayName, Message.MessageString, Message.Timestamp, Message.AuthorID = ? AS Owned FROM Message JOIN GroupMembership on Message.GroupID = GroupMembership.GroupID JOIN User ON User.UserID = Message.AuthorID WHERE GroupMembership.UserID = ? and GroupMembership.GroupID = ? ORDER BY Message.Timestamp;';
+          let getMessageDataQuery = `
+          SELECT Message.MessageID,
+            User.DisplayName AS AuthorDisplayName,
+            Message.MessageString,
+            Message.Timestamp,
+            Message.AuthorID = ? AS Owned
+          FROM Message
+          JOIN GroupMembership
+            ON Message.GroupID = GroupMembership.GroupID
+          JOIN User
+            ON User.UserID = Message.AuthorID
+          WHERE GroupMembership.UserID = ? AND GroupMembership.GroupID = ?
+          ORDER BY Message.Timestamp;`;
 
           db.query(connection, getMessageDataQuery, [req.session.UserID, req.session.UserID, req.body.GroupID], (result, fields) => {
             callback(null, result);
@@ -358,6 +371,38 @@ app.post('/api/GetMessages', (req, res, next) => {
           role: results.adminStatus, // Result of the first function.
           messageData: results.messages // Result of the second function.
         }));
+
+        connection.release();
+      });
+    });
+  } else {
+    next();
+  }
+});
+
+app.post('/api/GetFriendMessages', (req, res, next) => {
+  if (req.session.LoggedIn && req.body.FriendshipID) {
+    pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
+      let getMessageDataQuery = `
+      SELECT Message.MessageID,
+        User.DisplayName AS AuthorDisplayName,
+        Message.MessageString,
+        Message.Timestamp,
+        Message.AuthorID = ? AS Owned
+      FROM Message
+      JOIN Friendship
+        ON Message.FriendshipID = Friendship.FriendshipID
+      INNER JOIN UserFriend
+        ON Friendship.FriendshipID = UserFriend.FriendshipID
+      JOIN User
+        ON User.UserID = Message.AuthorID
+      WHERE UserFriend.UserInFriendship = ? AND Friendship.FriendshipID = ?
+      ORDER BY Message.Timestamp;`;
+
+      db.query(connection, getMessageDataQuery, [req.session.UserID, req.session.UserID, req.body.FriendshipID], (result, fields) => {
+        res.json(JSON.stringify(result));
 
         connection.release();
       });

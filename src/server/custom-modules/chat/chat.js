@@ -35,6 +35,21 @@ module.exports.initialise = (instance) => {
       });
     });
 
+    socket.on('join private', (id) => {
+      // Check the user is actually permitted to join first.
+      pool.getConnection(async (err, connection) => {
+        if (err) throw err; // Connection failed.
+
+        db.query(connection, 'SELECT COUNT(*) AS Matches FROM UserFriend WHERE UserInFriendship = ? AND FriendshipID = ?;', [socket.request.session.UserID, id], (result, fields) => {
+          if (result[0].Matches == 1) {
+            socket.join('FG' + id.toString());
+          }
+
+          connection.release();
+        });
+      });
+    });
+
     socket.on('chat', (message) => {
       if (0 < message.MessageString.trim().length && message.MessageString.trim().length <= 2000) {
         pool.getConnection(async (err, connection) => {
@@ -49,9 +64,10 @@ module.exports.initialise = (instance) => {
               });
             },
             insertMessage: function(callback) {
-              let insertMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
+              let insertGroupMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
+              let insertPrivateMessageQuery = 'INSERT INTO Message (FriendshipID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
 
-              db.query(connection, insertMessageQuery, [message.GroupID, socket.request.session.UserID, message.MessageString, message.Timestamp], (result, fields) => {
+              db.query(connection, message.GroupID ? insertGroupMessageQuery : insertPrivateMessageQuery, [message.GroupID ? message.GroupID : message.FriendshipID, socket.request.session.UserID, message.MessageString, message.Timestamp], (result, fields) => {
                 callback(null, result);
               });
             }
@@ -62,7 +78,7 @@ module.exports.initialise = (instance) => {
             message.AuthorDisplayName = results.getDisplayName;
             message.MessageID = results.insertMessage.insertId;
 
-            io.sockets.in(message.GroupID.toString()).emit('message return', message);
+            io.sockets.in(message.GroupID ? message.GroupID.toString() : 'FG' + message.FriendshipID.toString()).emit('message return', message);
 
             connection.release();
           });

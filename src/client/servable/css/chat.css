@@ -625,6 +625,7 @@ input, button {
   transform: translate(-50%, calc(-50% - 25px)); /* Manually adjust to fit in the center of the visible window, some of which is blocked by the message input field. */
   font-size: 2.3em;
   font-weight: lighter;
+  text-align: center;
 }
 
 #chat-container #invite-prompt {
