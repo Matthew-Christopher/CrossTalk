@@ -74,11 +74,11 @@ $(window).on("load", () => {
       });
 
       $(document).on('click', '.accept-button', function(event) {
-        AlterFriendState($(event.target).closest('.friend-request-display').attr('id'), true);
+        alterFriendState($(event.target).closest('.friend-request-display').attr('id'), true);
       });
 
       $(document).on('click', '.reject-button', function(event) {
-        AlterFriendState($(event.target).closest('.friend-request-display').attr('id'), false);
+        alterFriendState($(event.target).closest('.friend-request-display').attr('id'), false);
       });
 
       $(document).on('click', '.friend-button', (event) => {
