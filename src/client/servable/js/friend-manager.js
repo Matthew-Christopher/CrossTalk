@@ -1,7 +1,9 @@
 $(window).on("load", () => {
 
+  // What text should we show in the chatbox?
   const chatBoxReminder = 'Select or add a friend first.';
 
+  // Toggle expansion of the box that has our pending requests in it.
   $('#friend-requests-toggle').click(function(event) {
     $(event.target).closest('#friend-requests-toggle').toggleClass('active-button');
     $(event.target).closest('#friend-requests-toggle').find('img').toggleClass('expanded');
@@ -23,6 +25,7 @@ $(window).on("load", () => {
 
       setFriends();
 
+      // Send the server some information because we have acted on a friend request.
       $(document).on('click', '.accept-button', function(event) {
         alterFriendState($(event.target).closest('.friend-request-display').attr('id'), true);
       });
@@ -31,6 +34,7 @@ $(window).on("load", () => {
         alterFriendState($(event.target).closest('.friend-request-display').attr('id'), false);
       });
 
+      // We have clicked on a private message. Change button styling and load up the messages.
       $(document).on('click', '.friend-button', (event) => {
         if ($(event.target).closest('.friend-button').attr('id') != activeServerID || !$(event.target).closest('.friend-button').hasClass('active-button')) { // Only do something if we are not clicking the currently active button.
           // If the event target is the text in the button, we actually want the parent button.
@@ -62,6 +66,7 @@ $(window).on("load", () => {
   }
 });
 
+// Get and display our friends in the right areas.
 function setFriends() {
   if ($('#chat-type-toggle')[0].checked) { // Don't do anything unless we have toggled to friends.
     // Call the server's API to get our friends and requests.
@@ -92,6 +97,7 @@ function setFriends() {
           $('#group-prompt-container').css('display', 'block');
         }
 
+        // We can click a button to do something to these requests, so add those buttons into each element that we need to.
         friends.notSentPending.forEach((request) => {
           $('#friend-requests').append($('<div class="friend-request-display">').attr('id', request.FriendshipID)
                                .append($('<p>').text(request.DisplayName))
@@ -127,6 +133,7 @@ function setFriends() {
   }
 }
 
+// The server has told us that another client did something to a request we sent them. We should update its appearance on our end, too.
 function oneOfMyFriendsUpdated(data) {
   if (data.Status == 1) {
     $('#' + data.FriendshipID).remove();

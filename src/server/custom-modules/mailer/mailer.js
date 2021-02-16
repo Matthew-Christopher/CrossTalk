@@ -4,6 +4,7 @@ const nodemailer = require('nodemailer');
 
 require('dotenv').config();
 
+// Set up the email service. This is hidden data.
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {

@@ -6,12 +6,14 @@ const path = require('path');
 const log4js = require('log4js');
 const logger = log4js.getLogger();
 
+// Files don't like slashes in their names, so let's alter their name from the timestamp we use for the console.
 const logFile = GetLogTimeStamp().replace(/\//g, '-').replace(/\:/g, '.') + '.log';
 fs.writeFile(path.join(__dirname, '../../../../logs', logFile), '', (err) => {
   if (err) throw err
   logger.info(`Log file created: ${logFile}`);
 });
 
+// Use this format for our logs. We will save to a file and also send them to the master console.
 log4js.configure({
   appenders: {
     out: {
@@ -41,6 +43,7 @@ log4js.configure({
 
 module.exports = logger;
 
+// Get the timestamp in the format that we want.
 function GetLogTimeStamp() {
   let date = new Date();
 

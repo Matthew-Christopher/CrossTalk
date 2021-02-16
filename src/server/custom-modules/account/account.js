@@ -22,12 +22,14 @@ module.exports.Register = async (request, response) => {
   let hash = await cryptography.Hash(request.body.password);
   const emailCheckRegex = /^[a-z0-9!#$%&\'*+\/=?^_`{|}~.-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i; // (Regex DB, n.d.)
 
+  // Check that the display name isn't just white-space, the email is valid, the password isn't just white space, the email and email confirmation match and that the password and password confirmation match.
   if (!request.body['display-name'].trim() || emailCheckRegex.exec(request.body.email) === null || !request.body.password.trim() || (request.body.email != request.body['confirm-email']) || !await cryptography.CompareHashes(hash, request.body['confirm-password'])) {
     response.send("fail");
   } else {
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
 
+      // Check if any of the user's desired input is not allowed because it already appears somewhere in the database.
       let getQuery = `
       SELECT *
       FROM   (SELECT Count(*) AS DisplayNameDuplicates
@@ -39,6 +41,7 @@ module.exports.Register = async (request, response) => {
               ON True;`;
 
       db.query(connection, getQuery, [request.body['display-name'], request.body.email], (result, fields) => {
+        // Send the appropriate response to the client.
         if (result[0].DisplayNameDuplicates > 0) {
           response.send('display');
         } else if (result[0].EmailDuplicates > 0) {
@@ -46,6 +49,8 @@ module.exports.Register = async (request, response) => {
         } else if (request.body.password.length < 8) {
           response.send('password');
         } else {
+          // The registration can proceed because the data are all valid.
+
           GetUserID(connection, (verificationKey) => {
             let sql = 'INSERT INTO User (DisplayName, EmailAddress, PasswordHash, Verified, VerificationKey) VALUES (?, ?, ?, False, ?);';
             let inserts = [request.body['display-name'], request.body.email, hash, verificationKey];
@@ -66,11 +71,13 @@ module.exports.Register = async (request, response) => {
 
 module.exports.Recover = (request, response) => {
   if (!request.body.email) {
+    // The user didn't give us an email address to send the verification link to.
     response.status(105).send("Data entered was not valid.");
   } else {
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
 
+      // Set the recovery key to check again later after we have got a unique one. We will make sure it expires in 24 hours from now (the user can generate another link, if they need to).
       GetRecoveryKey(connection, (recoveryKey) => {
         let sql = "UPDATE User SET RecoveryKey = ?, RecoveryKeyExpires = ? WHERE EmailAddress = ?;";
 
@@ -97,12 +104,13 @@ module.exports.ChangePassword = async (request, response) => {
 
   if (!await cryptography.CompareHashes(newHash, request.body.formData.confirmNewPassword)) {
     response.json(JSON.stringify({
-      outcome: 'mismatch'
+      outcome: 'mismatch' // The password and confirmation field did not match.
     }));
   } else {
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
 
+      // Check if the user is logged in or has given a valid recovery key.
       let checkValidQuery = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE (RecoveryKey = ? AND RecoveryKeyExpires > ?) OR UserID = ?;";
 
       db.query(connection, checkValidQuery, [request.body.recoveryKey, new Date().getTime(), request.session.UserID], (result, fields) => {
@@ -110,6 +118,7 @@ module.exports.ChangePassword = async (request, response) => {
           response.status(422).sendFile(path.join(__dirname + '/../client/hidden/invalid-recovery-key.html'));
         } else {
           async.parallel({
+            // Get the display name and email to send the user a nicely-formatted email to notify them that their password was changed.
             nameAndEmail: function(callback) {
               let getDisplayNameAndEmailQuery = 'SELECT DisplayName, EmailAddress FROM User WHERE RecoveryKey = ? OR UserID = ?';
 
@@ -117,6 +126,7 @@ module.exports.ChangePassword = async (request, response) => {
                 callback(null, result);
               });
             },
+            // Change the password hash so the user can log in with their new one.
             updatePassword: function(callback) {
               let updatePasswordQuery = 'UPDATE User SET PasswordHash = ?, RecoveryKey = NULL, RecoveryKeyExpires = NULL WHERE RecoveryKey = ? OR UserID = ?;';
 
@@ -127,8 +137,10 @@ module.exports.ChangePassword = async (request, response) => {
           }, (error, results) => {
             if (error) throw error;
 
+            // Send the change notification email.
             mailer.SendChangeNotification(results.nameAndEmail[0].DisplayName, results.nameAndEmail[0].EmailAddress);
 
+            // Let the client know that the password has been changed successfully.
             response.json(JSON.stringify({
               outcome: 'change'
             }));
@@ -146,12 +158,14 @@ module.exports.LogIn = async (request, response) => {
   pool.getConnection(async (err, connection) => {
     if (err) throw err; // Connection failed.
 
+    // Get the user from the database so we can authenticate them.
     var sql = "SELECT * FROM User WHERE EmailAddress = ?";
 
     db.query(connection, sql, request.body.email, async (res, fields) => {
       if (res.length > 0 && await cryptography.CompareHashes(res[0].PasswordHash, request.body.password) && res[0].Verified) {
         // Authenticated.
 
+        // Set the necessary session information so we can get it again elsewhere.
         request.session.LoggedIn = true;
         request.session.UserID = res[0].UserID;
         request.session.DisplayName = res[0].DisplayName;
@@ -175,12 +189,15 @@ module.exports.LogIn = async (request, response) => {
 };
 
 module.exports.LogOut = async (request, response) => {
+  // Delete all of the session data from the store and then send the client back to the main page.
   request.session.destroy((err) => {
     response.redirect('/');
   });
 };
 
 function GetRecoveryKey(connection, callback) {
+  // Generate a recovery key of 16 bytes and regenerate it if it already exists (this is very unlikely).
+
   let duplicates = 0;
 
   do {
@@ -199,6 +216,7 @@ function GetRecoveryKey(connection, callback) {
 }
 
 function GetUserID(connection, callback) {
+  // Generate a user verification key of 16 bytes and regenerate it if it already exists (this is very unlikely).
 
   let duplicates = 0;
   let candidateID = require('crypto').randomBytes(16).toString('hex');

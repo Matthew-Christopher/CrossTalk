@@ -1,4 +1,5 @@
 $(window).on("load", () => {
+  // Handle data submission and display an appropriate message once the server gets back to us.
   $('#password-reset-form').submit((e) => {
     e.preventDefault();
 

@@ -70,7 +70,7 @@ app.use(bodyParser.json());
 
 app.get('(/login(.html)?)?', (req, res) => {
   if (req.session.LoggedIn) {
-    res.redirect('/chat');
+    res.redirect('/chat'); // Only allow users that are not logged in.
   } else {
     res.sendFile(path.join(__dirname + '/../client/servable/login.html'));
   }
@@ -78,7 +78,7 @@ app.get('(/login(.html)?)?', (req, res) => {
 
 app.get('/recover(.html)?', (req, res) => {
   if (req.session.LoggedIn) {
-    res.redirect('/chat');
+    res.redirect('/chat');  // Only allow users that are not logged in.
   } else {
     res.sendFile(path.join(__dirname + '/../client/servable/recover.html'));
   }
@@ -86,20 +86,20 @@ app.get('/recover(.html)?', (req, res) => {
 
 app.get('/register(.html)?', (req, res) => {
   if (req.session.LoggedIn) {
-    res.redirect('/chat');
+    res.redirect('/chat'); // Only allow users that are not logged in.
   } else {
     res.sendFile(path.join(__dirname + '/../client/servable/register.html'));
   }
 });
 
 app.get('/verify', (req, res) => {
-  if (req.session.LoggedIn || !req.query.verificationKey) {
+  if (req.session.LoggedIn || !req.query.verificationKey) { // Only allow users that are not logged in and have provided some key for us to check.
     res.redirect('/chat');
   } else {
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
 
-      let sql = 'UPDATE USER SET Verified = 1, VerificationKey = NULL WHERE VerificationKey = ?';
+      let sql = 'UPDATE USER SET Verified = 1, VerificationKey = NULL WHERE VerificationKey = ?'; // Set the user as verified.
 
       db.query(connection, sql, req.query.verificationKey, (result, fields) => {
 
@@ -145,18 +145,18 @@ app.post('/JoinGroup', (req, res) => {
       db.query(connection, checkValid, [req.body.code, req.session.UserID, req.body.code], (firstResult, fields) => {
 
         if (firstResult[0] && firstResult[0].JoinID && !firstResult[0].MembershipJoinID) {
-          let joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`;
+          let joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`; // Add the user to the group.
 
           db.query(connection, joinGroup, [req.session.UserID, firstResult[0].JoinID], (secondResult, fields) => {
             res.json(JSON.stringify({
               status: 'success',
-              groupID: firstResult[0].JoinID
+              groupID: firstResult[0].JoinID // Return the group ID so the client can add it.
             }));
           });
         } else if (firstResult[0] && firstResult[0].MembershipJoinID) {
           res.json(JSON.stringify({
             status: 'existing',
-            groupID: firstResult[0].JoinID
+            groupID: firstResult[0].JoinID // Return the group ID so the client can jump to it.
           }));
         } else {
           res.json(JSON.stringify({status: 'invalid'}));
@@ -180,9 +180,9 @@ app.get('/account/change-password(.html)?', (req, res) => {
   pool.getConnection(async (err, connection) => {
     if (err) throw err; // Connection failed.
 
-    let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE RecoveryKey = ? AND RecoveryKeyExpires > ?;";
+    let sql = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE RecoveryKey = ? AND RecoveryKeyExpires > ?;"; // Is the recovery key correct and not-expired?
 
-    if (!(req.query.recoveryKey || req.session.LoggedIn)) {
+    if (!(req.query.recoveryKey || req.session.LoggedIn)) { // Only allow users that are not logged in and have provided us with a verification key to check.
       res.status(422).sendFile(path.join(__dirname + '/../client/hidden/invalid-recovery-key.html'));
     } else {
       db.query(connection, sql, [req.query.recoveryKey, new Date().getTime()], (result, fields) => {
@@ -210,35 +210,28 @@ app.post('/CreateGroup', (req, res) => {
     if (err) throw err; // Connection failed.
 
     async.waterfall([
-      function GetID(callback) {
+      function GetID(callback) { // Get a unique invite code.
         GetNewGroupID(connection, (inviteCode) => {
           callback(null, inviteCode);
         });
       },
-      function InsertID(inviteCode, callback) {
+      function InsertID(inviteCode, callback) { // Create the group.
         let idInsertionQuery = 'INSERT INTO \`Group\` (GroupName, InviteCode) VALUES (?, ?);';
 
         db.query(connection, idInsertionQuery, [req.body.group, inviteCode], (result, fields) => {
           callback(null, inviteCode, result);
         });
       },
-      function GetGroupID(inviteCode, firstResult, callback) {
-        let selectionQuery = 'SELECT GroupID FROM \`Group\` WHERE InviteCode = ?;';
-
-        db.query(connection, selectionQuery, inviteCode, (result, fields) => {
-          callback(null, inviteCode, firstResult, result);
-        });
-      },
-      function AddMembership(inviteCode, firstResult, secondResult, callback) {
+      function AddMembership(inviteCode, firstResult, callback) { // Add the user to the group using the primary key from the record we just inserted.
         let membershipInsertionQuery = 'INSERT INTO GroupMembership VALUES (?, ?, 2);';
 
-        db.query(connection, membershipInsertionQuery, [req.session.UserID, secondResult[0].GroupID], (result, fields) => {
-          callback(null, inviteCode, firstResult, secondResult, result);
+        db.query(connection, membershipInsertionQuery, [req.session.UserID, firstResult.insertId], (result, fields) => {
+          callback(null, inviteCode, firstResult, result);
         });
       }
-    ], (error, inviteCode, firstResult, secondResult, thirdResult) => {
+    ], (error, inviteCode, firstResult, secondResult) => {
       res.status(200).json(JSON.stringify([{
-        'GroupID': secondResult[0].GroupID
+        'GroupID': firstResult.insertId
       }]));
 
       connection.release();
@@ -293,7 +286,7 @@ app.post('/api/GetMyGroups', (req, res, next) => {
       });
     });
   } else {
-    next();
+    next(); // Continue along routes, will serve a 404.
   }
 });
 
@@ -312,17 +305,17 @@ app.post('/api/GetMyDisplayName', (req, res, next) => {
       });
     });
   } else {
-    next();
+    next(); // Continue along routes, will serve a 404.
   }
 });
 
 app.post('/api/GetMyUserID', (req, res, next) => {
   if (req.session.LoggedIn) {
     res.json(JSON.stringify([{
-      'UserID': req.session.UserID
+      'UserID': req.session.UserID // Return the user's ID.
     }]));
   } else {
-    next();
+    next(); // Continue along routes, will serve a 404.
   }
 });
 
@@ -371,7 +364,7 @@ app.post('/api/GetMessages', (req, res, next) => {
       });
     });
   } else {
-    next();
+    next(); // Continue along routes, will serve a 404.
   }
 });
 
@@ -403,7 +396,7 @@ app.post('/api/GetFriendMessages', (req, res, next) => {
       });
     });
   } else {
-    next();
+    next(); // Continue along routes, will serve a 404.
   }
 });
 
@@ -432,7 +425,7 @@ app.post('/api/GetPinnedMessage', (req, res, next) => {
       });
     });
   } else {
-    next();
+    next(); // Continue along routes, will serve a 404.
   }
 })
 
@@ -450,7 +443,7 @@ app.post('/api/GetInviteCode', (req, res, next) => {
       });
     });
   } else {
-    next();
+    next(); // Continue along routes, will serve a 404.
   }
 });
 
@@ -511,12 +504,12 @@ app.get('/group-info', (req, res, next) => {
         if (result[0].Matches == 1 && result[0].Role > 0) {
           res.status(200).sendFile(path.join(__dirname + '/../client/hidden/group-info.html'));
         } else {
-          next();
+          next(); // Continue along routes, will serve a 404.
         }
       });
     });
   } else {
-    next();
+    next(); // Continue along routes, will serve a 404.
   }
 });
 
@@ -561,7 +554,7 @@ app.post('/api/GetGroupData', (req, res) => {
                   chat.getClients(results.members.map(element => element.UserID), req.body.GroupID, req.session.UserID)[index] // Reuse the same index because we preserved the order of elements.
               })), // Result of the second function.
               messages: results.messages, // Result of the third function.
-              currentServerDate: new Date().setHours(0, 0, 0, 0)
+              currentServerDate: new Date().setHours(0, 0, 0, 0) // Ignore the time to compare by day.
             }));
 
             connection.release();
@@ -620,12 +613,12 @@ app.post('/api/GetMyFriends', (req, res, next) => {
       });
     });
   } else {
-    next();
+    next(); // Continue along routes, will serve a 404.
   }
 });
 
 app.use(express.static('../client/servable', {
-  extensions: ['html', 'htm']
+  extensions: ['html', 'htm'] // We can leave off the .html from a URL and the correct file will still be served.
 }));
 
 app.use((req, res) => {
@@ -634,7 +627,7 @@ app.use((req, res) => {
 
 const httpServer = http.createServer(app).listen(defaultPort, () => {
   log.info('Node.js HTTP web server started on port ' + httpServer.address().port);
-  chat.initialise(io);
+  chat.initialise(io); // Start the socket chat service.
 });
 
 let io = require('socket.io')(httpServer);

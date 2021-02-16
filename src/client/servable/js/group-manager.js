@@ -1,5 +1,6 @@
 $(window).on("load", () => {
 
+  // What text should we show in the chatbox?
   const chatboxReminder = 'Select or join a group first.';
 
   $('#chatbox-reminder').text(chatboxReminder); // Set chatbox reminder text for group view.
@@ -21,6 +22,8 @@ $(window).on("load", () => {
   // Now the server selector is populated, we can manage the server states.
 
   $('#group-join-form').submit((e) => {
+    // Let's not refresh. We will request that the server adds us to the group and then open it up.
+
     e.preventDefault();
 
     $.ajax({
@@ -36,7 +39,7 @@ $(window).on("load", () => {
             // Select the new group and scroll to it.
             $('#' + newGroupID).trigger('click');
 
-            ScrollTo(newGroupID);
+            scrollTo(newGroupID);
           });
 
           $('#group-join-code').val('');
@@ -48,7 +51,7 @@ $(window).on("load", () => {
           // Select the new group and scroll to it.
           $('#' + newGroupID).trigger('click');
 
-          ScrollTo(newGroupID);
+          scrollTo(newGroupID);
 
           $('#group-join-code').val('');
           $('#group-join').removeClass('active-button');
@@ -67,12 +70,14 @@ $(window).on("load", () => {
         }
       },
       failure: () => {
-        alert("Could not recognise the invite code. Check it and try again.");
+        alert("Could not process the invite code. Try again later.");
       }
     });
   });
 
   $('#group-create-form').submit((e) => {
+    // We will ask the server to make the group for us and then we will make a new button for it in the selector and open it.
+
     e.preventDefault();
 
     $('#group-create-button').css('background', '#8ffd9f');
@@ -92,7 +97,7 @@ $(window).on("load", () => {
           // Select the new group and scroll to it.
           $('#' + newGroupID).trigger('click');
 
-          ScrollTo(newGroupID);
+          scrollTo(newGroupID);
         });
 
         $('#group-create').removeClass('active-button');
@@ -112,6 +117,7 @@ $(window).on("load", () => {
     });
   });
 
+  // We have opened a new group. Let's change the styling of the buttons and load up the group data and messages.
   $(document).on('click', '.server-button', (event) => {
     if ($(event.target).closest('.server-button').attr('id') != activeServerID) { // Only do something if we are not clicking the currently active button.
       // If the event target is the text in the button, we actually want the parent button.
@@ -135,6 +141,7 @@ $(window).on("load", () => {
     }
   });
 
+  // What groups are we in? Get them and put them in the server selector so we can pick one.
   function FetchGroups(callback) {
 
     // Remove the groups we already have, they might have changed.
@@ -176,14 +183,15 @@ $(window).on("load", () => {
       }
     });
   }
-});
 
-function ScrollTo(newGroupID) {
-  $('#server-selector').scrollTop(
-    $('#' + newGroupID)[0].offsetTop // The distance from the top of this element that the desired elemenent is.
-    - ($('#toggle-box').height() + 1) // Account for height of the top toggle and buttons.
-    - $('#server-buttons-container').height()
-    - ($('#group-join-form .slide-back').height() + 1) // The invite form will hide after executing and we need to account for its height.
-    - $('#server-selector').height() // Scroll so that the element is at the bottom of the window.
-    + $('#' + newGroupID).height()); // Account for the height of the element itself, so that its bottom edge is at the bottom of this element.
-}
+  // Go to a group in the server selector, if we can't see it at the moment.
+  function scrollTo(newGroupID) {
+    $('#server-selector').scrollTop(
+      $('#' + newGroupID)[0].offsetTop // The distance from the top of this element that the desired elemenent is.
+      - ($('#toggle-box').height() + 1) // Account for height of the top toggle and buttons.
+      - $('#server-buttons-container').height()
+      - ($('#group-join-form .slide-back').height() + 1) // The invite form will hide after executing and we need to account for its height.
+      - $('#server-selector').height() // Scroll so that the element is at the bottom of the window.
+      + $('#' + newGroupID).height()); // Account for the height of the element itself, so that its bottom edge is at the bottom of this element.
+  }
+});

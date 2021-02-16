@@ -2,6 +2,8 @@ $(window).on("load", () => {
   $(document).click((event) => {
     // Handle click events. We should hide the nav container if it's visible and we click outside of it.
 
+    // We hide and show various elements depending on the context and ensure that the styling is appropriate on the remaining ones.
+
     if ($('#profile-options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#profile-options-nav-container') && !$(event.target).is('#profile-options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *') || $(event.target).is('#options-button') || $(event.target).is('#options-button *'))) {
       toggleVisiblity('#profile-options-nav-container');
 
@@ -44,6 +46,36 @@ $(window).on("load", () => {
       }, 4000);
     }
   });
+
+  // SOURCE:https://codepen.io/shaikmaqsood/pen/XmydxJ [Accessed 04/01/2021]
+  function copyInviteCode() {
+    // Create a temporary element so we can copy the code, then delete it again.
+
+    let $temp = $('<input>')
+    $('body').append($temp);
+    $temp.val($('#invite-code-display p').text()).select();
+    document.execCommand("copy");
+    $temp.remove();
+  }
+  // END SOURCE
+
+  function getInviteCode() {
+    // Request our code from the server so that we can give it to other users to join.
+
+    $.ajax({
+      type: "POST",
+      url: "/api/GetInviteCode",
+      data:  {
+        GroupID: activeServerID
+      },
+      success: (data) => {
+        $('#invite-code').text($.parseJSON(data)[0].InviteCode);
+      },
+      failure: () => {
+        $('#invite-code').text("Error. Try again later.");
+      }
+    });
+  }
 });
 
 function toggleVisiblity (name) {
@@ -66,34 +98,6 @@ function toggleVisiblity (name) {
 
     $(name).css('visibility', 'visible');
   }
-}
-
-// SOURCE:https://codepen.io/shaikmaqsood/pen/XmydxJ [Accessed 04/01/2021]
-function copyInviteCode() {
-  // Create a temporary element so we can copy the code, then delete it again.
-
-  let $temp = $('<input>')
-  $('body').append($temp);
-  $temp.val($('#invite-code-display p').text()).select();
-  document.execCommand("copy");
-  $temp.remove();
-}
-// END SOURCE
-
-function getInviteCode() {
-  $.ajax({
-    type: "POST",
-    url: "/api/GetInviteCode",
-    data:  {
-      GroupID: activeServerID
-    },
-    success: (data) => {
-      $('#invite-code').text($.parseJSON(data)[0].InviteCode);
-    },
-    failure: () => {
-      $('#invite-code').text("Error. Try again later.");
-    }
-  });
 }
 
 function hideInviteCode() {

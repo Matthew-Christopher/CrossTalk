@@ -27,6 +27,7 @@ module.exports.initialise = (instance) => {
 
         db.query(connection, 'SELECT COUNT(*) AS Matches FROM GroupMembership WHERE UserID = ? AND GroupID = ?;', [socket.request.session.UserID, id], (result, fields) => {
           if (result[0].Matches == 1) {
+            // Put the user in a new room with all other online users. We will send data in this room if we need something to update in real-time, like messages or permissions.
             socket.join(id.toString());
           }
 
@@ -40,6 +41,7 @@ module.exports.initialise = (instance) => {
       pool.getConnection(async (err, connection) => {
         if (err) throw err; // Connection failed.
 
+        // Check the users are friends and add any of them that are online to a room.
         db.query(connection, 'SELECT COUNT(*) AS Matches FROM UserFriend WHERE UserInFriendship = ? AND FriendshipID = ?;', [socket.request.session.UserID, id], (result, fields) => {
           if (result[0].Matches == 1) {
             socket.join('FG' + id.toString());
@@ -51,11 +53,13 @@ module.exports.initialise = (instance) => {
     });
 
     socket.on('chat', (message) => {
+      // Check a message was sent (no white-space) and that it wasn't too long.
       if (0 < message.MessageString.trim().length && message.MessageString.trim().length <= 2000) {
         pool.getConnection(async (err, connection) => {
           if (err) throw err; // Connection failed.
 
           async.parallel({
+            // Get the display name of the author to display along with the message text and timestamp.
             getDisplayName: function(callback) {
               let getDisplayNameQuery = 'SELECT DisplayName FROM User WHERE UserID = ?;';
 
@@ -63,6 +67,7 @@ module.exports.initialise = (instance) => {
                 callback(null, result[0].DisplayName);
               });
             },
+            // Add the message to the database so offline users in the group or friendship can read it later.
             insertMessage: function(callback) {
               let insertGroupMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
               let insertPrivateMessageQuery = 'INSERT INTO Message (FriendshipID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
@@ -74,10 +79,12 @@ module.exports.initialise = (instance) => {
           }, (error, results) => {
             if (error) throw error;
 
+            // Set the rest of the message data that we couldn't get from the client.
             message.AuthorID = socket.request.session.UserID;
             message.AuthorDisplayName = results.getDisplayName;
             message.MessageID = results.insertMessage.insertId;
 
+            // Send the message in the appropriate room. We add 'FG' to the start of a private message to indicate that it is so.
             io.sockets.in(message.GroupID ? message.GroupID.toString() : 'FG' + message.FriendshipID.toString()).emit('message return', message);
 
             connection.release();
@@ -91,6 +98,7 @@ module.exports.initialise = (instance) => {
         if (err) throw err; // Connection failed.
 
         async.parallel({
+          // Ensure the requesting user is actually in the group and no nefarious request has been constructed.
           checkInGroup: function(callback) {
             let checkInGroupQuery = 'SELECT COUNT(*) AS Matches, Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
 
@@ -98,6 +106,7 @@ module.exports.initialise = (instance) => {
               callback(null, result[0].Matches, result[0].Role);
             });
           },
+          // Get the current role of the user to be edited. The requesting user can only edit roles below their current one.
           actingOnRole: function(callback) {
             let confirmAuthorityQuery = 'SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
 
@@ -131,6 +140,7 @@ module.exports.initialise = (instance) => {
         pool.getConnection(async (err, connection) => {
           if (err) throw err; // Connection failed.
 
+          // We will handle deletion in groups and private messages together. Let's check that the message should be able to be deleted based on the requesting user's permissions or friendships.
           let checkValidQuery = `
           SELECT COUNT(*) AS Matches, GroupID, FriendshipID
           FROM
@@ -155,7 +165,8 @@ module.exports.initialise = (instance) => {
           db.query(connection, checkValidQuery, [messageID, socket.request.session.UserID, socket.request.session.UserID, socket.request.session.UserID, messageID], (firstResult, fields) => {
             if (firstResult[0].Matches == 1) {
               async.parallel({
-                secondResult: function(callback) { // Wipe the message from the database.
+                secondResult: function(callback) {
+                  // Wipe the message from the database.
                   let deleteQuery = "DELETE FROM Message WHERE MessageID = ?;";
 
                   db.query(connection, deleteQuery, messageID, (result, fields) => {
@@ -163,6 +174,7 @@ module.exports.initialise = (instance) => {
                   });
                 },
                 thirdResult: function(callback) {
+                  // Get the latest message in the group at the moment.
                   let getRecentMessageQuery = 'SELECT Message.MessageString AS LatestMessageString FROM Message WHERE Message.GroupID = ? OR Message.FriendshipID = ? ORDER BY Timestamp DESC LIMIT 1;'; // Get the message that is now the most recent in the group.
 
                   db.query(connection, getRecentMessageQuery, [firstResult[0].GroupID, firstResult[0].FriendshipID], (result, fields) => {
@@ -203,12 +215,14 @@ module.exports.initialise = (instance) => {
         pool.getConnection(async (err, connection) => {
           if (err) throw err; // Connection failed.
 
+          // Does the requesting user have the authority to pin the message?
           let checkValidQuery = 'SELECT COUNT(*) AS Matches FROM Message JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
 
           db.query(connection, checkValidQuery, [messageID, socket.request.session.UserID], (result, fields) => {
             if (result[0].Matches == 1) {
               async.waterfall([
                 function(callback) {
+                  // Which group are we working in?
                   let getGroupQuery = "SELECT GroupID FROM Message WHERE MessageID = ?;";
 
                   db.query(connection, getGroupQuery, messageID, (result, fields) => {
@@ -216,6 +230,7 @@ module.exports.initialise = (instance) => {
                   });
                 },
                 function(groupIDToUpdate, callback) {
+                  // Update the group so offline user's can display the correct pinned message when they log in again.
                   let updateGroupQuery = 'UPDATE \`Group\` SET PinnedMessageID = ? WHERE GroupID = ?;';
 
                   db.query(connection, updateGroupQuery, [messageID, groupIDToUpdate], (result, fields) => {
@@ -238,15 +253,18 @@ module.exports.initialise = (instance) => {
         pool.getConnection(async (err, connection) => {
           if (err) throw err; // Connection failed.
 
+          // Is the requesting user allowed to pin the message?
           let checkValidQuery = 'SELECT COUNT(*) AS Matches, \`Group\`.GroupID, \`Group\`.PinnedMessageID AS MessageID FROM \`Group\` JOIN GroupMembership ON \`Group\`.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND \`Group\`.GroupID = ? AND GroupMembership.UserID = ?;';
+
           db.query(connection, checkValidQuery, [groupID, socket.request.session.UserID], (result, fields) => {
             if (result[0].Matches == 1) {
               let groupIDToUpdate = result[0].GroupID;
               let unpinnedMessageID = result[0].MessageID;
 
+              // Update the database and send out the unpin message in a socket room so clients can get rid of it in real-time.
               let updateQuery = 'UPDATE \`Group\` SET PinnedMessageID = NULL WHERE GroupID = ?;';
-              db.query(connection, updateQuery, groupIDToUpdate, (result, fields) => {
 
+              db.query(connection, updateQuery, groupIDToUpdate, (result, fields) => {
                 io.sockets.in(groupIDToUpdate.toString()).emit('unpinned', { group: groupIDToUpdate, message: unpinnedMessageID });
               });
             }
@@ -286,6 +304,7 @@ module.exports.initialise = (instance) => {
 
               async.waterfall([
                 function AddPendingFriendship(callback) {
+                  // Make a friendship, the status will be NULL for the moment, until the request is acted upon by the other party.
                   let addPendingFriendshipQuery = 'INSERT INTO Friendship (Status) VALUES (DEFAULT);';
 
                   db.query(connection, addPendingFriendshipQuery, [], (result, fields) => {
@@ -294,6 +313,7 @@ module.exports.initialise = (instance) => {
                 },
                 function AddUsersToFriendship(friendshipID, callback) {
                   async.parallel({
+                    // The user that requested to add.
                     insertRequestingUser: function(callback) {
                       let insertRequestingUserQuery = 'INSERT INTO UserFriend VALUES (?, ?, True)';
 
@@ -301,6 +321,7 @@ module.exports.initialise = (instance) => {
                         callback(null);
                       });
                     },
+                    // The user that the request went to.
                     insertRequestedUser: function(callback) {
                       let insertRequestedUserQuery = 'INSERT INTO UserFriend (FriendshipID, UserInFriendship) VALUES (?, ?)';
 
@@ -317,6 +338,7 @@ module.exports.initialise = (instance) => {
               ], (error, results) => {
                 if (error) throw error;
 
+                // Send the data out to the group that the request was made in so we can update the member items.
                 io.sockets.in(data.ReferringGroup.toString()).emit('friend requested', data.NewFriend);
               });
             }
@@ -355,13 +377,15 @@ module.exports.initialise = (instance) => {
               db.query(connection, updateFriendshipQuery, [data.IsAccepting ? 2 : 1, result[0].FriendshipID], (result, fields) => {
                 let newFriendshipData = {
                   FriendshipID: data.FriendshipID,
-                  Status: data.IsAccepting ? 2 : 1
+                  Status: data.IsAccepting ? 2 : 1 // We can either make the users friends or reject the request.
                 };
 
+                // Allow a real-time update.
                 io.to(socket.id).emit('friend update', newFriendshipData);
 
                 let otherUserConnectedSocket;
 
+                // We will check through the connected users and see if any of them are the user that the request goes to, and send them the request if they are online.
                 io.sockets.sockets.forEach((item) => {
                   if (item.request.session.UserID == otherUserID) {
                     otherUserConnectedSocket = item;
@@ -381,8 +405,7 @@ module.exports.initialise = (instance) => {
     });
   });
 
-
-
+  // What are the clients that are online in this room/group?
   module.exports.getClients = function getClients(allUserIDs, groupID, requestingUserID) {
     let currentRoom = io.sockets.adapter.rooms.get(groupID);
     if (currentRoom) var clientSocketIDArray = Array.from(currentRoom); // Socket IDs for open connections in the group room.
