@@ -43,11 +43,11 @@ let sessionMiddleware = session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 86400000 // 24 hours.
+    maxAge: 172800000 // 48 hours.
   }
 });
 
-app.use(sessionMiddleware);
+app.use(sessionMiddleware); // Allow sessions to be saved to clients.
 
 const http = require('http');
 
@@ -62,11 +62,6 @@ const db = require('./custom-modules/db');
 // END CUSTOM MODULES
 
 app.set('etag', false);
-
-app.use((req, res, next) => {
-  res.set('Cache-Control', 'no-store')
-  next()
-});
 
 app.use(bodyParser.urlencoded({
   extended: true
