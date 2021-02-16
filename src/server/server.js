@@ -591,7 +591,7 @@ app.post('/api/GetMyFriends', (req, res, next) => {
       FROM
         (
           SELECT * FROM UserFriend
-          WHERE UserInFriendship = 2) AS MyFriendships
+          WHERE UserInFriendship = ?) AS MyFriendships
           JOIN UserFriend
             ON MyFriendships.FriendshipID = UserFriend.FriendshipID
           JOIN Friendship
@@ -608,7 +608,7 @@ app.post('/api/GetMyFriends', (req, res, next) => {
             AS LatestMessageInFriendship
 
             ON MyFriendships.FriendshipID = LatestMessageInFriendship.FriendshipID
-        WHERE UserFriend.UserInFriendship != 2
+        WHERE UserFriend.UserInFriendship != ?
         ORDER BY LatestMessageInFriendship.Timestamp, User.DisplayName;`;
 
       db.query(connection, getFriendsQuery, [req.session.UserID, req.session.UserID], (result, fields) => {
