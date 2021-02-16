@@ -474,8 +474,8 @@ app.post('/api/GetGroupMemberList', (req, res, next) => {
                 WHERE UserInFriendship != ?
               GROUP BY FirstDerivedTable.FriendshipID) AS SecondDerivedTable
             ON User.UserID = SecondDerivedTable.UserInFriendship
-            WHERE GroupID = ?
-            ORDER BY User.DisplayName;`;
+          WHERE GroupID = ?
+          ORDER BY User.DisplayName;`;
 
           db.query(connection, getMemberListQuery, [req.session.UserID, req.session.UserID, req.body.GroupID], (result, fields) => {
             result.forEach(element => element.IsAFriend = element.UserID == req.session.UserID ? 1 : element.IsAFriend); // Check each item and make sure the requested users is marked as a friend with themselves.
