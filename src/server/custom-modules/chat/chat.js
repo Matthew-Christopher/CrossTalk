@@ -170,8 +170,6 @@ module.exports.initialise = (instance) => {
                   });
                 }
               }, (error, results) => {
-                log.info(firstResult[0]);
-                log.info(results);
                 if (error) throw error;
 
                 if (firstResult[0].GroupID) {

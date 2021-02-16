@@ -19,7 +19,6 @@ $(window).on("load", () => {
 
       $('#options').addClass('friends'); // Ensure the correct border radii are displayed for the visible elements.
 
-      $('#friend-requests').empty(); // Clear out any old data.
       $('#pinned-message-container').hide(); // Don't show old pinned messages.
 
       setFriends();
@@ -33,7 +32,7 @@ $(window).on("load", () => {
       });
 
       $(document).on('click', '.friend-button', (event) => {
-        if ($(event.target).closest('.friend-button').attr('id') != activeServerID) { // Only do something if we are not clicking the currently active button.
+        if ($(event.target).closest('.friend-button').attr('id') != activeServerID || !$(event.target).closest('.friend-button').hasClass('active-button')) { // Only do something if we are not clicking the currently active button.
           // If the event target is the text in the button, we actually want the parent button.
 
           let friendshipID = $(event.target).closest('.friend-button').attr('id');
@@ -61,14 +60,26 @@ $(window).on("load", () => {
       IsAccepting: isAccepting
     });
   }
+});
 
-  function setFriends() {
+function setFriends() {
+  console.log($('#chat-type-toggle')[0].checked);
+  if ($('#chat-type-toggle')[0].checked) { // Don't do anything unless we have toggled to friends.
     // Call the server's API to get our friends and requests.
     $.ajax({
       type: "POST",
       url: "/api/GetMyFriends",
       success: (data) => {
         let friends = $.parseJSON(data);
+
+        $('#friend-requests').empty(); // Clear out any old data.
+        $('#server-selector').empty(); // Clear out any old data.
+
+        if (friends.sentPending.length + friends.notSentPending.length == 0) {
+          $('#friend-requests').append($('<p id="no-requests-prompt" style="width: 100%; text-align: center; padding: 10px 5px;">').text('Nothing to display.'));
+        } else {
+          $('#no-requests-prompt').remove();
+        }
 
         if (friends.notSentPending.length > 0) {
           $('#alert').css('display', 'inline');
@@ -115,12 +126,16 @@ $(window).on("load", () => {
       }
     });
   }
-});
+}
 
 function oneOfMyFriendsUpdated(data) {
   if (data.Status == 1) {
     $('#' + data.FriendshipID).remove();
   } else if (data.Status == 2) {
+    $('#group-prompt-container').hide(); // Now there are friends to select.
+
+    socket.emit('join private', data.FriendshipID);
+
     $('#server-selector').append(
       $('<button class="friend-button" type="button">').attr('id', data.FriendshipID)
         .append($('<span class="friend-info-container">')
@@ -129,4 +144,6 @@ function oneOfMyFriendsUpdated(data) {
 
     $('#' + data.FriendshipID).remove();
   }
+
+  setFriends();
 }

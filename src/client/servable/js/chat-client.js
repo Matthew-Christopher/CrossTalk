@@ -171,7 +171,7 @@ $(window).on("load", () => {
 
     if ($('#chatbox li').length == 0) {
       $('#chatbox-reminder').show();
-      $('#invite-prompt').show();
+      if (!groupIsPrivate) $('#invite-prompt').show();
       $('#chatbox-reminder').text('No messages yet');
     }
 
@@ -258,15 +258,19 @@ $(window).on("load", () => {
   });
 
   socket.on('friend requested', (toUser) => {
-    let friendButton = $('#' + toUser).find('.friend-add-button')
-    friendButton.text('Request sent!').css('background', '#8ffd9f');
+    if (toUser == id) {
+      setFriends();
+    } else {
+      let friendButton = $('#' + toUser).find('.friend-add-button')
+      friendButton.text('Request sent!').css('background', '#8ffd9f');
 
-    // Wait for a bit and then remove this button.
-    setTimeout(() => {
-      friendButton.css('display', 'none');
+      // Wait for a bit and then remove this button.
+      setTimeout(() => {
+        friendButton.css('display', 'none');
 
-      // May now need to set member options to empty, check for that.
-    }, 1500);
+        // May now need to set member options to empty, check for that.
+      }, 1500);
+    }
   });
 
   $('#chat-type-toggle').change(function(event) {
