@@ -42,23 +42,34 @@ input, button {
   width: 100%;
   height: 100%;
   z-index: 3;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
 }
 
 .popup-container {
   position: relative;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
   width: 35%;
   padding: 100px;
   background: white;
   border-radius: 15px;
-  box-shadow: 10px 10px 32px 0px rgba(0, 0, 0, 0.75);
+  -webkit-box-shadow: 10px 10px 32px 0px rgba(0, 0, 0, 0.75);
+          box-shadow: 10px 10px 32px 0px rgba(0, 0, 0, 0.75);
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  flex-flow: wrap;
-  justify-content: center;
-  align-items: center;
+  -ms-flex-flow: wrap;
+      flex-flow: wrap;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
 }
 
 .popup-container p, .popup-container form {
@@ -93,12 +104,14 @@ input, button {
 
   /* Correct text display bug with scaling */
   -webkit-font-smoothing: antialiased;
-  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+          transform: translate3d(0, 0, 0);
 }
 
 .popup-container input[type="submit"]:hover {
   background: #8ffd9f;
-  transform: translate3d(0, 0, 0) scale(1.03);
+  -webkit-transform: translate3d(0, 0, 0) scale(1.03);
+          transform: translate3d(0, 0, 0) scale(1.03);
 }
 
 .popup-container input:not([type="submit"]) {
@@ -127,6 +140,8 @@ input, button {
   border: none;
   cursor: pointer;
   opacity: 0.5;
+  -webkit-transition: all .2s ease-in-out;
+  -o-transition: all .2s ease-in-out;
   transition: all .2s ease-in-out;
 }
 
@@ -136,23 +151,33 @@ input, button {
 
 .popup-container .popup-close-button:hover, #chat-container #pinned-message-container #pinned-message-delete-button:hover {
   opacity: 1;
-  transform: scale(1.1);
+  -webkit-transform: scale(1.1);
+      -ms-transform: scale(1.1);
+          transform: scale(1.1);
 }
 
 #server-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  flex-direction: column;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
   position: absolute;
   height: 100%;
   left: 0;
   top: 0;
   width: 15%;
   border-right: solid 1px black;
-  box-shadow: 2px 0 5px -2px black;
+  -webkit-box-shadow: 2px 0 5px -2px black;
+          box-shadow: 2px 0 5px -2px black;
 }
 
 #server-container #group-prompt-container {
-  flex: 1 1 auto;
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
 }
 
 #server-container #group-prompt {
@@ -160,7 +185,9 @@ input, button {
   position: relative;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
   text-align: center;
   padding: 10px;
   font-size: 1.5em;
@@ -174,15 +201,23 @@ input, button {
 }
 
 #server-container #chat-type-toggle-container {
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   width: 100%;
 }
 
 #server-container #chat-type-toggle-container #toggle-box {
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
   height: 49px;
   position: relative;
 }
@@ -196,6 +231,8 @@ input, button {
 /* SOURCE: https://www.w3schools.com/howto/howto_css_switch.asp [Accessed 08/02/2021] */
 #server-container #chat-type-toggle-container #chat-type-toggle-slider-visual {
   position: relative;
+  -webkit-transition: background 0.3s linear;
+  -o-transition: background 0.3s linear;
   transition: background 0.3s linear;
   background: #62cbe4;
   cursor: pointer;
@@ -208,6 +245,8 @@ input, button {
 #server-container #chat-type-toggle-container #chat-type-toggle-slider-visual::after {
   content: '';
   position: absolute;
+  -webkit-transition: left 0.2s ease-in-out;
+  -o-transition: left 0.2s ease-in-out;
   transition: left 0.2s ease-in-out;
   background: white;
   display: block;
@@ -242,8 +281,10 @@ input, button {
 
 #server-container #friend-requests-container #friend-requests-toggle #alert {
   display: none;
-  animation-duration: 1.5s;
-  animation-iteration-count: infinite;
+  -webkit-animation-duration: 1.5s;
+          animation-duration: 1.5s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
   vertical-align: middle;
   height: 30px;
   width: 30px;
@@ -252,8 +293,10 @@ input, button {
   margin-top: -2px;
   right: 0;
   bottom: 8px;
-  animation-name: bounce;
-  animation-timing-function: ease;
+  -webkit-animation-name: bounce;
+          animation-name: bounce;
+  -webkit-animation-timing-function: ease;
+          animation-timing-function: ease;
 }
 
 #server-container #friend-requests-container #friend-requests-toggle:hover {
@@ -261,7 +304,9 @@ input, button {
 }
 
 #server-container #friend-requests-container #friend-requests-toggle img.expanded:first-child {
-  transform: rotate(90deg); /* Rotate so the arrow is pointing down. */
+  -webkit-transform: rotate(90deg);
+      -ms-transform: rotate(90deg);
+          transform: rotate(90deg); /* Rotate so the arrow is pointing down. */
 }
 
 #server-container #friend-requests-container .slide-back {
@@ -274,10 +319,13 @@ input, button {
 
 #server-container #friend-requests-container #friend-requests div {
   text-align: center;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   min-height: 40px;
   padding: 10px 0;
   position: relative;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
 }
 
@@ -287,7 +335,8 @@ input, button {
 
 #server-container #friend-requests-container #friend-requests p {
   display: inline-block;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   padding: 0 10px;
   overflow-wrap: break-word;
   width: calc(100% - 78px);
@@ -306,8 +355,11 @@ input, button {
   position: absolute;
   right: 0;
   top: 50%;
-  transform: translateY(-50%);
-  box-sizing: content-box;
+  -webkit-transform: translateY(-50%);
+      -ms-transform: translateY(-50%);
+          transform: translateY(-50%);
+  -webkit-box-sizing: content-box;
+          box-sizing: content-box;
 }
 
 #server-container #friend-requests-container #friend-requests div button {
@@ -316,6 +368,8 @@ input, button {
   background: transparent;
   border: none;
   outline: none;
+  -webkit-transition: background 0.1s linear;
+  -o-transition: background 0.1s linear;
   transition: background 0.1s linear;
 }
 
@@ -329,7 +383,8 @@ input, button {
 }
 
 #server-container #server-buttons-container {
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   width: 100%;
 }
 
@@ -341,8 +396,11 @@ input, button {
   border: 0;
   height: 50px;
   width: 50%;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   float: left;
+  -webkit-transition: background 0.2s linear;
+  -o-transition: background 0.2s linear;
   transition: background 0.2s linear;
   border-top: 1px solid black;
   border-bottom: 1px solid black;
@@ -369,8 +427,10 @@ input, button {
 
 #server-container #group-join-form .slide-back, #server-container #friend-requests-container .slide-back:not(:empty) {
   border-bottom: 1px solid black;
-  box-sizing: border-box;
-  box-shadow: inset 0 0 5px #888;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  -webkit-box-shadow: inset 0 0 5px #888;
+          box-shadow: inset 0 0 5px #888;
   background: #f0f0f0;
   position: relative;
   display: inline-block;
@@ -393,18 +453,22 @@ input, button {
   width: calc(100% - 10px);
   border-bottom: 1px solid #888;
   height: calc(100% - 5px);
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
 }
 
 #server-container #group-join-form #group-join-button {
   height: 35px;
   font-weight: bolder;
   border: 1px solid black;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   border-radius: 10px;
   background: transparent;
   outline: none;
   margin-right: 5px;
+  -webkit-transition: background 0.1s linear;
+  -o-transition: background 0.1s linear;
   transition: background 0.1s linear;
   width: calc(30% - 14px);
   cursor: pointer;
@@ -415,6 +479,8 @@ input, button {
 }
 
 #server-selector .server-button, #server-selector .friend-button {
+  -webkit-transition: background 0.1s linear;
+  -o-transition: background 0.1s linear;
   transition: background 0.1s linear;
   outline: none;
   background: transparent;
@@ -438,9 +504,11 @@ input, button {
 
 #server-selector .server-button .server-info-container *, #server-selector .friend-button .friend-info-container * {
   padding: 0 10px;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   overflow: hidden;
-  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+     text-overflow: ellipsis;
   white-space: initial;
   word-break: break-all;
   -webkit-line-clamp: 1;
@@ -463,19 +531,28 @@ input, button {
   height: calc(100% - 50px);
   width: 85%;
   overflow-wrap: break-word;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  flex-direction: column;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
 }
 
 #chat-container #pinned-message-container {
   display: none;
   width: 100%;
   min-height: 100px;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   border-bottom: 1px solid black;
   padding: 10px;
   font-size: 1.1em;
-  flex-flow: column;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-flow: column;
+          flex-flow: column;
 }
 
 #chat-container #pinned-message-container #pinned-message-delete-button {
@@ -491,14 +568,24 @@ input, button {
 }
 
 #chat-container #pinned-message-container #pinned-message {
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   margin: 10px;
   max-width: calc(100% - 40px);
   height: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  flex-flow: column;
-  justify-content: center;
-  flex: 1;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-flow: column;
+          flex-flow: column;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
 }
 
 #chat-container #pinned-message-container #pinned-message-text::before {
@@ -510,7 +597,8 @@ input, button {
 }
 
 #chat-container #chatbox {
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   padding: 10px;
   padding-bottom: 0;
   overflow-y: auto; /* Only show the scroll bar when necessary */
@@ -608,7 +696,8 @@ input, button {
 }
 
 #chat-container #message {
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   outline: none;
   border: solid 1px black;
   border-right: none;
@@ -622,7 +711,9 @@ input, button {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, calc(-50% - 25px)); /* Manually adjust to fit in the center of the visible window, some of which is blocked by the message input field. */
+  -webkit-transform: translate(-50%, calc(-50% - 25px));
+      -ms-transform: translate(-50%, calc(-50% - 25px));
+          transform: translate(-50%, calc(-50% - 25px)); /* Manually adjust to fit in the center of the visible window, some of which is blocked by the message input field. */
   font-size: 2.3em;
   font-weight: lighter;
   text-align: center;
@@ -632,7 +723,9 @@ input, button {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, calc(-50% - 25px + 2.3em));
+  -webkit-transform: translate(-50%, calc(-50% - 25px + 2.3em));
+      -ms-transform: translate(-50%, calc(-50% - 25px + 2.3em));
+          transform: translate(-50%, calc(-50% - 25px + 2.3em));
   font-weight: 200;
   display: none;
   text-align: center;
@@ -649,7 +742,8 @@ input, button {
 }
 
 #message-form #message-send-tick * {
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
 }
 
 #message-form #message-send-tick {
@@ -681,25 +775,26 @@ input, button {
 
 /* SOURCE: https://codepen.io/Takumari85/pen/RaYwpJ [Accessed 27/10/2020] */
 .effect-20 ~ .focus-border:before,
-.effect-20 ~ .focus-border:after{content: ""; position: absolute; top: 0; left: 0; width: 0; height: 2px; background-color: #3399FF; transition: 0.3s;}
+.effect-20 ~ .focus-border:after{content: ""; position: absolute; top: 0; left: 0; width: 0; height: 2px; background-color: #3399FF; -webkit-transition: 0.3s; -o-transition: 0.3s; transition: 0.3s;}
 .effect-20 ~ .focus-border:after{top: auto; bottom: 0; left: auto; right: 0;}
 .effect-20 ~ .focus-border i:before,
-.effect-20 ~ .focus-border i:after{content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 0; background-color: #3399FF; transition: 0.4s;}
+.effect-20 ~ .focus-border i:after{content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 0; background-color: #3399FF; -webkit-transition: 0.4s; -o-transition: 0.4s; transition: 0.4s;}
 .effect-20 ~ .focus-border i:after{left: auto; right: 0; top: auto; bottom: 0;}
 .effect-20:focus ~ .focus-border:before,
 .effect-20:focus ~ .focus-border:after,
 .non-empty.effect-20 ~ .focus-border:before,
-.non-empty.effect-20 ~ .focus-border:after{width: 100%; transition: 0.3s;}
+.non-empty.effect-20 ~ .focus-border:after{width: 100%; -webkit-transition: 0.3s; -o-transition: 0.3s; transition: 0.3s;}
 .effect-20:focus ~ .focus-border i:before,
 .effect-20:focus ~ .focus-border i:after,
 .non-empty.effect-20 ~ .focus-border i:before,
-.non-empty.effect-20 ~ .focus-border i:after{height: 100%; transition: 0.4s;}
-.effect-20 ~ label{transform: translateY(-50%); text-align: left; position: absolute; left: 20px; width: 100%; top: 50%; color: #aaa; transition: 0.3s; z-index: -1; letter-spacing: 0.5px;}
-.effect-20:focus ~ label, .non-empty.effect-20 ~ label{top: -18px; left: 0; font-size: 12px; color: #3399FF; transition: 0.3s;}
+.non-empty.effect-20 ~ .focus-border i:after{height: 100%; -webkit-transition: 0.4s; -o-transition: 0.4s; transition: 0.4s;}
+.effect-20 ~ label{-webkit-transform: translateY(-50%);-ms-transform: translateY(-50%);transform: translateY(-50%); text-align: left; position: absolute; left: 20px; width: 100%; top: 50%; color: #aaa; -webkit-transition: 0.3s; -o-transition: 0.3s; transition: 0.3s; z-index: -1; letter-spacing: 0.5px;}
+.effect-20:focus ~ label, .non-empty.effect-20 ~ label{top: -18px; left: 0; font-size: 12px; color: #3399FF; -webkit-transition: 0.3s; -o-transition: 0.3s; transition: 0.3s;}
 /* END SOURCE */
 
 #chat-container #message :focus {
-  box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+  -webkit-box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+          box-shadow: 0 0 5px rgba(81, 203, 238, 1);
 }
 
 .requires-group-selection {
@@ -707,7 +802,8 @@ input, button {
 }
 
 #info-container {
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   height: 50px;
   width: 85%;
   position: absolute;
@@ -716,7 +812,8 @@ input, button {
   border-left: solid 1px black;
   border-bottom: solid 1px black;
   background: #2193b0;  /* fallback for old browsers */  /* Chrome 10-25, Safari 5.1-6 */
-  background: -webkit-linear-gradient(to right, #6dd5ed, #2193b0);
+  background: -webkit-gradient(linear, left top, right top, from(#6dd5ed), to(#2193b0));
+  background: -o-linear-gradient(left, #6dd5ed, #2193b0);
   background: linear-gradient(to right, #6dd5ed, #2193b0); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
@@ -731,15 +828,20 @@ input, button {
 
 #info-container .title {
   height: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
   -ms-align-items: center;
-  align-items: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
   margin-left: 10px;
   float: left;
 }
 
 #info-container #server-name-display {
-  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+     text-overflow: ellipsis;
   white-space: initial;
   word-break: break-all;
   -webkit-line-clamp: 1;
@@ -748,7 +850,8 @@ input, button {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   padding-top: 6px;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
 }
 
 #info-container #server-name-display:before {
@@ -776,7 +879,8 @@ input, button {
 }
 
 #info-container #info-buttons-container * {
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
   z-index: 1; /* Ensure cursor displays correctly */
 }
 
@@ -916,8 +1020,8 @@ input, button {
 	margin-bottom: -10px;
 	padding-bottom: 20px;
 	background: #2193b0;
-	background: -webkit-gradient(linear, left top, right top, from(#6dd5ed), to(#2193b0));
 	background: -o-linear-gradient(left, #6dd5ed, #2193b0);
+	background: -webkit-gradient(linear, left top, right top, from(#6dd5ed), to(#2193b0));
 	background: linear-gradient(to right, #6dd5ed, #2193b0);
 }
 
@@ -950,9 +1054,15 @@ input, button {
 #member-list-container #member-list-popup {
   max-height: 80%;
   width: 70%;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
-  flex-flow: column;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-flow: column;
+          flex-flow: column;
 }
 
 #member-list-container #member-list-title::before {
@@ -1021,7 +1131,8 @@ input, button {
   -webkit-transition: background .1s linear;
 	-o-transition: background .1s linear;
 	transition: background .1s linear;
-  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box;
 }
 
 #member-list-container #member-list li .member-options-container button:first-child {
@@ -1046,9 +1157,16 @@ input, button {
   border: none !important;
 }
 
+@-webkit-keyframes bounce {
+  0%   { -webkit-transform: translateY(0); transform: translateY(0); }
+  30%  { -webkit-transform: translateY(-8px); transform: translateY(-8px); } /* Negative, so moving upwards. */
+  50%  { -webkit-transform: translateY(0); transform: translateY(0); }
+  100% { -webkit-transform: translateY(0); transform: translateY(0); } /* Finish early and have some pause at end. */
+}
+
 @keyframes bounce {
-  0%   { transform: translateY(0); }
-  30%  { transform: translateY(-8px); } /* Negative, so moving upwards. */
-  50%  { transform: translateY(0); }
-  100% { transform: translateY(0); } /* Finish early and have some pause at end. */
+  0%   { -webkit-transform: translateY(0); transform: translateY(0); }
+  30%  { -webkit-transform: translateY(-8px); transform: translateY(-8px); } /* Negative, so moving upwards. */
+  50%  { -webkit-transform: translateY(0); transform: translateY(0); }
+  100% { -webkit-transform: translateY(0); transform: translateY(0); } /* Finish early and have some pause at the end. */
 }
