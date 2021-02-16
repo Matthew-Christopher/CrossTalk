@@ -131,9 +131,28 @@ module.exports.initialise = (instance) => {
         pool.getConnection(async (err, connection) => {
           if (err) throw err; // Connection failed.
 
-          let checkValidQuery = 'SELECT COUNT(*) AS Matches, Message.GroupID FROM Message JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE (Message.AuthorID = GroupMembership.UserID OR GroupMembership.Role > 0) AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
+          let checkValidQuery = `
+          SELECT COUNT(*) AS Matches, GroupID, FriendshipID
+          FROM
+            (
+              SELECT Message.*
+              FROM Message
+              JOIN GroupMembership
+                ON Message.GroupID = GroupMembership.GroupID
+              WHERE (Message.AuthorID = GroupMembership.UserID OR GroupMembership.Role > 0)
+                AND Message.MessageID = ?
+                AND GroupMembership.UserID = ?
+              UNION SELECT Message.*
+              FROM Message
+              JOIN (
+                SELECT UserFriend.FriendshipID FROM UserFriend
+                JOIN (SELECT FriendshipID FROM UserFriend WHERE UserInFriendship = ?) AS MyFriendships
+                  ON UserFriend.FriendshipID = MyFriendships.FriendshipID
+                WHERE UserFriend.UserInFriendship != ?) AS SecondDerivedTable
+              ON Message.FriendshipID = SecondDerivedTable.FriendshipID WHERE MessageID = ?)
+            AS AllMessageMatches;`;
 
-          db.query(connection, checkValidQuery, [messageID, socket.request.session.UserID], (firstResult, fields) => {
+          db.query(connection, checkValidQuery, [messageID, socket.request.session.UserID, socket.request.session.UserID, socket.request.session.UserID, messageID], (firstResult, fields) => {
             if (firstResult[0].Matches == 1) {
               async.parallel({
                 secondResult: function(callback) { // Wipe the message from the database.
@@ -144,20 +163,34 @@ module.exports.initialise = (instance) => {
                   });
                 },
                 thirdResult: function(callback) {
-                  let getRecentMessageQuery = 'SELECT Message.MessageString AS LatestMessageString FROM Message WHERE Message.GroupID = ? ORDER BY Timestamp DESC LIMIT 1;'; // Get the message that is now the most recent in the group.
+                  let getRecentMessageQuery = 'SELECT Message.MessageString AS LatestMessageString FROM Message WHERE Message.GroupID = ? OR Message.FriendshipID = ? ORDER BY Timestamp DESC LIMIT 1;'; // Get the message that is now the most recent in the group.
 
-                  db.query(connection, getRecentMessageQuery, firstResult[0].GroupID, (result, fields) => {
+                  db.query(connection, getRecentMessageQuery, [firstResult[0].GroupID, firstResult[0].FriendshipID], (result, fields) => {
                     callback(null, result);
                   });
                 }
               }, (error, results) => {
+                log.info(firstResult[0]);
+                log.info(results);
                 if (error) throw error;
 
-                io.sockets.in(firstResult[0].GroupID.toString()).emit('binned', { // Send out the information to clients so they can remove the message.
-                  group: firstResult[0].GroupID,
-                  message: messageID,
-                  newLatestMessage: results.thirdResult[0] ? results.thirdResult[0].LatestMessageString : 'No messages yet.'
-                });
+                if (firstResult[0].GroupID) {
+                  // This was a group message.
+
+                  io.sockets.in(firstResult[0].GroupID.toString()).emit('binned', { // Send out the information to clients so they can remove the message.
+                    group: firstResult[0].GroupID,
+                    message: messageID,
+                    newLatestMessage: results.thirdResult[0] ? results.thirdResult[0].LatestMessageString : 'No messages yet.'
+                  });
+                } else {
+                  // This was a private message.
+
+                  io.sockets.in('FG' + firstResult[0].FriendshipID.toString()).emit('binned', { // Send out the information to clients so they can remove the message.
+                    group: firstResult[0].FriendshipID,
+                    message: messageID,
+                    newLatestMessage: results.thirdResult[0] ? results.thirdResult[0].LatestMessageString : 'No messages yet.'
+                  });
+                }
               });
             }
 
@@ -319,8 +352,8 @@ module.exports.initialise = (instance) => {
             if (result.length == 1) {
               // Everything is valid, update the record.
 
-              // let updateFriendshipQuery = 'UPDATE Friendship SET Status = ? WHERE FriendshipID = ? AND (Status IS NULL OR Status = 0);'; // Don't do anything if the status is already set.
-let updateFriendshipQuery = 'SELECT NULL FROM User;';
+              let updateFriendshipQuery = 'UPDATE Friendship SET Status = ? WHERE FriendshipID = ? AND (Status IS NULL OR Status = 0);'; // Don't do anything if the status is already set.
+
               db.query(connection, updateFriendshipQuery, [data.IsAccepting ? 2 : 1, result[0].FriendshipID], (result, fields) => {
                 let newFriendshipData = {
                   FriendshipID: data.FriendshipID,
