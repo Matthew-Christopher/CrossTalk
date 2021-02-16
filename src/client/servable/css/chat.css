@@ -804,11 +804,11 @@ input, button {
 }
 
 #options.friends li {
-  display: none;
+  display: none !important;
 }
 
 #options.friends li:first-child, #options.friends li:nth-child(2) {
-  display: block;
+  display: block !important;
 }
 
 #options.friends li:nth-child(2) {
