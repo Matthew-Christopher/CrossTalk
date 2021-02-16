@@ -63,7 +63,6 @@ $(window).on("load", () => {
 });
 
 function setFriends() {
-  console.log($('#chat-type-toggle')[0].checked);
   if ($('#chat-type-toggle')[0].checked) { // Don't do anything unless we have toggled to friends.
     // Call the server's API to get our friends and requests.
     $.ajax({
