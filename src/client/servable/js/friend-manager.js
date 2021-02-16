@@ -103,7 +103,7 @@ $(window).on("load", () => {
             $('<button class="friend-button" type="button">').attr('id', item.FriendshipID)
               .append($('<span class="friend-info-container">')
               .append($("<h1></h1>").text(item.DisplayName))
-              .append($("<i></i>").text(item.LatestMessageString ? item.LatestMessageString : "No messages yet.")));
+              .append($("<i></i>").text(item.LatestMessageString ? item.LatestMessageString : 'No messages yet.')));
 
           $('#server-selector').append(newGroup);
 
@@ -121,6 +121,12 @@ function oneOfMyFriendsUpdated(data) {
   if (data.Status == 1) {
     $('#' + data.FriendshipID).remove();
   } else if (data.Status == 2) {
+    $('#server-selector').append(
+      $('<button class="friend-button" type="button">').attr('id', data.FriendshipID)
+        .append($('<span class="friend-info-container">')
+        .append($("<h1></h1>").text($('#' + data.FriendshipID).find('p').text()))
+        .append($("<i></i>").text('No messages yet.'))));
 
+    $('#' + data.FriendshipID).remove();
   }
 }

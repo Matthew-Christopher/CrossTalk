@@ -126,7 +126,7 @@ $(window).on("load", () => {
       stickScroll(scrollOffset);
     }
 
-    setRecentMessage(message.GroupID, message.MessageString);
+    setRecentMessage(message.GroupID ? message.GroupID : message.FriendshipID, message.MessageString);
   });
 
   $('#search').on('input', () => {
@@ -254,7 +254,7 @@ $(window).on("load", () => {
   });
 
   socket.on('friend update', (data) => {
-    OneOfMyFriendsUpdated(data);
+    oneOfMyFriendsUpdated(data);
   });
 
   socket.on('friend requested', (toUser) => {
@@ -405,37 +405,39 @@ function appendSavedMessages(messageArray) {
 }
 
 function checkPinnedMessage() {
-  $.ajax({
-    type: "POST",
-    url: "/api/GetPinnedMessage",
-    data:  {
-      GroupID: activeServerID
-    },
-    success: (data) => {
+  if (!groupIsPrivate) { // We can't pin messages in private chats.
+    $.ajax({
+      type: "POST",
+      url: "/api/GetPinnedMessage",
+      data:  {
+        GroupID: activeServerID
+      },
+      success: (data) => {
 
-      let JSONData = $.parseJSON(data);
-      let mustAdjustScroll = $('#pinned-message-container').css('display') == 'none';
+        let JSONData = $.parseJSON(data);
+        let mustAdjustScroll = $('#pinned-message-container').css('display') == 'none';
 
-      if (JSONData.length > 0) {
-        $('#pinned-message-container').css('display', 'flex');
+        if (JSONData.length > 0) {
+          $('#pinned-message-container').css('display', 'flex');
 
-        $('#pinned-message-label').text('Pinned message from ' + JSONData[0].AuthorDisplayName + ', sent ' + getPinnedMessageTimestamp(JSONData[0].Timestamp) + '.');
-        $('#pinned-message-text').text(JSONData[0].MessageString);
+          $('#pinned-message-label').text('Pinned message from ' + JSONData[0].AuthorDisplayName + ', sent ' + getPinnedMessageTimestamp(JSONData[0].Timestamp) + '.');
+          $('#pinned-message-text').text(JSONData[0].MessageString);
 
-        $('#chatbox li').removeClass('pinned');
-        $('#' + JSONData[0].MessageID).addClass('pinned');
+          $('#chatbox li').removeClass('pinned');
+          $('#' + JSONData[0].MessageID).addClass('pinned');
 
-        if (mustAdjustScroll) $('#chatbox').scrollTop($('#chatbox').scrollTop() + $('#pinned-message-container').outerHeight());
-      } else {
-        if ($('#pinned-message-container').css('display') == 'flex') {
-          handleUnpinInCurrentGroup();
+          if (mustAdjustScroll) $('#chatbox').scrollTop($('#chatbox').scrollTop() + $('#pinned-message-container').outerHeight());
+        } else {
+          if ($('#pinned-message-container').css('display') == 'flex') {
+            handleUnpinInCurrentGroup();
+          }
         }
+      },
+      failure: () => {
+        console.error("Could not retreive messages. Try again later.");
       }
-    },
-    failure: () => {
-      console.error("Could not retreive messages. Try again later.");
-    }
-  });
+    });
+  }
 }
 
 function unhidePopup() {
@@ -503,7 +505,7 @@ function handleUnpinInCurrentGroup() {
 }
 
 function setRecentMessage(groupID, messageString) {
-  $('#' + groupID + ' .server-info-container i').text(messageString);
+  $('#' + groupID + ' span i').text(messageString);
 }
 
 function fetchMemberList() {
