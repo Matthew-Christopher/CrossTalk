@@ -8,7 +8,7 @@ $(window).on("load", () => {
     } else if ($('#options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#options-nav-container') && !$(event.target).is('#options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *') || $(event.target).is('#options-button') || $(event.target).is('#options-button *'))) {
       toggleVisiblity('#options-nav-container');
 
-      HideInviteCode();
+      hideInviteCode();
     } else if ($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *')) {
       toggleVisiblity('#profile-options-nav-container');
     } else if ($(event.target).is('#options-button') || $(event.target).is('#options-button *')) {

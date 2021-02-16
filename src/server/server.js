@@ -276,7 +276,7 @@ app.post('/api/GetMyGroups', (req, res, next) => {
             JOIN GroupMembership
             ON \`Group\`.GroupID = GroupMembership.GroupID
             WHERE  GroupMembership.UserID = ?) AS GroupInfo
-      LEFT JOIN (SELECT Message.Messagestring AS LatestMessageString,
+      LEFT JOIN (SELECT Message.MessageString AS LatestMessageString,
                         LatestMessage.GroupID,
                         LatestMessage.Timestamp
                  FROM   Message
@@ -587,16 +587,29 @@ app.post('/api/GetMyFriends', (req, res, next) => {
       if (err) throw err; // Connection failed.
 
       let getFriendsQuery = `
-      SELECT MyFriendships.FriendshipID, User.DisplayName, MyFriendships.UserSentRequest AS SentRequest, Friendship.Status
-      FROM (SELECT * FROM UserFriend WHERE UserInFriendship = ?) AS MyFriendships
-        JOIN UserFriend
-          ON MyFriendships.FriendshipID = UserFriend.FriendshipID
-        JOIN Friendship
-          ON MyFriendships.FriendshipID = Friendship.FriendshipID
-        JOIN User
-          ON UserFriend.UserInFriendship = User.UserID
-      WHERE UserFriend.UserInFriendship != ?
-      ORDER BY User.DisplayName;`;
+      SELECT MyFriendships.FriendshipID, User.DisplayName, MyFriendships.UserSentRequest AS SentRequest, Friendship.Status, LatestMessageInFriendship.LatestMessageString
+      FROM
+        (
+          SELECT * FROM UserFriend
+          WHERE UserInFriendship = 2) AS MyFriendships
+          JOIN UserFriend
+            ON MyFriendships.FriendshipID = UserFriend.FriendshipID
+          JOIN Friendship
+            ON MyFriendships.FriendshipID = Friendship.FriendshipID
+          JOIN User
+            ON UserFriend.UserInFriendship = User.UserID
+          LEFT JOIN
+            (
+              SELECT Message.MessageString AS LatestMessageString, LatestMessage.FriendshipID, LatestMessage.Timestamp
+              FROM Message
+              JOIN (SELECT FriendshipID, MAX(Timestamp) AS Timestamp FROM Message GROUP BY FriendshipID) AS LatestMessage
+                ON Message.FriendshipID = LatestMessage.FriendshipID AND Message.Timestamp = LatestMessage.Timestamp
+            )
+            AS LatestMessageInFriendship
+
+            ON MyFriendships.FriendshipID = LatestMessageInFriendship.FriendshipID
+        WHERE UserFriend.UserInFriendship != 2
+        ORDER BY LatestMessageInFriendship.Timestamp, User.DisplayName;`;
 
       db.query(connection, getFriendsQuery, [req.session.UserID, req.session.UserID], (result, fields) => {
         res.json(JSON.stringify({

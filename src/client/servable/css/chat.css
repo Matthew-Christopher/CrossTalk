@@ -803,6 +803,19 @@ input, button {
   opacity: 1;
 }
 
+#options.friends li {
+  display: none;
+}
+
+#options.friends li:first-child, #options.friends li:nth-child(2) {
+  display: block;
+}
+
+#options.friends li:nth-child(2) {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
 #info-container #info-buttons-container img {
   height: 100%;
   width: auto;

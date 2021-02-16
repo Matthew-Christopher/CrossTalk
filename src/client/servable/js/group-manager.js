@@ -10,6 +10,8 @@ $(window).on("load", () => {
 
   $('#chat-type-toggle').change(function(event) {
     if (!event.target.checked) { // Groups view.
+      $('#options').removeClass('friends'); // Return display of group options to default.
+
       $('#chatbox-reminder').text(chatboxReminder); // Update the chatbox reminder to show text relevant to groups.
 
       FetchGroups(); // Fetch groups when changing from friends back to groups view.

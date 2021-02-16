@@ -17,6 +17,8 @@ $(window).on("load", () => {
     $('#invite-prompt').hide(); // Users cannot invite to a private message and so we should hide this prompt.
 
     if (event.target.checked) { // Friends view.
+      $('#options').addClass('friends'); // Ensure the correct border radii are displayed for the visible elements.
+
       $('#friend-requests').empty(); // Clear out any old data.
       $('#pinned-message-container').hide(); // Don't show old pinned messages.
 
