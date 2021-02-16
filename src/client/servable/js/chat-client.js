@@ -270,6 +270,8 @@ $(window).on("load", () => {
   });
 
   $('#chat-type-toggle').change(function(event) {
+    $('#options-button').hide(); // Hide the cog button until a group or friend is selected.
+
     $('#server-name-display').text('Crosstalk'); // Reset title from group/friend names.
     $('#chatbox').empty(); // Clear data before we select a group/friend.
 

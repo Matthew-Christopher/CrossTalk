@@ -67,7 +67,6 @@ $(window).on("load", () => {
             $('#server-selector').append(newGroup);
 
             socket.emit('join private', item.FriendshipID);
-            console.log(item.FriendshipID);
           });
         },
         failure: () => {

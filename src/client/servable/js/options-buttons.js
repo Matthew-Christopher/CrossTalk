@@ -12,7 +12,7 @@ $(window).on("load", () => {
     } else if ($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *')) {
       toggleVisiblity('#profile-options-nav-container');
     } else if ($(event.target).is('#options-button') || $(event.target).is('#options-button *')) {
-      if ($('#options-nav-container').css('visibility') == 'hidden') getInviteCode();
+      if ($('#options-nav-container').css('visibility') == 'hidden' && !$('#options').hasClass('friends')) getInviteCode();
 
       toggleVisiblity('#options-nav-container');
     } else if ($(event.target).is('#show-invite-code')) {
@@ -53,7 +53,7 @@ function toggleVisiblity (name) {
   if (($(name).css('visibility') == 'visible')) {
     $(name).css('visibility', 'hidden');
 
-    if (name == "#options-nav-container") {
+    if (name == '#options-nav-container') {
       hideInviteCode();
       $('#search').val('').trigger('input');
     }
