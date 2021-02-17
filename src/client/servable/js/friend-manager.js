@@ -151,5 +151,8 @@ function oneOfMyFriendsUpdated(data) {
     $('#' + data.FriendshipID).remove();
   }
 
-  setFriends();
+  if ($('#friend-requests *').length == 0) {
+    $('#friend-requests').append($('<p id="no-requests-prompt" style="width: 100%; text-align: center; padding: 10px 5px;">').text('Nothing to display.'));
+    $('#alert').css('display', 'none');
+  }
 }

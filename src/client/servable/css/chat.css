@@ -494,6 +494,10 @@ input, button {
   border-bottom: solid 1px #555;
 }
 
+.friend-add-button:disabled {
+  color: black !important;
+}
+
 #server-selector .server-button:not(.active-button):hover, #server-selector .friend-button:not(.active-button):hover {
   background: #eee;
 }
@@ -1149,7 +1153,7 @@ input, button {
   background: #ddd;
 }
 
-#member-list-container #member-list li .member-options-container button:not(:first-child) {
+#member-list-container #member-list li .member-options-container:not(.single) button:not(:first-child) {
   border-left: thin solid black;
 }
 
