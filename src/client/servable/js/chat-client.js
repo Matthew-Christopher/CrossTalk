@@ -1,24 +1,26 @@
-let activeServerID, role, id, groupIsPrivate = false;
+let activeServerID,
+  role,
+  id,
+  groupIsPrivate = false;
 const socket = io.connect('/');
 
-$(window).on("load", () => {
-
+$(window).on('load', () => {
   // Get the user's display name from their session cookie and the database.
   $.ajax({
-    type: "POST",
-    url: "/api/GetMyDisplayName",
+    type: 'POST',
+    url: '/api/GetMyDisplayName',
     success: (data) => {
       $('#name-display').text($.parseJSON(data)[0].DisplayName);
       $('#profile-options-name-label').text($.parseJSON(data)[0].DisplayName);
     },
     failure: () => {
-      console.error("Could not retreive display name. Try again later.");
-    }
+      console.error('Could not retreive display name. Try again later.');
+    },
   });
 
   setUserID();
 
-  $("#message-form").submit((event) => {
+  $('#message-form').submit((event) => {
     event.preventDefault(); // Don't refresh, we want a smooth experience.
 
     // We trim whitespace from the start and end of the message before sending it.
@@ -28,7 +30,7 @@ $(window).on("load", () => {
       let userID;
       if (activeServerID) {
         // Message object format: (MessageID, GroupID, FriendshipID, AuthorID, AuthorDisplayName, MessageString, Timestamp)
-        let message = new Message(null, groupIsPrivate ? null : activeServerID,  groupIsPrivate ? activeServerID : null, null, null, messageString, Date.now());
+        let message = new Message(null, groupIsPrivate ? null : activeServerID, groupIsPrivate ? activeServerID : null, null, null, messageString, Date.now());
 
         // Don't send the message if it's blank.
         if (message) {
@@ -95,7 +97,7 @@ $(window).on("load", () => {
 
   // Redirect to the correct page.
   $('#group-info-admin-button').click(() => {
-    window.location.href = "/group-info?GroupID=" + activeServerID;
+    window.location.href = '/group-info?GroupID=' + activeServerID;
   });
 
   $(document).click((event) => {
@@ -116,17 +118,19 @@ $(window).on("load", () => {
       let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
 
       // Add the message to the chatbox.
-      $('#chatbox').append($('<li ' + (message.AuthorID == id ? 'class="owned" ' : '') + 'style="position: relative;">').attr('id', message.MessageID)
-                   .append($('<i class="message-author" style="display: inline; color: #888;">')
-                     .text(message.AuthorDisplayName))
-                   .append($('<i class="message-timestamp" style="color: #888; float: right;">')
-                     .text(getMessageTimestamp(message.Timestamp)))
-                   .append($('<div class="message-options-container' + (!(role > 0 || message.AuthorID == id) ? ' empty' : '') + '">')
-                   .append($('<button class="message-pin-button" style="display: ' + (role > 0 ? 'inline-block' : 'none')  + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
-                   .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? 'inline-block' : 'none') + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">'))))
-                   .append('<br />')
-                   .append($('<p class="message-content" style="display: inline;">')
-                     .text(message.MessageString)));
+      $('#chatbox').append(
+        $('<li ' + (message.AuthorID == id ? 'class="owned" ' : "") + 'style="position: relative;">')
+          .attr('id', message.MessageID)
+          .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
+          .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(getMessageTimestamp(message.Timestamp)))
+          .append(
+            $('<div class="message-options-container' + (!(role > 0 || message.AuthorID == id) ? " empty" : "") + '">')
+              .append($('<button class="message-pin-button" style="display: ' + (role > 0 ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
+              .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
+          )
+          .append('<br />')
+          .append($('<p class="message-content" style="display: inline;">').text(message.MessageString))
+      );
 
       // Handle scrollbar behaviour.
       stickScroll(scrollOffset);
@@ -154,16 +158,18 @@ $(window).on("load", () => {
     for (let i = 0; i < listItems.length; i++) {
       if (listItems[i].innerHTML.toLowerCase().indexOf(search) > -1) {
         nothingFound = false;
-        listItems[i].parentElement.style.display = "list-item";
+        listItems[i].parentElement.style.display = 'list-item';
       } else {
-        listItems[i].parentElement.style.display = "none";
+        listItems[i].parentElement.style.display = 'none';
       }
     }
 
     stickScroll(scrollOffsetBeforeFilter);
 
     if (nothingFound) {
-      $('#chatbox-reminder').css('display', 'block').text('No messages ' + (listItems.length > 0 ? 'found' : 'yet'));
+      $('#chatbox-reminder')
+        .css('display', 'block')
+        .text('No messages ' + (listItems.length > 0 ? 'found' : 'yet'));
     } else {
       $('#chatbox-reminder').css('display', 'none');
     }
@@ -219,7 +225,7 @@ $(window).on("load", () => {
     socket.emit('role change', {
       GroupID: activeServerID,
       UserToChange: $(event.target).closest('li').attr('id'),
-      TargetRole: $(event.target).attr('value')
+      TargetRole: $(event.target).attr('value'),
     });
   });
 
@@ -228,32 +234,58 @@ $(window).on("load", () => {
     if (data.InGroup == activeServerID) {
       if (data.NewRole == 1) {
         // Change the text first, then move to the new list.
-        $('#' + data.AffectsUser).find('.role-button').attr('value', 'member').text('Make member');
+        $('#' + data.AffectsUser)
+          .find('.role-button')
+          .attr('value', 'member')
+          .text('Make member');
 
         $('#member-list #admins').append($('#' + data.AffectsUser).remove());
       } else {
         // Change the text first, then move to the new list.
-        $('#' + data.AffectsUser).find('.role-button').attr('value', 'admin').text('Make admin');
+        $('#' + data.AffectsUser)
+          .find('.role-button')
+          .attr('value', 'admin')
+          .text('Make admin');
 
         $('#member-list #members').append($('#' + data.AffectsUser).remove());
       }
 
       // Remove buttons to change role if they are now our rank or higher.
       if (data.NewRole < role) {
-        $('#' + data.AffectsUser).find('.role-button').css('display', 'inline-block');
+        $('#' + data.AffectsUser)
+          .find('.role-button')
+          .css('display', 'inline-block');
 
-        $('#' + data.AffectsUser).find('.member-options-container').removeClass('empty');
+        $('#' + data.AffectsUser)
+          .find('.member-options-container')
+          .removeClass('empty');
 
-        if ($('#' + data.AffectsUser).find('.friend-add-button').css('display') == 'none') {
-          $('#' + data.AffectsUser).find('.member-options-container').addClass('single');
+        if (
+          $('#' + data.AffectsUser)
+            .find('.friend-add-button')
+            .css('display') == 'none'
+        ) {
+          $('#' + data.AffectsUser)
+            .find('.member-options-container')
+            .addClass('single');
         }
       } else {
-        $('#' + data.AffectsUser).find('.role-button').css('display', 'none');
+        $('#' + data.AffectsUser)
+          .find('.role-button')
+          .css('display', 'none');
 
-        if ($('#' + data.AffectsUser).find('.friend-add-button').css('display') == 'none') {
-          $('#' + data.AffectsUser).find('.member-options-container').addClass('empty');
+        if (
+          $('#' + data.AffectsUser)
+            .find('.friend-add-button')
+            .css('display') == 'none'
+        ) {
+          $('#' + data.AffectsUser)
+            .find('.member-options-container')
+            .addClass('empty');
         } else {
-          $('#' + data.AffectsUser).find('.member-options-container').removeClass('empty');
+          $('#' + data.AffectsUser)
+            .find('.member-options-container')
+            .removeClass('empty');
         }
       }
     }
@@ -272,7 +304,7 @@ $(window).on("load", () => {
 
     socket.emit('friend add', {
       ReferringGroup: activeServerID,
-      NewFriend: $(event.target).closest('li').attr('id')
+      NewFriend: $(event.target).closest('li').attr('id'),
     });
   });
 
@@ -285,7 +317,9 @@ $(window).on("load", () => {
     if (toUser == id) {
       setFriends();
 
-      let friendButton = $('p.user-name:contains("' + name + '")').parents('li').find('.friend-add-button');
+      let friendButton = $('p.user-name:contains("' + name + '")')
+        .parents('li')
+        .find('.friend-add-button');
       let friendContainer = $('p.user-name:contains("' + name + '")').parents('li');
 
       friendButton.css('display', 'none');
@@ -305,17 +339,25 @@ $(window).on("load", () => {
         friendButton.css('display', 'none');
 
         // May now need to set member options to empty, check for that.
-        if ($('#' + toUser).find('.role-button').css('display') == 'none') {
-          $('#' + toUser).find('.member-options-container').addClass('empty');
+        if (
+          $('#' + toUser)
+            .find('.role-button')
+            .css('display') == 'none'
+        ) {
+          $('#' + toUser)
+            .find('.member-options-container')
+            .addClass('empty');
         } else {
-          $('#' + toUser).find('.member-options-container').addClass('single');
+          $('#' + toUser)
+            .find('.member-options-container')
+            .addClass('single');
         }
       }, 1500);
     }
   });
 
   // We are swapping between groups and friends.
-  $('#chat-type-toggle').change(function(event) {
+  $('#chat-type-toggle').change(function (event) {
     activeServerID = '';
 
     $('#options-button').hide(); // Hide the cog button until a group or friend is selected.
@@ -323,12 +365,14 @@ $(window).on("load", () => {
     $('#server-name-display').text('Crosstalk'); // Reset title from group/friend names.
     $('#chatbox').empty(); // Clear data before we select a group/friend.
 
-    if (event.target.checked) { // Friends view.
+    if (event.target.checked) {
+      // Friends view.
       $('#server-selector').empty();
       $('#server-buttons-container').css('display', 'none');
 
       $('#friend-requests-toggle').css('display', 'block');
-    } else { // Groups view.
+    } else {
+      // Groups view.
       $('#friend-requests-container .active-button').removeClass('active-button');
       $('#friend-requests-container .expanded').removeClass('expanded');
 
@@ -358,10 +402,10 @@ $(window).on("load", () => {
   function fetchMemberList() {
     // Get the user's display name from their session cookie and the database.
     $.ajax({
-      type: "POST",
-      url: "/api/GetGroupMemberList",
+      type: 'POST',
+      url: '/api/GetGroupMemberList',
       data: {
-        GroupID: activeServerID
+        GroupID: activeServerID,
       },
       success: (data) => {
         $('#member-list #owner, #member-list #admins, #member-list #members').empty(); // Empty before we append to avoid any duplicates.
@@ -370,7 +414,6 @@ $(window).on("load", () => {
         let memberList = $.parseJSON(data);
 
         for (let i = 0; i < memberList.length; ++i) {
-
           let roleButtonAction;
           if (memberList[i].Role == 1) {
             roleButtonAction = 'member';
@@ -386,12 +429,14 @@ $(window).on("load", () => {
           }
 
           let newNameRow = $('<li id="' + memberList[i].UserID + '">')
-                          .append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName))
-                          .append($('<div class="member-options-container' + optionsContainerClass + '">')
-                          .append($('<button class="role-button" style="display: ' + (role > memberList[i].Role && roleButtonAction ? 'inline-block' : 'none') + ';" value="' + roleButtonAction + '">').text('Make ' + roleButtonAction))
-                          .append($('<button class="friend-add-button" style="display: ' + (!memberList[i].IsAFriend ? 'inline-block' : 'none') + ';">').text('Add friend ')));
+            .append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName))
+            .append(
+              $('<div class="member-options-container' + optionsContainerClass + '">')
+                .append($('<button class="role-button" style="display: ' + (role > memberList[i].Role && roleButtonAction ? "inline-block" : "none") + ';" value="' + roleButtonAction + '">').text("Make " + roleButtonAction))
+                .append($('<button class="friend-add-button" style="display: ' + (!memberList[i].IsAFriend ? "inline-block" : "none") + ';">').text("Add friend "))
+            );
 
-          switch(memberList[i].Role) {
+          switch (memberList[i].Role) {
             case 2:
               // Owner.
               $('#member-list #owner').append(newNameRow);
@@ -408,14 +453,14 @@ $(window).on("load", () => {
         }
       },
       failure: () => {
-        console.error("Could not retreive members. Try again later.");
-      }
+        console.error('Could not retreive members. Try again later.');
+      },
     });
   }
 
   // Alter button and content visibility to match permissions.
   function refreshAdminContentDisplay() {
-    $('#chatbox li:not(.owned)').each(function() {
+    $('#chatbox li:not(.owned)').each(function () {
       let toAlter = $(this).find('.message-options-container button');
       if (role > 0) {
         toAlter.css('display', 'inline-block');
@@ -426,8 +471,10 @@ $(window).on("load", () => {
       }
     });
 
-    $('#chatbox li.owned').each(function() {
-      $(this).find('.message-options-container .message-pin-button').css('display', role > 0 ? 'inline-block' : 'none');
+    $('#chatbox li.owned').each(function () {
+      $(this)
+        .find('.message-options-container .message-pin-button')
+        .css('display', role > 0 ? 'inline-block' : 'none');
     });
 
     setGroupOptionButtonVisibility();
@@ -436,14 +483,14 @@ $(window).on("load", () => {
   function setUserID() {
     // Get the user's ID from their session cookie.
     $.ajax({
-      type: "POST",
-      url: "/api/GetMyUserID",
+      type: 'POST',
+      url: '/api/GetMyUserID',
       success: (data) => {
         id = $.parseJSON(data)[0].UserID;
       },
       failure: () => {
-        console.error("Could not retreive ID. Try again later.");
-      }
+        console.error('Could not retreive ID. Try again later.');
+      },
     });
   }
 });
@@ -459,13 +506,12 @@ function setActiveServerID(id) {
 
   $.when(
     $.ajax({
-      type: "POST",
-      url: "/api/GetMessages",
-      data:  {
-        GroupID: activeServerID
+      type: 'POST',
+      url: '/api/GetMessages',
+      data: {
+        GroupID: activeServerID,
       },
       success: (data) => {
-
         let JSONData = $.parseJSON(data);
 
         if (JSONData.messageData.length > 0) {
@@ -486,8 +532,8 @@ function setActiveServerID(id) {
         checkPinnedMessage();
       },
       failure: () => {
-        console.error("Could not retreive messages. Try again later.");
-      }
+        console.error('Could not retreive messages. Try again later.');
+      },
     })
   ).then(() => {
     $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
@@ -505,13 +551,12 @@ function setActiveFriendID(id) {
 
   $.when(
     $.ajax({
-      type: "POST",
-      url: "/api/GetFriendMessages",
-      data:  {
-        FriendshipID: id
+      type: 'POST',
+      url: '/api/GetFriendMessages',
+      data: {
+        FriendshipID: id,
       },
       success: (data) => {
-
         let friendMessages = $.parseJSON(data);
 
         if (friendMessages.length > 0) {
@@ -524,8 +569,8 @@ function setActiveFriendID(id) {
         appendSavedMessages(friendMessages);
       },
       failure: () => {
-        console.error("Could not retreive messages. Try again later.");
-      }
+        console.error('Could not retreive messages. Try again later.');
+      },
     })
   ).then(() => {
     $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
@@ -537,31 +582,33 @@ function appendSavedMessages(messageArray) {
   $('#chatbox').empty(); // Remove old messages.
 
   messageArray.forEach((message) => {
-    $('#chatbox').append($('<li ' + (message.Owned ? 'class="owned" ' : '') + 'style="position: relative;">').attr('id', message.MessageID)
-                 .append($('<i class="message-author" style="display: inline; color: #888;">')
-                   .text(message.AuthorDisplayName))
-                 .append($('<i class="message-timestamp" style="color: #888; float: right;">')
-                   .text(getMessageTimestamp(message.Timestamp)))
-                 .append($('<div class="message-options-container' + (!(role > 0 || message.Owned) ? ' empty' : '') + '">')
-                 .append($('<button class="message-pin-button" style="display: ' + (role > 0 ? 'inline-block' : 'none')  + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
-                 .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? 'inline-block' : 'none') + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">'))))
-                 .append('<br />')
-                 .append($('<p class="message-content" style="display: inline;">')
-                   .text(message.MessageString)));
+    $('#chatbox').append(
+      $('<li ' + (message.Owned ? 'class="owned" ' : '') + 'style="position: relative;">')
+        .attr('id', message.MessageID)
+        .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
+        .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(getMessageTimestamp(message.Timestamp)))
+        .append(
+          $('<div class="message-options-container' + (!(role > 0 || message.Owned) ? " empty" : "") + '">')
+            .append($('<button class="message-pin-button" style="display: ' + (role > 0 ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
+            .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
+        )
+        .append('<br />')
+        .append($('<p class="message-content" style="display: inline;">').text(message.MessageString))
+    );
   });
 }
 
 // Is a (new) message pinned in this chat?
 function checkPinnedMessage() {
-  if (!groupIsPrivate) { // We can't pin messages in private chats.
+  if (!groupIsPrivate) {
+    // We can't pin messages in private chats.
     $.ajax({
-      type: "POST",
-      url: "/api/GetPinnedMessage",
-      data:  {
-        GroupID: activeServerID
+      type: 'POST',
+      url: '/api/GetPinnedMessage',
+      data: {
+        GroupID: activeServerID,
       },
       success: (data) => {
-
         let JSONData = $.parseJSON(data);
         let mustAdjustScroll = $('#pinned-message-container').css('display') == 'none';
 
@@ -582,8 +629,8 @@ function checkPinnedMessage() {
         }
       },
       failure: () => {
-        console.error("Could not retreive messages. Try again later.");
-      }
+        console.error('Could not retreive messages. Try again later.');
+      },
     });
   }
 }
@@ -600,7 +647,7 @@ function getMessageTimestamp(timestamp) {
 
   if (date.getDate() == today.getDate()) {
     // The message was sent today, so we'll just say the time.
-    return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   } else if (date.getDate() == today.getDate() - 1) {
     // The date is yesterday.
     return 'Yesterday';
@@ -618,10 +665,8 @@ function handleUnpinInCurrentGroup() {
 
   // Ensure that, despite the chatbox changing dimensions, we keep the same scroll position relative to the bottom.
   $('#chatbox').scrollTop(
-    $('#chatbox').scrollTop() -
-    (($('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight()) >= $('#pinned-message-container').height() ?
-    $('#pinned-message-container').outerHeight()
-    : beforeHideScrollOffset));
+    $('#chatbox').scrollTop() - ($('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight() >= $('#pinned-message-container').height() ? $('#pinned-message-container').outerHeight() : beforeHideScrollOffset)
+  );
 
   $('#pinned-message-label').text();
   $('#pinned-message-text').text();
@@ -634,7 +679,7 @@ function getPinnedMessageTimestamp(timestamp) {
   let date = new Date(eval(timestamp));
   let today = new Date();
 
-  let atTimeString = ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  let atTimeString = ' at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   if (date.getDate() == today.getDate()) {
     // The message was sent today, so we'll just say the time.
     return 'today' + atTimeString;

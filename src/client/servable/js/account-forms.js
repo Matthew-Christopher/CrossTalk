@@ -1,11 +1,11 @@
-$(window).on("load", () => {
+$(window).on('load', () => {
   // Handle data submission and display an appropriate message once the server gets back to us.
   $('#register-form').submit((e) => {
     e.preventDefault();
 
     $.ajax({
-      type: "POST",
-      url: "/register-account",
+      type: 'POST',
+      url: '/register-account',
       data: $('#register-form').serialize(),
       success: (data) => {
         if (data == 'success') {
@@ -18,7 +18,7 @@ $(window).on("load", () => {
           $('input[name="email"]').val('').focus();
           $('input[name="confirm-email"]').removeClass('non-empty').val('');
         } else if (data == 'password') {
-          $('#result').text('Password does not meet the security requirements. It needs to be at least 8 characters long.')
+          $('#result').text('Password does not meet the security requirements. It needs to be at least 8 characters long.');
           $('input[name="password"]').val('').focus();
           $('input[name="confirm-password"]').removeClass('non-empty').val('');
         } else {
@@ -27,7 +27,7 @@ $(window).on("load", () => {
       },
       error: () => {
         $('#result').text('Something went wrong. Try again later.');
-      }
+      },
     });
   });
 
@@ -35,8 +35,8 @@ $(window).on("load", () => {
     e.preventDefault();
 
     $.ajax({
-      type: "POST",
-      url: "/authenticate-login",
+      type: 'POST',
+      url: '/authenticate-login',
       data: $('#login-form').serialize(),
       success: (data) => {
         if (data == 'fail') {
@@ -46,12 +46,12 @@ $(window).on("load", () => {
         } else if (data == 'unverified') {
           $('#result').text('You need to verify your account first!');
         } else {
-          window.location.replace("/chat");
+          window.location.replace('/chat');
         }
       },
       error: () => {
         $('#result').text('Something went wrong. Try again later.');
-      }
+      },
     });
   });
 
@@ -59,8 +59,8 @@ $(window).on("load", () => {
     e.preventDefault();
 
     $.ajax({
-      type: "POST",
-      url: "/recover-account",
+      type: 'POST',
+      url: '/recover-account',
       data: $('#recover-form').serialize(),
       success: (data) => {
         if (data == 'success') {
@@ -69,7 +69,7 @@ $(window).on("load", () => {
       },
       error: () => {
         $('#result').text('Something went wrong. Try again later.');
-      }
+      },
     });
   });
 });

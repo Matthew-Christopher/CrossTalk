@@ -5,7 +5,7 @@
 
 body {
   font-size: 100%;
-  font-family: 'Work Sans', sans-serif;
+  font-family: "Work Sans", sans-serif;
   overflow: hidden;
 }
 
@@ -13,12 +13,14 @@ body *:not(.blur-exclude):not(.blur-exclude *) {
   transition: 0.1s -webkit-filter linear;
 }
 
-input, button {
+input,
+button {
   font-size: 100%;
-  font-family: 'Work Sans', sans-serif;
+  font-family: "Work Sans", sans-serif;
 }
 
-#group-create-container, #member-list-container {
+#group-create-container,
+#member-list-container {
   position: fixed;
   left: 0;
   top: 0;
@@ -28,14 +30,16 @@ input, button {
   display: none;
 }
 
-#group-create-container *:not(label), #member-list-container * {
+#group-create-container *:not(label),
+#member-list-container * {
   z-index: 5;
 }
 
-#group-create-container.overlay::after, #member-list-container.overlay::after {
+#group-create-container.overlay::after,
+#member-list-container.overlay::after {
   opacity: 0.4;
   background: black;
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
@@ -43,7 +47,7 @@ input, button {
   height: 100%;
   z-index: 3;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 .popup-container {
@@ -51,28 +55,29 @@ input, button {
   left: 50%;
   top: 50%;
   -webkit-transform: translate(-50%, -50%);
-      -ms-transform: translate(-50%, -50%);
-          transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
   width: 35%;
   padding: 100px;
   background: white;
   border-radius: 15px;
   -webkit-box-shadow: 10px 10px 32px 0px rgba(0, 0, 0, 0.75);
-          box-shadow: 10px 10px 32px 0px rgba(0, 0, 0, 0.75);
+  box-shadow: 10px 10px 32px 0px rgba(0, 0, 0, 0.75);
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-flow: wrap;
-      flex-flow: wrap;
+  flex-flow: wrap;
   -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
-.popup-container p, .popup-container form {
+.popup-container p,
+.popup-container form {
   margin-top: 50px;
 }
 
@@ -95,8 +100,8 @@ input, button {
   width: 100%;
   height: 100%;
   border: 1px solid black;
-  -webkit-box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.1);
-  box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.1);
+  -webkit-box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.1);
   -webkit-transition: all 0.15s ease-in-out;
   -o-transition: all 0.15s ease-in-out;
   transition: all 0.15s ease-in-out;
@@ -105,18 +110,18 @@ input, button {
   /* Correct text display bug with scaling */
   -webkit-font-smoothing: antialiased;
   -webkit-transform: translate3d(0, 0, 0);
-          transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
 }
 
 .popup-container input[type="submit"]:hover {
   background: #8ffd9f;
   -webkit-transform: translate3d(0, 0, 0) scale(1.03);
-          transform: translate3d(0, 0, 0) scale(1.03);
+  transform: translate3d(0, 0, 0) scale(1.03);
 }
 
 .popup-container input:not([type="submit"]) {
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   outline: none;
   left: -20px;
   background: transparent;
@@ -128,7 +133,8 @@ input, button {
   height: 100%;
 }
 
-.popup-container .popup-close-button, #chat-container #pinned-message-container #pinned-message-delete-button {
+.popup-container .popup-close-button,
+#chat-container #pinned-message-container #pinned-message-delete-button {
   font-weight: 100;
   line-height: 0.65;
   font-size: 3.5em;
@@ -140,20 +146,22 @@ input, button {
   border: none;
   cursor: pointer;
   opacity: 0.5;
-  -webkit-transition: all .2s ease-in-out;
-  -o-transition: all .2s ease-in-out;
-  transition: all .2s ease-in-out;
+  -webkit-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
-.popup-container .popup-close-button:after, #chat-container #pinned-message-container #pinned-message-delete-button:after {
+.popup-container .popup-close-button:after,
+#chat-container #pinned-message-container #pinned-message-delete-button:after {
   content: "\00d7"; /* Cross */
 }
 
-.popup-container .popup-close-button:hover, #chat-container #pinned-message-container #pinned-message-delete-button:hover {
+.popup-container .popup-close-button:hover,
+#chat-container #pinned-message-container #pinned-message-delete-button:hover {
   opacity: 1;
   -webkit-transform: scale(1.1);
-      -ms-transform: scale(1.1);
-          transform: scale(1.1);
+  -ms-transform: scale(1.1);
+  transform: scale(1.1);
 }
 
 #server-container {
@@ -162,8 +170,8 @@ input, button {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
   position: absolute;
   height: 100%;
   left: 0;
@@ -171,13 +179,13 @@ input, button {
   width: 15%;
   border-right: solid 1px black;
   -webkit-box-shadow: 2px 0 5px -2px black;
-          box-shadow: 2px 0 5px -2px black;
+  box-shadow: 2px 0 5px -2px black;
 }
 
 #server-container #group-prompt-container {
   -webkit-box-flex: 1;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
 }
 
 #server-container #group-prompt {
@@ -186,8 +194,8 @@ input, button {
   left: 50%;
   top: 50%;
   -webkit-transform: translate(-50%, -50%);
-      -ms-transform: translate(-50%, -50%);
-          transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
   text-align: center;
   padding: 10px;
   font-size: 1.5em;
@@ -202,22 +210,22 @@ input, button {
 
 #server-container #chat-type-toggle-container {
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   width: 100%;
 }
 
 #server-container #chat-type-toggle-container #toggle-box {
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
   height: 49px;
   position: relative;
 }
@@ -243,7 +251,7 @@ input, button {
 
 /* The white circle that we will slide. */
 #server-container #chat-type-toggle-container #chat-type-toggle-slider-visual::after {
-  content: '';
+  content: "";
   position: absolute;
   -webkit-transition: left 0.2s ease-in-out;
   -o-transition: left 0.2s ease-in-out;
@@ -282,9 +290,9 @@ input, button {
 #server-container #friend-requests-container #friend-requests-toggle #alert {
   display: none;
   -webkit-animation-duration: 1.5s;
-          animation-duration: 1.5s;
+  animation-duration: 1.5s;
   -webkit-animation-iteration-count: infinite;
-          animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
   vertical-align: middle;
   height: 30px;
   width: 30px;
@@ -294,9 +302,9 @@ input, button {
   right: 0;
   bottom: 8px;
   -webkit-animation-name: bounce;
-          animation-name: bounce;
+  animation-name: bounce;
   -webkit-animation-timing-function: ease;
-          animation-timing-function: ease;
+  animation-timing-function: ease;
 }
 
 #server-container #friend-requests-container #friend-requests-toggle:hover {
@@ -305,8 +313,8 @@ input, button {
 
 #server-container #friend-requests-container #friend-requests-toggle img.expanded:first-child {
   -webkit-transform: rotate(90deg);
-      -ms-transform: rotate(90deg);
-          transform: rotate(90deg); /* Rotate so the arrow is pointing down. */
+  -ms-transform: rotate(90deg);
+  transform: rotate(90deg); /* Rotate so the arrow is pointing down. */
 }
 
 #server-container #friend-requests-container .slide-back {
@@ -320,7 +328,7 @@ input, button {
 #server-container #friend-requests-container #friend-requests div {
   text-align: center;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   min-height: 40px;
   padding: 10px 0;
   position: relative;
@@ -336,7 +344,7 @@ input, button {
 #server-container #friend-requests-container #friend-requests p {
   display: inline-block;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   padding: 0 10px;
   overflow-wrap: break-word;
   width: calc(100% - 78px);
@@ -356,10 +364,10 @@ input, button {
   right: 0;
   top: 50%;
   -webkit-transform: translateY(-50%);
-      -ms-transform: translateY(-50%);
-          transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
   -webkit-box-sizing: content-box;
-          box-sizing: content-box;
+  box-sizing: content-box;
 }
 
 #server-container #friend-requests-container #friend-requests div button {
@@ -377,14 +385,14 @@ input, button {
   background: rgba(0, 0, 0, 0.07); /* We set the hover with opacity so as not to affect the drop shadow in the "inset" effect from the slide-back. */
 }
 
-#server-container #friend-requests-container #friend-requests div button img  {
+#server-container #friend-requests-container #friend-requests div button img {
   max-height: 100%;
   max-width: 100%;
 }
 
 #server-container #server-buttons-container {
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   width: 100%;
 }
 
@@ -397,7 +405,7 @@ input, button {
   height: 50px;
   width: 50%;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   float: left;
   -webkit-transition: background 0.2s linear;
   -o-transition: background 0.2s linear;
@@ -425,12 +433,13 @@ input, button {
   width: 70%;
 }
 
-#server-container #group-join-form .slide-back, #server-container #friend-requests-container .slide-back:not(:empty) {
+#server-container #group-join-form .slide-back,
+#server-container #friend-requests-container .slide-back:not(:empty) {
   border-bottom: 1px solid black;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   -webkit-box-shadow: inset 0 0 5px #888;
-          box-shadow: inset 0 0 5px #888;
+  box-shadow: inset 0 0 5px #888;
   background: #f0f0f0;
   position: relative;
   display: inline-block;
@@ -454,7 +463,7 @@ input, button {
   border-bottom: 1px solid #888;
   height: calc(100% - 5px);
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 #server-container #group-join-form #group-join-button {
@@ -462,7 +471,7 @@ input, button {
   font-weight: bolder;
   border: 1px solid black;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   border-radius: 10px;
   background: transparent;
   outline: none;
@@ -474,11 +483,13 @@ input, button {
   cursor: pointer;
 }
 
-#server-container #group-join-form #group-join-button:hover, #options-nav-container #invite-code-display #invite-code-copy:hover {
+#server-container #group-join-form #group-join-button:hover,
+#options-nav-container #invite-code-display #invite-code-copy:hover {
   background: #8ffd9f;
 }
 
-#server-selector .server-button, #server-selector .friend-button {
+#server-selector .server-button,
+#server-selector .friend-button {
   -webkit-transition: background 0.1s linear;
   -o-transition: background 0.1s linear;
   transition: background 0.1s linear;
@@ -498,7 +509,8 @@ input, button {
   color: black !important;
 }
 
-#server-selector .server-button:not(.active-button):hover, #server-selector .friend-button:not(.active-button):hover {
+#server-selector .server-button:not(.active-button):hover,
+#server-selector .friend-button:not(.active-button):hover {
   background: #eee;
 }
 
@@ -506,13 +518,14 @@ input, button {
   background: #6dd5ed !important;
 }
 
-#server-selector .server-button .server-info-container *, #server-selector .friend-button .friend-info-container * {
+#server-selector .server-button .server-info-container *,
+#server-selector .friend-button .friend-info-container * {
   padding: 0 10px;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   overflow: hidden;
   -o-text-overflow: ellipsis;
-     text-overflow: ellipsis;
+  text-overflow: ellipsis;
   white-space: initial;
   word-break: break-all;
   -webkit-line-clamp: 1;
@@ -523,7 +536,8 @@ input, button {
   position: relative;
 }
 
-#server-selector .server-button .server-info-container h1, #server-selector .friend-button .friend-info-container h1 {
+#server-selector .server-button .server-info-container h1,
+#server-selector .friend-button .friend-info-container h1 {
   color: #555;
   font-size: 1.5em;
 }
@@ -540,8 +554,8 @@ input, button {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
 #chat-container #pinned-message-container {
@@ -549,14 +563,14 @@ input, button {
   width: 100%;
   min-height: 100px;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   border-bottom: 1px solid black;
   padding: 10px;
   font-size: 1.1em;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-flow: column;
-          flex-flow: column;
+  -ms-flex-flow: column;
+  flex-flow: column;
 }
 
 #chat-container #pinned-message-container #pinned-message-delete-button {
@@ -573,7 +587,7 @@ input, button {
 
 #chat-container #pinned-message-container #pinned-message {
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   margin: 10px;
   max-width: calc(100% - 40px);
   height: 100%;
@@ -582,14 +596,14 @@ input, button {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-flow: column;
-          flex-flow: column;
+  -ms-flex-flow: column;
+  flex-flow: column;
   -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
   -webkit-box-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }
 
 #chat-container #pinned-message-container #pinned-message-text::before {
@@ -602,7 +616,7 @@ input, button {
 
 #chat-container #chatbox {
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   padding: 10px;
   padding-bottom: 0;
   overflow-y: auto; /* Only show the scroll bar when necessary */
@@ -633,11 +647,11 @@ input, button {
 }
 
 #chat-container #chatbox li:hover {
-   background: #f5f5f5;
+  background: #f5f5f5;
 }
 
 #chat-container #chatbox li .message-timestamp {
-   padding-right: inherit;
+  padding-right: inherit;
 }
 
 #chat-container #chatbox li .message-options-container {
@@ -653,7 +667,7 @@ input, button {
 }
 
 #chat-container #chatbox li:hover .message-options-container {
-   display: block;
+  display: block;
 }
 
 #chat-container #chatbox li.pinned .message-pin-button {
@@ -672,9 +686,9 @@ input, button {
   padding: 5px;
   background: none;
   height: 100%;
-  -webkit-transition: background .1s linear;
-	-o-transition: background .1s linear;
-	transition: background .1s linear;
+  -webkit-transition: background 0.1s linear;
+  -o-transition: background 0.1s linear;
+  transition: background 0.1s linear;
 }
 
 #chat-container #chatbox li .message-options-container button img {
@@ -701,7 +715,7 @@ input, button {
 
 #chat-container #message {
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   outline: none;
   border: solid 1px black;
   border-right: none;
@@ -716,8 +730,8 @@ input, button {
   left: 50%;
   top: 50%;
   -webkit-transform: translate(-50%, calc(-50% - 25px));
-      -ms-transform: translate(-50%, calc(-50% - 25px));
-          transform: translate(-50%, calc(-50% - 25px)); /* Manually adjust to fit in the center of the visible window, some of which is blocked by the message input field. */
+  -ms-transform: translate(-50%, calc(-50% - 25px));
+  transform: translate(-50%, calc(-50% - 25px)); /* Manually adjust to fit in the center of the visible window, some of which is blocked by the message input field. */
   font-size: 2.3em;
   font-weight: lighter;
   text-align: center;
@@ -728,8 +742,8 @@ input, button {
   left: 50%;
   top: 50%;
   -webkit-transform: translate(-50%, calc(-50% - 25px + 2.3em));
-      -ms-transform: translate(-50%, calc(-50% - 25px + 2.3em));
-          transform: translate(-50%, calc(-50% - 25px + 2.3em));
+  -ms-transform: translate(-50%, calc(-50% - 25px + 2.3em));
+  transform: translate(-50%, calc(-50% - 25px + 2.3em));
   font-weight: 200;
   display: none;
   text-align: center;
@@ -747,7 +761,7 @@ input, button {
 
 #message-form #message-send-tick * {
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 #message-form #message-send-tick {
@@ -779,26 +793,92 @@ input, button {
 
 /* SOURCE: https://codepen.io/Takumari85/pen/RaYwpJ [Accessed 27/10/2020] */
 .effect-20 ~ .focus-border:before,
-.effect-20 ~ .focus-border:after{content: ""; position: absolute; top: 0; left: 0; width: 0; height: 2px; background-color: #3399FF; -webkit-transition: 0.3s; -o-transition: 0.3s; transition: 0.3s;}
-.effect-20 ~ .focus-border:after{top: auto; bottom: 0; left: auto; right: 0;}
+.effect-20 ~ .focus-border:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #3399ff;
+  -webkit-transition: 0.3s;
+  -o-transition: 0.3s;
+  transition: 0.3s;
+}
+.effect-20 ~ .focus-border:after {
+  top: auto;
+  bottom: 0;
+  left: auto;
+  right: 0;
+}
 .effect-20 ~ .focus-border i:before,
-.effect-20 ~ .focus-border i:after{content: ""; position: absolute; top: 0; left: 0; width: 2px; height: 0; background-color: #3399FF; -webkit-transition: 0.4s; -o-transition: 0.4s; transition: 0.4s;}
-.effect-20 ~ .focus-border i:after{left: auto; right: 0; top: auto; bottom: 0;}
+.effect-20 ~ .focus-border i:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 0;
+  background-color: #3399ff;
+  -webkit-transition: 0.4s;
+  -o-transition: 0.4s;
+  transition: 0.4s;
+}
+.effect-20 ~ .focus-border i:after {
+  left: auto;
+  right: 0;
+  top: auto;
+  bottom: 0;
+}
 .effect-20:focus ~ .focus-border:before,
 .effect-20:focus ~ .focus-border:after,
 .non-empty.effect-20 ~ .focus-border:before,
-.non-empty.effect-20 ~ .focus-border:after{width: 100%; -webkit-transition: 0.3s; -o-transition: 0.3s; transition: 0.3s;}
+.non-empty.effect-20 ~ .focus-border:after {
+  width: 100%;
+  -webkit-transition: 0.3s;
+  -o-transition: 0.3s;
+  transition: 0.3s;
+}
 .effect-20:focus ~ .focus-border i:before,
 .effect-20:focus ~ .focus-border i:after,
 .non-empty.effect-20 ~ .focus-border i:before,
-.non-empty.effect-20 ~ .focus-border i:after{height: 100%; -webkit-transition: 0.4s; -o-transition: 0.4s; transition: 0.4s;}
-.effect-20 ~ label{-webkit-transform: translateY(-50%);-ms-transform: translateY(-50%);transform: translateY(-50%); text-align: left; position: absolute; left: 20px; width: 100%; top: 50%; color: #aaa; -webkit-transition: 0.3s; -o-transition: 0.3s; transition: 0.3s; z-index: -1; letter-spacing: 0.5px;}
-.effect-20:focus ~ label, .non-empty.effect-20 ~ label{top: -18px; left: 0; font-size: 12px; color: #3399FF; -webkit-transition: 0.3s; -o-transition: 0.3s; transition: 0.3s;}
+.non-empty.effect-20 ~ .focus-border i:after {
+  height: 100%;
+  -webkit-transition: 0.4s;
+  -o-transition: 0.4s;
+  transition: 0.4s;
+}
+.effect-20 ~ label {
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  text-align: left;
+  position: absolute;
+  left: 20px;
+  width: 100%;
+  top: 50%;
+  color: #aaa;
+  -webkit-transition: 0.3s;
+  -o-transition: 0.3s;
+  transition: 0.3s;
+  z-index: -1;
+  letter-spacing: 0.5px;
+}
+.effect-20:focus ~ label,
+.non-empty.effect-20 ~ label {
+  top: -18px;
+  left: 0;
+  font-size: 12px;
+  color: #3399ff;
+  -webkit-transition: 0.3s;
+  -o-transition: 0.3s;
+  transition: 0.3s;
+}
 /* END SOURCE */
 
 #chat-container #message :focus {
   -webkit-box-shadow: 0 0 5px rgba(81, 203, 238, 1);
-          box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+  box-shadow: 0 0 5px rgba(81, 203, 238, 1);
 }
 
 .requires-group-selection {
@@ -807,7 +887,7 @@ input, button {
 
 #info-container {
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   height: 50px;
   width: 85%;
   position: absolute;
@@ -815,9 +895,9 @@ input, button {
   left: 15%;
   border-left: solid 1px black;
   border-bottom: solid 1px black;
-  background: #2193b0;  /* fallback for old browsers */  /* Chrome 10-25, Safari 5.1-6 */
-  background: -webkit-gradient(linear, left top, right top, from(#6dd5ed), to(#2193b0));
+  background: #2193b0; /* fallback for old browsers */ /* Chrome 10-25, Safari 5.1-6 */
   background: -o-linear-gradient(left, #6dd5ed, #2193b0);
+  background: -webkit-gradient(linear, left top, right top, from(#6dd5ed), to(#2193b0));
   background: linear-gradient(to right, #6dd5ed, #2193b0); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
@@ -837,15 +917,15 @@ input, button {
   display: flex;
   -ms-align-items: center;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   margin-left: 10px;
   float: left;
 }
 
 #info-container #server-name-display {
   -o-text-overflow: ellipsis;
-     text-overflow: ellipsis;
+  text-overflow: ellipsis;
   white-space: initial;
   word-break: break-all;
   -webkit-line-clamp: 1;
@@ -855,7 +935,7 @@ input, button {
   -webkit-box-orient: vertical;
   padding-top: 6px;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 #info-container #server-name-display:before {
@@ -869,12 +949,12 @@ input, button {
 }
 
 #info-container #name-display:before {
-  content: 'Welcome, ';
+  content: "Welcome, ";
   white-space: pre;
 }
 
 #info-container #name-display:after {
-  content: '.';
+  content: ".";
 }
 
 #info-container #info-buttons-container {
@@ -884,7 +964,7 @@ input, button {
 
 #info-container #info-buttons-container * {
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   z-index: 1; /* Ensure cursor displays correctly */
 }
 
@@ -907,7 +987,8 @@ input, button {
   padding-left: 0 !important;
 }
 
-#info-container #info-buttons-container #profile-options-button:hover, #info-container #info-buttons-container #options-button:hover {
+#info-container #info-buttons-container #profile-options-button:hover,
+#info-container #info-buttons-container #options-button:hover {
   opacity: 1;
 }
 
@@ -915,7 +996,8 @@ input, button {
   display: none !important;
 }
 
-#options.friends li:first-child, #options.friends li:nth-child(2) {
+#options.friends li:first-child,
+#options.friends li:nth-child(2) {
   display: block !important;
 }
 
@@ -951,7 +1033,7 @@ input, button {
 }
 
 #options-nav-container .arrow-up {
-	right: 54px;
+  right: 54px;
 }
 
 #profile-options-nav-container .arrow-up {
@@ -959,48 +1041,48 @@ input, button {
 }
 
 #options-nav-container #invite-code-container {
-	position: relative;
-	left: 50%;
-	-webkit-transform: translateX(-50%);
-	-ms-transform: translateX(-50%);
-	transform: translateX(-50%);
-	padding: 10px;
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-pack: center;
-	-ms-flex-pack: center;
-	justify-content: center;
-	-webkit-box-align: center;
-	-ms-flex-align: center;
-	align-items: center;
-	white-space: nowrap;
+  position: relative;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
+  padding: 10px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  white-space: nowrap;
 }
 
 #options-nav-container #invite-code-container * {
-	float: left;
+  float: left;
 }
 
 #options-nav-container #invite-code-display {
-	-webkit-box-shadow: inset 0 0 5px #888;
-	box-shadow: inset 0 0 5px #888;
-	display: none;
-	padding: 0;
+  -webkit-box-shadow: inset 0 0 5px #888;
+  box-shadow: inset 0 0 5px #888;
+  display: none;
+  padding: 0;
 }
 
 #options-nav-container #invite-code-display #invite-code-copy {
-	height: 30px;
-	margin-left: 10px;
-	padding: 2px;
-	font-weight: bolder;
-	border: 1px solid #000;
-	border-radius: 10px;
-	background: 0 0;
-	cursor: pointer;
-	outline: 0;
-	-webkit-transition: background .1s linear;
-	-o-transition: background .1s linear;
-	transition: background .1s linear;
+  height: 30px;
+  margin-left: 10px;
+  padding: 2px;
+  font-weight: bolder;
+  border: 1px solid #000;
+  border-radius: 10px;
+  background: 0 0;
+  cursor: pointer;
+  outline: 0;
+  -webkit-transition: background 0.1s linear;
+  -o-transition: background 0.1s linear;
+  transition: background 0.1s linear;
 }
 
 #options-nav-container #search {
@@ -1009,68 +1091,68 @@ input, button {
 }
 
 .options-box li {
-	list-style-type: none;
-	-webkit-box-sizing: content-box;
-	box-sizing: content-box;
-	padding: 10px;
-	z-index: 3;
+  list-style-type: none;
+  -webkit-box-sizing: content-box;
+  box-sizing: content-box;
+  padding: 10px;
+  z-index: 3;
 }
 
 .options-box li:first-child {
-	border-top-left-radius: 9px;
-	border-top-right-radius: 9px;
-	color: #fff;
-	font-weight: 500;
-	margin-bottom: -10px;
-	padding-bottom: 20px;
-	background: #2193b0;
-	background: -o-linear-gradient(left, #6dd5ed, #2193b0);
-	background: -webkit-gradient(linear, left top, right top, from(#6dd5ed), to(#2193b0));
-	background: linear-gradient(to right, #6dd5ed, #2193b0);
+  border-top-left-radius: 9px;
+  border-top-right-radius: 9px;
+  color: #fff;
+  font-weight: 500;
+  margin-bottom: -10px;
+  padding-bottom: 20px;
+  background: #2193b0;
+  background: -o-linear-gradient(left, #6dd5ed, #2193b0);
+  background: -webkit-gradient(linear, left top, right top, from(#6dd5ed), to(#2193b0));
+  background: linear-gradient(to right, #6dd5ed, #2193b0);
 }
 
 #group-options-label::before {
-	content: 'Options for ';
+  content: "Options for ";
 }
 
 .options-box li.round-bottom {
   border-bottom-left-radius: 10px;
-	border-bottom-right-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 .options-box li:not(:first-child) {
-	border-top: 1px solid #888;
+  border-top: 1px solid #888;
   background: #fff;
 }
 
 .options-box li:nth-child(2) {
-	border-top-left-radius: 10px;
-	border-top-right-radius: 10px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 }
 
 .options-box li a {
-	text-decoration: none;
-	color: #000;
-	cursor: pointer;
-	z-index: 4;
+  text-decoration: none;
+  color: #000;
+  cursor: pointer;
+  z-index: 4;
 }
 
 #member-list-container #member-list-popup {
   max-height: 80%;
   width: 70%;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-flow: column;
-          flex-flow: column;
+  -ms-flex-flow: column;
+  flex-flow: column;
 }
 
 #member-list-container #member-list-title::before {
- content: "Members of ";
+  content: "Members of ";
 }
 
 #member-list-container #members-scrollbox {
@@ -1089,7 +1171,8 @@ input, button {
   background: #eee;
 }
 
-#member-list-container #member-list .member-section:not(:last-child), #member-list-container #member-list li:not(:last-child) {
+#member-list-container #member-list .member-section:not(:last-child),
+#member-list-container #member-list li:not(:last-child) {
   margin-bottom: 10px;
 }
 
@@ -1107,7 +1190,7 @@ input, button {
 #member-list-container #member-list ul:empty:before {
   margin-left: 10px;
   font-weight: bold;
-  content: 'No one\'s here, yet!';
+  content: "No one's here, yet!";
 }
 
 #member-list-container #member-list li .member-options-container {
@@ -1132,11 +1215,11 @@ input, button {
   border: none;
   height: 100%;
   padding: 5px;
-  -webkit-transition: background .1s linear;
-	-o-transition: background .1s linear;
-	transition: background .1s linear;
+  -webkit-transition: background 0.1s linear;
+  -o-transition: background 0.1s linear;
+  transition: background 0.1s linear;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 #member-list-container #member-list li .member-options-container button:first-child {
@@ -1162,15 +1245,39 @@ input, button {
 }
 
 @-webkit-keyframes bounce {
-  0%   { -webkit-transform: translateY(0); transform: translateY(0); }
-  30%  { -webkit-transform: translateY(-8px); transform: translateY(-8px); } /* Negative, so moving upwards. */
-  50%  { -webkit-transform: translateY(0); transform: translateY(0); }
-  100% { -webkit-transform: translateY(0); transform: translateY(0); } /* Finish early and have some pause at end. */
+  0% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  30% {
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+  } /* Negative, so moving upwards. */
+  50% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  } /* Finish early and have some pause at end. */
 }
 
 @keyframes bounce {
-  0%   { -webkit-transform: translateY(0); transform: translateY(0); }
-  30%  { -webkit-transform: translateY(-8px); transform: translateY(-8px); } /* Negative, so moving upwards. */
-  50%  { -webkit-transform: translateY(0); transform: translateY(0); }
-  100% { -webkit-transform: translateY(0); transform: translateY(0); } /* Finish early and have some pause at the end. */
+  0% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  30% {
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+  } /* Negative, so moving upwards. */
+  50% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  } /* Finish early and have some pause at the end. */
 }

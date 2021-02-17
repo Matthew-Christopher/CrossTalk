@@ -1,4 +1,4 @@
-$(window).on("load", () => {
+$(window).on('load', () => {
   // Get the GroupID.
   let searchParams = new URLSearchParams(window.location.search);
 
@@ -6,10 +6,10 @@ $(window).on("load", () => {
   if (searchParams.has('GroupID')) {
     // Get the group data.
     $.ajax({
-      type: "POST",
-      url: "/api/GetGroupData",
+      type: 'POST',
+      url: '/api/GetGroupData',
       data: {
-        GroupID: searchParams.get('GroupID')
+        GroupID: searchParams.get('GroupID'),
       },
       success: (data) => {
         let stats = $.parseJSON(data);
@@ -17,7 +17,7 @@ $(window).on("load", () => {
         $('#data-container > .title').text(stats.groupName);
 
         $('#users-readout').text(stats.members.length);
-        $('#online-users-readout').text(stats.members.filter(element => element.Online).length);
+        $('#online-users-readout').text(stats.members.filter((element) => element.Online).length);
         $('#messages-sent-readout').text(countMessages(stats.messages));
 
         // Let's check with the server and see how many messages have been sent recently.
@@ -30,15 +30,17 @@ $(window).on("load", () => {
         let messageChart = new Chart(messageChartContext, {
           type: 'line',
           data: {
-            labels: sevenDayActivity.map(element => element.date), // Extract just the dates.
-            datasets: [{
-              label: 'Number of Messages',
-              data: sevenDayActivity.map(element => element.messagesToday), // Extract just the number of messages on each day.
-              backgroundColor: '#ff6384',
-              borderColor: '#ff6384',
-              borderWidth: 1,
-              fill: false
-            }]
+            labels: sevenDayActivity.map((element) => element.date), // Extract just the dates.
+            datasets: [
+              {
+                label: 'Number of Messages',
+                data: sevenDayActivity.map((element) => element.messagesToday), // Extract just the number of messages on each day.
+                backgroundColor: '#ff6384',
+                borderColor: '#ff6384',
+                borderWidth: 1,
+                fill: false,
+              },
+            ],
           },
           options: {
             responsive: true,
@@ -47,55 +49,59 @@ $(window).on("load", () => {
               display: true,
               text: 'Message Activity Over the Previous 7 Days',
               fontSize: 20,
-              fontStyle: 'normal'
+              fontStyle: 'normal',
             },
             tooltips: {
               mode: 'index',
               intersect: false,
-              titleFontStyle: 'normal'
+              titleFontStyle: 'normal',
             },
             hover: {
               mode: 'nearest',
-              intersect: true
+              intersect: true,
             },
             scales: {
-              xAxes: [{
-                display: true,
-                ticks: {
-                  fontSize: 14
-                },
-                scaleLabel: {
+              xAxes: [
+                {
                   display: true,
-                  labelString: 'Date',
-                  fontSize: 14
-                }
-              }],
-              yAxes: [{
-                display: true,
-                ticks: {
-                  beginAtZero: true,
-                  fontSize: 14,
-                  precision: 0 // Don't show any decimal points on the y-axis.
+                  ticks: {
+                    fontSize: 14,
+                  },
+                  scaleLabel: {
+                    display: true,
+                    labelString: 'Date',
+                    fontSize: 14,
+                  },
                 },
-                scaleLabel: {
+              ],
+              yAxes: [
+                {
                   display: true,
-                  labelString: 'Number of Messages',
-                  fontSize: 14
-                }
-              }]
+                  ticks: {
+                    beginAtZero: true,
+                    fontSize: 14,
+                    precision: 0, // Don't show any decimal points on the y-axis.
+                  },
+                  scaleLabel: {
+                    display: true,
+                    labelString: 'Number of Messages',
+                    fontSize: 14,
+                  },
+                },
+              ],
             },
             legend: {
-              display: false
+              display: false,
             },
             animation: {
-              duration: 0
-            }
-          }
+              duration: 0,
+            },
+          },
         });
       },
       failure: () => {
-        console.error("Could not group data. Try again later.");
-      }
+        console.error('Could not group data. Try again later.');
+      },
     });
   }
 
@@ -114,16 +120,17 @@ $(window).on("load", () => {
   function getPrevious7DayMessages(messages, today) {
     let result = [];
 
-    let providedMessagesToday = messages.map(element => element.MessagesToday) // Extract just the number of messages per day that we are given by the server.
-    let providedTimes = messages.map(element => new Date(element.MessageBlockDay).getTime()) // Extract just the dates we are given by the server.
+    let providedMessagesToday = messages.map((element) => element.MessagesToday); // Extract just the number of messages per day that we are given by the server.
+    let providedTimes = messages.map((element) => new Date(element.MessageBlockDay).getTime()); // Extract just the dates we are given by the server.
 
-    for (let daysAgo = 6; daysAgo >= 0; --daysAgo) { // Go in this order so we get today on the right of the graph.
+    for (let daysAgo = 6; daysAgo >= 0; --daysAgo) {
+      // Go in this order so we get today on the right of the graph.
       let newDay = new Date(today);
-      newDay.setDate(newDay.getDate() - daysAgo) // Get the date for daysAgo.
+      newDay.setDate(newDay.getDate() - daysAgo); // Get the date for daysAgo.
 
       result.push({
         date: newDay.toLocaleDateString(),
-        messagesToday: providedTimes.includes(newDay.getTime()) ? providedMessagesToday[providedTimes.indexOf(newDay.getTime())] : 0 // We must compare by the numerical value of getTime to get a match as dates are compared by reference, not value.
+        messagesToday: providedTimes.includes(newDay.getTime()) ? providedMessagesToday[providedTimes.indexOf(newDay.getTime())] : 0, // We must compare by the numerical value of getTime to get a match as dates are compared by reference, not value.
       });
     }
 

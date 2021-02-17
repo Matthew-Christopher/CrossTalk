@@ -1,5 +1,4 @@
-$(window).on("load", () => {
-
+$(window).on('load', () => {
   // What text should we show in the chatbox?
   const chatboxReminder = 'Select or join a group first.';
 
@@ -9,8 +8,9 @@ $(window).on("load", () => {
 
   FetchGroups(); // Initially loaded on groups view, so get the groups.
 
-  $('#chat-type-toggle').change(function(event) {
-    if (!event.target.checked) { // Groups view.
+  $('#chat-type-toggle').change(function (event) {
+    if (!event.target.checked) {
+      // Groups view.
       $('#options').removeClass('friends'); // Return display of group options to default.
 
       $('#chatbox-reminder').text(chatboxReminder); // Update the chatbox reminder to show text relevant to groups.
@@ -27,8 +27,8 @@ $(window).on("load", () => {
     e.preventDefault();
 
     $.ajax({
-      type: "POST",
-      url: "/JoinGroup",
+      type: 'POST',
+      url: '/JoinGroup',
       data: $('#group-join-form').serialize(),
       success: (data) => {
         if ($.parseJSON(data).status.toLowerCase() == 'success') {
@@ -45,7 +45,7 @@ $(window).on("load", () => {
           $('#group-join-code').val('');
           $('#group-join').removeClass('active-button');
           $('#server-container #group-join-form').css('display', 'none');
-        } else if ($.parseJSON(data).status.toLowerCase() == "existing") {
+        } else if ($.parseJSON(data).status.toLowerCase() == 'existing') {
           let newGroupID = $.parseJSON(data).groupID;
 
           // Select the new group and scroll to it.
@@ -70,8 +70,8 @@ $(window).on("load", () => {
         }
       },
       failure: () => {
-        alert("Could not process the invite code. Try again later.");
-      }
+        alert('Could not process the invite code. Try again later.');
+      },
     });
   });
 
@@ -83,11 +83,10 @@ $(window).on("load", () => {
     $('#group-create-button').css('background', '#8ffd9f');
 
     $.ajax({
-      type: "POST",
-      url: "/CreateGroup",
+      type: 'POST',
+      url: '/CreateGroup',
       data: $('#group-create-form').serialize(),
       success: (data) => {
-
         JSONData = $.parseJSON(data);
 
         let newGroupID = $.parseJSON(data)[0].GroupID;
@@ -105,24 +104,24 @@ $(window).on("load", () => {
         $('#group-create-container').fadeOut(200); // Take 200ms to fade.
         $('body *:not(.blur-exclude)').css('-webkit-filter', '');
 
-
         $('#group-create-form input[name="group"]').val(''); // Clear the name input.
         $('#group-create-form input[name="group"]').removeClass('non-empty'); // Clear the name input.
 
         $('#group-create-button').css('background', '#6dd5ed');
       },
       error: () => {
-        alert("Something went wrong. Try again later.");
-      }
+        alert('Something went wrong. Try again later.');
+      },
     });
   });
 
   // We have opened a new group. Let's change the styling of the buttons and load up the group data and messages.
   $(document).on('click', '.server-button', (event) => {
-    if ($(event.target).closest('.server-button').attr('id') != activeServerID) { // Only do something if we are not clicking the currently active button.
+    if ($(event.target).closest('.server-button').attr('id') != activeServerID) {
+      // Only do something if we are not clicking the currently active button.
       // If the event target is the text in the button, we actually want the parent button.
       // Match by just the GroupID property.
-      targetIndex = JSONData.findIndex(x => x.GroupID == $(event.target).closest('button').attr('id'));
+      targetIndex = JSONData.findIndex((x) => x.GroupID == $(event.target).closest('button').attr('id'));
 
       $('#' + JSONData[targetIndex].GroupID).addClass('active-button');
 
@@ -143,14 +142,13 @@ $(window).on("load", () => {
 
   // What groups are we in? Get them and put them in the server selector so we can pick one.
   function FetchGroups(callback) {
-
     // Remove the groups we already have, they might have changed.
     $('#server-selector').empty();
 
     // Call the server's API to get the user's groups.
     $.ajax({
-      type: "POST",
-      url: "/api/GetMyGroups",
+      type: 'POST',
+      url: '/api/GetMyGroups',
       success: (data) => {
         JSONData = $.parseJSON(data);
 
@@ -163,13 +161,14 @@ $(window).on("load", () => {
 
         // Then we can populate the container dynamically.
         $.each(JSONData, (i, item) => {
-
           // Construct HTML from the parsed JSON data. Using .text() escapes any malformed or malicious strings.
-          let newGroup =
-            $('<button class="server-button" type="button">').attr('id', item.GroupID)
-              .append($('<span class="server-info-container">')
-              .append($("<h1></h1>").text(item.GroupName))
-              .append($("<i></i>").text(item.LatestMessageString ? item.LatestMessageString : "No messages yet.")));
+          let newGroup = $('<button class="server-button" type="button">')
+            .attr('id', item.GroupID)
+            .append(
+              $('<span class="server-info-container">')
+                .append($('<h1>').text(item.GroupName))
+                .append($('<i>').text(item.LatestMessageString ? item.LatestMessageString : 'No messages yet.'))
+            );
 
           socket.emit('join', item.GroupID);
 
@@ -179,19 +178,20 @@ $(window).on("load", () => {
         if (callback) callback();
       },
       failure: () => {
-        console.error("Could not retreive messaging groups. Try again later.");
-      }
+        console.error('Could not retreive messaging groups. Try again later.');
+      },
     });
   }
 
   // Go to a group in the server selector, if we can't see it at the moment.
   function scrollTo(newGroupID) {
     $('#server-selector').scrollTop(
-      $('#' + newGroupID)[0].offsetTop // The distance from the top of this element that the desired elemenent is.
-      - ($('#toggle-box').height() + 1) // Account for height of the top toggle and buttons.
-      - $('#server-buttons-container').height()
-      - ($('#group-join-form .slide-back').height() + 1) // The invite form will hide after executing and we need to account for its height.
-      - $('#server-selector').height() // Scroll so that the element is at the bottom of the window.
-      + $('#' + newGroupID).height()); // Account for the height of the element itself, so that its bottom edge is at the bottom of this element.
+      $('#' + newGroupID)[0].offsetTop - // The distance from the top of this element that the desired elemenent is.
+      ($('#toggle-box').height() + 1) - // Account for height of the top toggle and buttons.
+      $('#server-buttons-container').height() -
+      ($('#group-join-form .slide-back').height() + 1) - // The invite form will hide after executing and we need to account for its height.
+      $('#server-selector').height() + // Scroll so that the element is at the bottom of the window.
+        $('#' + newGroupID).height()
+    ); // Account for the height of the element itself, so that its bottom edge is at the bottom of this element.
   }
 });

@@ -1,13 +1,22 @@
-$(window).on("load", () => {
+$(window).on('load', () => {
   $(document).click((event) => {
     // Handle click events. We should hide the nav container if it's visible and we click outside of it.
 
     // We hide and show various elements depending on the context and ensure that the styling is appropriate on the remaining ones.
 
-    if ($('#profile-options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#profile-options-nav-container') && !$(event.target).is('#profile-options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *') || $(event.target).is('#options-button') || $(event.target).is('#options-button *'))) {
+    if (
+      $('#profile-options-nav-container').css('visibility') == 'visible' &&
+      !$(event.target).is('#profile-options-nav-container') &&
+      !$(event.target).is('#profile-options-nav-container *') &&
+      !($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *') || $(event.target).is('#options-button') || $(event.target).is('#options-button *'))
+    ) {
       toggleVisiblity('#profile-options-nav-container');
-
-    } else if ($('#options-nav-container').css('visibility') == 'visible' && !$(event.target).is('#options-nav-container') && !$(event.target).is('#options-nav-container *') && !($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *') || $(event.target).is('#options-button') || $(event.target).is('#options-button *'))) {
+    } else if (
+      $('#options-nav-container').css('visibility') == 'visible' &&
+      !$(event.target).is('#options-nav-container') &&
+      !$(event.target).is('#options-nav-container *') &&
+      !($(event.target).is('#profile-options-button') || $(event.target).is('#profile-options-button *') || $(event.target).is('#options-button') || $(event.target).is('#options-button *'))
+    ) {
       toggleVisiblity('#options-nav-container');
 
       hideInviteCode();
@@ -51,10 +60,10 @@ $(window).on("load", () => {
   function copyInviteCode() {
     // Create a temporary element so we can copy the code, then delete it again.
 
-    let $temp = $('<input>')
+    let $temp = $('<input>');
     $('body').append($temp);
     $temp.val($('#invite-code-display p').text()).select();
-    document.execCommand("copy");
+    document.execCommand('copy');
     $temp.remove();
   }
   // END SOURCE
@@ -63,26 +72,26 @@ $(window).on("load", () => {
     // Request our code from the server so that we can give it to other users to join.
 
     $.ajax({
-      type: "POST",
-      url: "/api/GetInviteCode",
-      data:  {
-        GroupID: activeServerID
+      type: 'POST',
+      url: '/api/GetInviteCode',
+      data: {
+        GroupID: activeServerID,
       },
       success: (data) => {
         $('#invite-code').text($.parseJSON(data)[0].InviteCode);
       },
       failure: () => {
-        $('#invite-code').text("Error. Try again later.");
-      }
+        $('#invite-code').text('Error. Try again later.');
+      },
     });
   }
 });
 
-function toggleVisiblity (name) {
+function toggleVisiblity(name) {
   // If I'm visible, hide me.
   // If I need to be shown, show me, and if the other nav item is visible then hide it too.
 
-  if (($(name).css('visibility') == 'visible')) {
+  if ($(name).css('visibility') == 'visible') {
     $(name).css('visibility', 'hidden');
 
     if (name == '#options-nav-container') {
@@ -90,7 +99,7 @@ function toggleVisiblity (name) {
       $('#search').val('').trigger('input');
     }
   } else {
-    let otherContainer = (name == '#profile-options-nav-container') ? '#options-nav-container' : '#profile-options-nav-container';
+    let otherContainer = name == '#profile-options-nav-container' ? '#options-nav-container' : '#profile-options-nav-container';
 
     if ($(otherContainer).css('visibility') == 'visible') {
       $(otherContainer).css('visibility', 'hidden');

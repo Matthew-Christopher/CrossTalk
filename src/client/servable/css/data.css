@@ -3,16 +3,18 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   font-size: 100%;
-  font-family: 'Work Sans', sans-serif;
+  font-family: "Work Sans", sans-serif;
   overflow: hidden;
 }
 
-input, button {
+input,
+button {
   font-size: 100%;
-  font-family: 'Work Sans', sans-serif;
+  font-family: "Work Sans", sans-serif;
 }
 
 #landing-container {
@@ -21,7 +23,7 @@ input, button {
   width: 100%;
   z-index: 1;
   height: 100%;
-  background: #2193b0;  /* fallback for old browsers */  /* Chrome 10-25, Safari 5.1-6 */
+  background: #2193b0; /* fallback for old browsers */ /* Chrome 10-25, Safari 5.1-6 */
   background: -o-linear-gradient(left, #6dd5ed, #2193b0);
   background: -webkit-gradient(linear, left top, right top, from(#6dd5ed), to(#2193b0));
   background: linear-gradient(to right, #6dd5ed, #2193b0); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
@@ -45,9 +47,9 @@ input, button {
   position: relative;
   height: calc(100% - 200px);
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   -webkit-box-shadow: 10px 10px 32px 0px rgba(0, 0, 0, 0.75);
-          box-shadow: 10px 10px 32px 0px rgba(0, 0, 0, 0.75);
+  box-shadow: 10px 10px 32px 0px rgba(0, 0, 0, 0.75);
 }
 
 #data-container > .title {
@@ -60,7 +62,7 @@ input, button {
 }
 
 #data-container > .title::before {
-  content: 'Group Info for ';
+  content: "Group Info for ";
 }
 
 #data-container #stats-container #numbers {
@@ -69,10 +71,10 @@ input, button {
   display: flex;
   -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
-      -ms-flex-direction: row;
-          flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
   -ms-flex-pack: distribute;
-      justify-content: space-around;
+  justify-content: space-around;
   height: 80px;
 }
 
@@ -80,7 +82,7 @@ input, button {
   font-size: 1.5em;
   margin-bottom: 20px;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 #data-container #stats-container #numbers h2 {
@@ -96,10 +98,10 @@ input, button {
   position: relative;
   left: 50%;
   -webkit-transform: translateX(-50%);
-      -ms-transform: translateX(-50%);
-          transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   margin: 50px 0;
   width: 80%;
   height: calc(100vh - 510px);
