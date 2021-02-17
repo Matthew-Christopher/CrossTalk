@@ -13,7 +13,7 @@ const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
-  database: process.env.DB_DATABASE
+  database: process.env.DB_DATABASE,
 });
 
 module.exports.initialise = (instance) => {
@@ -58,37 +58,45 @@ module.exports.initialise = (instance) => {
         pool.getConnection(async (err, connection) => {
           if (err) throw err; // Connection failed.
 
-          async.parallel({
-            // Get the display name of the author to display along with the message text and timestamp.
-            getDisplayName: function(callback) {
-              let getDisplayNameQuery = 'SELECT DisplayName FROM User WHERE UserID = ?;';
+          async.parallel(
+            {
+              // Get the display name of the author to display along with the message text and timestamp.
+              getDisplayName: function (callback) {
+                let getDisplayNameQuery = 'SELECT DisplayName FROM User WHERE UserID = ?;';
 
-              db.query(connection, getDisplayNameQuery, socket.request.session.UserID, (result, fields) => {
-                callback(null, result[0].DisplayName);
-              });
+                db.query(connection, getDisplayNameQuery, socket.request.session.UserID, (result, fields) => {
+                  callback(null, result[0].DisplayName);
+                });
+              },
+              // Add the message to the database so offline users in the group or friendship can read it later.
+              insertMessage: function (callback) {
+                let insertGroupMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
+                let insertPrivateMessageQuery = 'INSERT INTO Message (FriendshipID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
+
+                db.query(
+                  connection,
+                  message.GroupID ? insertGroupMessageQuery : insertPrivateMessageQuery,
+                  [message.GroupID ? message.GroupID : message.FriendshipID, socket.request.session.UserID, message.MessageString, message.Timestamp],
+                  (result, fields) => {
+                    callback(null, result);
+                  }
+                );
+              },
             },
-            // Add the message to the database so offline users in the group or friendship can read it later.
-            insertMessage: function(callback) {
-              let insertGroupMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
-              let insertPrivateMessageQuery = 'INSERT INTO Message (FriendshipID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
+            (error, results) => {
+              if (error) throw error;
 
-              db.query(connection, message.GroupID ? insertGroupMessageQuery : insertPrivateMessageQuery, [message.GroupID ? message.GroupID : message.FriendshipID, socket.request.session.UserID, message.MessageString, message.Timestamp], (result, fields) => {
-                callback(null, result);
-              });
+              // Set the rest of the message data that we couldn't get from the client.
+              message.AuthorID = socket.request.session.UserID;
+              message.AuthorDisplayName = results.getDisplayName;
+              message.MessageID = results.insertMessage.insertId;
+
+              // Send the message in the appropriate room. We add 'FG' to the start of a private message to indicate that it is so.
+              io.sockets.in(message.GroupID ? message.GroupID.toString() : 'FG' + message.FriendshipID.toString()).emit('message return', message);
+
+              connection.release();
             }
-          }, (error, results) => {
-            if (error) throw error;
-
-            // Set the rest of the message data that we couldn't get from the client.
-            message.AuthorID = socket.request.session.UserID;
-            message.AuthorDisplayName = results.getDisplayName;
-            message.MessageID = results.insertMessage.insertId;
-
-            // Send the message in the appropriate room. We add 'FG' to the start of a private message to indicate that it is so.
-            io.sockets.in(message.GroupID ? message.GroupID.toString() : 'FG' + message.FriendshipID.toString()).emit('message return', message);
-
-            connection.release();
-          });
+          );
         });
       }
     });
@@ -97,41 +105,44 @@ module.exports.initialise = (instance) => {
       pool.getConnection(async (err, connection) => {
         if (err) throw err; // Connection failed.
 
-        async.parallel({
-          // Ensure the requesting user is actually in the group and no nefarious request has been constructed.
-          checkInGroup: function(callback) {
-            let checkInGroupQuery = 'SELECT COUNT(*) AS Matches, Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
+        async.parallel(
+          {
+            // Ensure the requesting user is actually in the group and no nefarious request has been constructed.
+            checkInGroup: function (callback) {
+              let checkInGroupQuery = 'SELECT COUNT(*) AS Matches, Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
 
-            db.query(connection, checkInGroupQuery, [socket.request.session.UserID, requestData.GroupID], (result, fields) => {
-              callback(null, result[0].Matches, result[0].Role);
-            });
-          },
-          // Get the current role of the user to be edited. The requesting user can only edit roles below their current one.
-          actingOnRole: function(callback) {
-            let confirmAuthorityQuery = 'SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
-
-            db.query(connection, confirmAuthorityQuery, [requestData.UserToChange, requestData.GroupID], (result, fields) => {
-              callback(null, result[0].Role);
-            });
-          }
-        }, (error, results) => {
-          if (error) throw error;
-
-          if (results.checkInGroup[0] == 1 && results.checkInGroup[1] > results.actingOnRole && results.checkInGroup[1] > (requestData.TargetRole == 'admin' ? 1 : null)) {
-            // Operation is permitted, update the user's role.
-            let updateRoleQuery = 'UPDATE GroupMembership SET Role = ? WHERE UserID = ? AND GroupID = ?;';
-
-            db.query(connection, updateRoleQuery, [requestData.TargetRole == 'admin' ? 1 : null, requestData.UserToChange, requestData.GroupID], (result, fields) => {
-              io.sockets.in(requestData.GroupID.toString()).emit('role update', {
-                InGroup: requestData.GroupID,
-                AffectsUser: requestData.UserToChange,
-                NewRole: requestData.TargetRole == 'admin' ? 1 : null
+              db.query(connection, checkInGroupQuery, [socket.request.session.UserID, requestData.GroupID], (result, fields) => {
+                callback(null, result[0].Matches, result[0].Role);
               });
-            });
-          }
+            },
+            // Get the current role of the user to be edited. The requesting user can only edit roles below their current one.
+            actingOnRole: function (callback) {
+              let confirmAuthorityQuery = 'SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
 
-          connection.release();
-        });
+              db.query(connection, confirmAuthorityQuery, [requestData.UserToChange, requestData.GroupID], (result, fields) => {
+                callback(null, result[0].Role);
+              });
+            },
+          },
+          (error, results) => {
+            if (error) throw error;
+
+            if (results.checkInGroup[0] == 1 && results.checkInGroup[1] > results.actingOnRole && results.checkInGroup[1] > (requestData.TargetRole == 'admin' ? 1 : null)) {
+              // Operation is permitted, update the user's role.
+              let updateRoleQuery = 'UPDATE GroupMembership SET Role = ? WHERE UserID = ? AND GroupID = ?;';
+
+              db.query(connection, updateRoleQuery, [requestData.TargetRole == 'admin' ? 1 : null, requestData.UserToChange, requestData.GroupID], (result, fields) => {
+                io.sockets.in(requestData.GroupID.toString()).emit('role update', {
+                  InGroup: requestData.GroupID,
+                  AffectsUser: requestData.UserToChange,
+                  NewRole: requestData.TargetRole == 'admin' ? 1 : null,
+                });
+              });
+            }
+
+            connection.release();
+          }
+        );
       });
     });
 
@@ -164,44 +175,49 @@ module.exports.initialise = (instance) => {
 
           db.query(connection, checkValidQuery, [messageID, socket.request.session.UserID, socket.request.session.UserID, socket.request.session.UserID, messageID], (firstResult, fields) => {
             if (firstResult[0].Matches == 1) {
-              async.parallel({
-                secondResult: function(callback) {
-                  // Wipe the message from the database.
-                  let deleteQuery = "DELETE FROM Message WHERE MessageID = ?;";
+              async.parallel(
+                {
+                  secondResult: function (callback) {
+                    // Wipe the message from the database.
+                    let deleteQuery = 'DELETE FROM Message WHERE MessageID = ?;';
 
-                  db.query(connection, deleteQuery, messageID, (result, fields) => {
-                    callback(null, result);
-                  });
+                    db.query(connection, deleteQuery, messageID, (result, fields) => {
+                      callback(null, result);
+                    });
+                  },
+                  thirdResult: function (callback) {
+                    // Get the latest message in the group at the moment.
+                    let getRecentMessageQuery = 'SELECT Message.MessageString AS LatestMessageString FROM Message WHERE Message.GroupID = ? OR Message.FriendshipID = ? ORDER BY Timestamp DESC LIMIT 1;'; // Get the message that is now the most recent in the group.
+
+                    db.query(connection, getRecentMessageQuery, [firstResult[0].GroupID, firstResult[0].FriendshipID], (result, fields) => {
+                      callback(null, result);
+                    });
+                  },
                 },
-                thirdResult: function(callback) {
-                  // Get the latest message in the group at the moment.
-                  let getRecentMessageQuery = 'SELECT Message.MessageString AS LatestMessageString FROM Message WHERE Message.GroupID = ? OR Message.FriendshipID = ? ORDER BY Timestamp DESC LIMIT 1;'; // Get the message that is now the most recent in the group.
+                (error, results) => {
+                  if (error) throw error;
 
-                  db.query(connection, getRecentMessageQuery, [firstResult[0].GroupID, firstResult[0].FriendshipID], (result, fields) => {
-                    callback(null, result);
-                  });
+                  if (firstResult[0].GroupID) {
+                    // This was a group message.
+
+                    io.sockets.in(firstResult[0].GroupID.toString()).emit('binned', {
+                      // Send out the information to clients so they can remove the message.
+                      group: firstResult[0].GroupID,
+                      message: messageID,
+                      newLatestMessage: results.thirdResult[0] ? results.thirdResult[0].LatestMessageString : 'No messages yet.',
+                    });
+                  } else {
+                    // This was a private message.
+
+                    io.sockets.in('FG' + firstResult[0].FriendshipID.toString()).emit('binned', {
+                      // Send out the information to clients so they can remove the message.
+                      group: firstResult[0].FriendshipID,
+                      message: messageID,
+                      newLatestMessage: results.thirdResult[0] ? results.thirdResult[0].LatestMessageString : 'No messages yet.',
+                    });
+                  }
                 }
-              }, (error, results) => {
-                if (error) throw error;
-
-                if (firstResult[0].GroupID) {
-                  // This was a group message.
-
-                  io.sockets.in(firstResult[0].GroupID.toString()).emit('binned', { // Send out the information to clients so they can remove the message.
-                    group: firstResult[0].GroupID,
-                    message: messageID,
-                    newLatestMessage: results.thirdResult[0] ? results.thirdResult[0].LatestMessageString : 'No messages yet.'
-                  });
-                } else {
-                  // This was a private message.
-
-                  io.sockets.in('FG' + firstResult[0].FriendshipID.toString()).emit('binned', { // Send out the information to clients so they can remove the message.
-                    group: firstResult[0].FriendshipID,
-                    message: messageID,
-                    newLatestMessage: results.thirdResult[0] ? results.thirdResult[0].LatestMessageString : 'No messages yet.'
-                  });
-                }
-              });
+              );
             }
 
             connection.release();
@@ -220,26 +236,29 @@ module.exports.initialise = (instance) => {
 
           db.query(connection, checkValidQuery, [messageID, socket.request.session.UserID], (result, fields) => {
             if (result[0].Matches == 1) {
-              async.waterfall([
-                function(callback) {
-                  // Which group are we working in?
-                  let getGroupQuery = "SELECT GroupID FROM Message WHERE MessageID = ?;";
+              async.waterfall(
+                [
+                  function (callback) {
+                    // Which group are we working in?
+                    let getGroupQuery = 'SELECT GroupID FROM Message WHERE MessageID = ?;';
 
-                  db.query(connection, getGroupQuery, messageID, (result, fields) => {
-                    callback(null, result[0].GroupID);
-                  });
-                },
-                function(groupIDToUpdate, callback) {
-                  // Update the group so offline user's can display the correct pinned message when they log in again.
-                  let updateGroupQuery = 'UPDATE \`Group\` SET PinnedMessageID = ? WHERE GroupID = ?;';
+                    db.query(connection, getGroupQuery, messageID, (result, fields) => {
+                      callback(null, result[0].GroupID);
+                    });
+                  },
+                  function (groupIDToUpdate, callback) {
+                    // Update the group so offline user's can display the correct pinned message when they log in again.
+                    let updateGroupQuery = 'UPDATE `Group` SET PinnedMessageID = ? WHERE GroupID = ?;';
 
-                  db.query(connection, updateGroupQuery, [messageID, groupIDToUpdate], (result, fields) => {
-                    callback(null, groupIDToUpdate);
-                  });
+                    db.query(connection, updateGroupQuery, [messageID, groupIDToUpdate], (result, fields) => {
+                      callback(null, groupIDToUpdate);
+                    });
+                  },
+                ],
+                (error, groupIDToUpdate) => {
+                  io.sockets.in(groupIDToUpdate.toString()).emit('pinned', groupIDToUpdate);
                 }
-              ], (error, groupIDToUpdate) => {
-                io.sockets.in(groupIDToUpdate.toString()).emit('pinned', groupIDToUpdate);
-              });
+              );
             }
 
             connection.release();
@@ -254,7 +273,8 @@ module.exports.initialise = (instance) => {
           if (err) throw err; // Connection failed.
 
           // Is the requesting user allowed to pin the message?
-          let checkValidQuery = 'SELECT COUNT(*) AS Matches, \`Group\`.GroupID, \`Group\`.PinnedMessageID AS MessageID FROM \`Group\` JOIN GroupMembership ON \`Group\`.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND \`Group\`.GroupID = ? AND GroupMembership.UserID = ?;';
+          let checkValidQuery =
+            'SELECT COUNT(*) AS Matches, `Group`.GroupID, `Group`.PinnedMessageID AS MessageID FROM `Group` JOIN GroupMembership ON `Group`.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND `Group`.GroupID = ? AND GroupMembership.UserID = ?;';
 
           db.query(connection, checkValidQuery, [groupID, socket.request.session.UserID], (result, fields) => {
             if (result[0].Matches == 1) {
@@ -262,7 +282,7 @@ module.exports.initialise = (instance) => {
               let unpinnedMessageID = result[0].MessageID;
 
               // Update the database and send out the unpin message in a socket room so clients can get rid of it in real-time.
-              let updateQuery = 'UPDATE \`Group\` SET PinnedMessageID = NULL WHERE GroupID = ?;';
+              let updateQuery = 'UPDATE `Group` SET PinnedMessageID = NULL WHERE GroupID = ?;';
 
               db.query(connection, updateQuery, groupIDToUpdate, (result, fields) => {
                 io.sockets.in(groupIDToUpdate.toString()).emit('unpinned', { group: groupIDToUpdate, message: unpinnedMessageID });
@@ -302,53 +322,59 @@ module.exports.initialise = (instance) => {
             if (result[0].RequestingUserMatches == 1 && result[0].TargetingUserMatches == 1 && result[0].AlreadyFriendMatches == 0) {
               // Everything is valid and the users aren't already friends. Let's sent the request.
 
-              async.waterfall([
-                function getSenderName(callback) {
-                  // Get the name of the user that send this request.
-                  let getSenderNameQuery = 'SELECT DisplayName FROM User WHERE UserID = ?;';
+              async.waterfall(
+                [
+                  function getSenderName(callback) {
+                    // Get the name of the user that send this request.
+                    let getSenderNameQuery = 'SELECT DisplayName FROM User WHERE UserID = ?;';
 
-                  db.query(connection, getSenderNameQuery, socket.request.session.UserID, (result, fields) => {
-                    callback(null, result[0].DisplayName);
-                  });
-                },
-                function AddPendingFriendship(name, callback) {
-                  // Make a friendship, the status will be NULL for the moment, until the request is acted upon by the other party.
-                  let addPendingFriendshipQuery = 'INSERT INTO Friendship (Status) VALUES (DEFAULT);';
+                    db.query(connection, getSenderNameQuery, socket.request.session.UserID, (result, fields) => {
+                      callback(null, result[0].DisplayName);
+                    });
+                  },
+                  function AddPendingFriendship(name, callback) {
+                    // Make a friendship, the status will be NULL for the moment, until the request is acted upon by the other party.
+                    let addPendingFriendshipQuery = 'INSERT INTO Friendship (Status) VALUES (DEFAULT);';
 
-                  db.query(connection, addPendingFriendshipQuery, [], (result, fields) => {
-                    callback(null, name, result.insertId); // The new FriendshipID.
-                  });
-                },
-                function AddUsersToFriendship(name, friendshipID, callback) {
-                  async.parallel({
-                    // The user that requested to add.
-                    insertRequestingUser: function(callback) {
-                      let insertRequestingUserQuery = 'INSERT INTO UserFriend VALUES (?, ?, True)';
+                    db.query(connection, addPendingFriendshipQuery, [], (result, fields) => {
+                      callback(null, name, result.insertId); // The new FriendshipID.
+                    });
+                  },
+                  function AddUsersToFriendship(name, friendshipID, callback) {
+                    async.parallel(
+                      {
+                        // The user that requested to add.
+                        insertRequestingUser: function (callback) {
+                          let insertRequestingUserQuery = 'INSERT INTO UserFriend VALUES (?, ?, True)';
 
-                      db.query(connection, insertRequestingUserQuery, [friendshipID, socket.request.session.UserID], (fields, result) => {
-                        callback(null);
-                      });
-                    },
-                    // The user that the request went to.
-                    insertRequestedUser: function(callback) {
-                      let insertRequestedUserQuery = 'INSERT INTO UserFriend (FriendshipID, UserInFriendship) VALUES (?, ?)';
+                          db.query(connection, insertRequestingUserQuery, [friendshipID, socket.request.session.UserID], (fields, result) => {
+                            callback(null);
+                          });
+                        },
+                        // The user that the request went to.
+                        insertRequestedUser: function (callback) {
+                          let insertRequestedUserQuery = 'INSERT INTO UserFriend (FriendshipID, UserInFriendship) VALUES (?, ?)';
 
-                      db.query(connection, insertRequestedUserQuery, [friendshipID, data.NewFriend], (fields, result) => {
-                        callback(null);
-                      });
-                    }
-                  }, (error, results) => {
-                    if (error) throw error;
+                          db.query(connection, insertRequestedUserQuery, [friendshipID, data.NewFriend], (fields, result) => {
+                            callback(null);
+                          });
+                        },
+                      },
+                      (error, results) => {
+                        if (error) throw error;
 
-                    callback(null, name, friendshipID);
-                  });
+                        callback(null, name, friendshipID);
+                      }
+                    );
+                  },
+                ],
+                (error, name, friendshipID) => {
+                  if (error) throw error;
+
+                  // Send the data out to the group that the request was made in so we can update the member items.
+                  io.sockets.in(data.ReferringGroup.toString()).emit('friend requested', data.NewFriend, name);
                 }
-              ], (error, name, friendshipID) => {
-                if (error) throw error;
-
-                // Send the data out to the group that the request was made in so we can update the member items.
-                io.sockets.in(data.ReferringGroup.toString()).emit('friend requested', data.NewFriend, name);
-              });
+              );
             }
 
             connection.release();
@@ -374,7 +400,6 @@ module.exports.initialise = (instance) => {
               ON Friendship.FriendshipID = FirstDerivedTable.FriendshipID;`; // Perform a self join on UserFriend.
 
           db.query(connection, checkValidQuery, [socket.request.session.UserID, data.FriendshipID], (result, fields) => {
-
             let otherUserID = result[0].OtherUserID;
 
             if (result.length == 1) {
@@ -385,7 +410,7 @@ module.exports.initialise = (instance) => {
               db.query(connection, updateFriendshipQuery, [data.IsAccepting ? 2 : 1, result[0].FriendshipID], (result, fields) => {
                 let newFriendshipData = {
                   FriendshipID: data.FriendshipID,
-                  Status: data.IsAccepting ? 2 : 1 // We can either make the users friends or reject the request.
+                  Status: data.IsAccepting ? 2 : 1, // We can either make the users friends or reject the request.
                 };
 
                 // Allow a real-time update.
@@ -431,8 +456,10 @@ module.exports.initialise = (instance) => {
       let currentIDToCheck = allUserIDs[i];
 
       result.push(
-        currentIDToCheck == requestingUserID ? true // Ensure the user that is making the request is always marked as online, as they may not have the chat window open in the background.
-        : connectedClientIDs.includes(currentIDToCheck));
+        currentIDToCheck == requestingUserID
+          ? true // Ensure the user that is making the request is always marked as online, as they may not have the chat window open in the background.
+          : connectedClientIDs.includes(currentIDToCheck)
+      );
     }
 
     return result;

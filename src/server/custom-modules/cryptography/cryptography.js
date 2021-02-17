@@ -14,4 +14,4 @@ module.exports.Hash = async (password) => {
 module.exports.CompareHashes = async (hash, password) => {
   // Does this password match this hash?
   return argon2.verify(hash, password);
-}
+};

@@ -15,7 +15,7 @@ const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
-  database: process.env.DB_DATABASE
+  database: process.env.DB_DATABASE,
 });
 
 module.exports.Register = async (request, response) => {
@@ -23,8 +23,14 @@ module.exports.Register = async (request, response) => {
   const emailCheckRegex = /^[a-z0-9!#$%&\'*+\/=?^_`{|}~.-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/i; // (Regex DB, n.d.)
 
   // Check that the display name isn't just white-space, the email is valid, the password isn't just white space, the email and email confirmation match and that the password and password confirmation match.
-  if (!request.body['display-name'].trim() || emailCheckRegex.exec(request.body.email) === null || !request.body.password.trim() || (request.body.email != request.body['confirm-email']) || !await cryptography.CompareHashes(hash, request.body['confirm-password'])) {
-    response.send("fail");
+  if (
+    !request.body['display-name'].trim() ||
+    emailCheckRegex.exec(request.body.email) === null ||
+    !request.body.password.trim() ||
+    request.body.email != request.body['confirm-email'] ||
+    !(await cryptography.CompareHashes(hash, request.body['confirm-password']))
+  ) {
+    response.send('fail');
   } else {
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
@@ -60,7 +66,7 @@ module.exports.Register = async (request, response) => {
             });
           });
 
-          response.status(201).send("success");
+          response.status(201).send('success');
         }
       });
 
@@ -72,20 +78,19 @@ module.exports.Register = async (request, response) => {
 module.exports.Recover = (request, response) => {
   if (!request.body.email) {
     // The user didn't give us an email address to send the verification link to.
-    response.status(105).send("Data entered was not valid.");
+    response.status(105).send('Data entered was not valid.');
   } else {
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
 
       // Set the recovery key to check again later after we have got a unique one. We will make sure it expires in 24 hours from now (the user can generate another link, if they need to).
       GetRecoveryKey(connection, (recoveryKey) => {
-        let sql = "UPDATE User SET RecoveryKey = ?, RecoveryKeyExpires = ? WHERE EmailAddress = ?;";
+        let sql = 'UPDATE User SET RecoveryKey = ?, RecoveryKeyExpires = ? WHERE EmailAddress = ?;';
 
         let expiryDate = new Date();
         expiryDate.setHours(expiryDate.getHours() + 24);
 
         db.query(connection, sql, [recoveryKey, expiryDate.valueOf(), request.body.email], (result, fields) => {
-
           if (result.affectedRows) {
             mailer.SendRecovery(request.body.email, recoveryKey);
           }
@@ -95,56 +100,63 @@ module.exports.Recover = (request, response) => {
       });
     });
 
-    response.status(201).send("success");
+    response.status(201).send('success');
   }
 };
 
 module.exports.ChangePassword = async (request, response) => {
   let newHash = await cryptography.Hash(request.body.formData.newPassword);
 
-  if (!await cryptography.CompareHashes(newHash, request.body.formData.confirmNewPassword)) {
-    response.json(JSON.stringify({
-      outcome: 'mismatch' // The password and confirmation field did not match.
-    }));
+  if (!(await cryptography.CompareHashes(newHash, request.body.formData.confirmNewPassword))) {
+    response.json(
+      JSON.stringify({
+        outcome: 'mismatch', // The password and confirmation field did not match.
+      })
+    );
   } else {
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
 
       // Check if the user is logged in or has given a valid recovery key.
-      let checkValidQuery = "SELECT COUNT(*) AS NumberOfMatches FROM User WHERE (RecoveryKey = ? AND RecoveryKeyExpires > ?) OR UserID = ?;";
+      let checkValidQuery = 'SELECT COUNT(*) AS NumberOfMatches FROM User WHERE (RecoveryKey = ? AND RecoveryKeyExpires > ?) OR UserID = ?;';
 
       db.query(connection, checkValidQuery, [request.body.recoveryKey, new Date().getTime(), request.session.UserID], (result, fields) => {
         if (result[0].NumberOfMatches != 1) {
           response.status(422).sendFile(path.join(__dirname + '/../client/hidden/invalid-recovery-key.html'));
         } else {
-          async.parallel({
-            // Get the display name and email to send the user a nicely-formatted email to notify them that their password was changed.
-            nameAndEmail: function(callback) {
-              let getDisplayNameAndEmailQuery = 'SELECT DisplayName, EmailAddress FROM User WHERE RecoveryKey = ? OR UserID = ?';
+          async.parallel(
+            {
+              // Get the display name and email to send the user a nicely-formatted email to notify them that their password was changed.
+              nameAndEmail: function (callback) {
+                let getDisplayNameAndEmailQuery = 'SELECT DisplayName, EmailAddress FROM User WHERE RecoveryKey = ? OR UserID = ?';
 
-              db.query(connection, getDisplayNameAndEmailQuery, [request.body.recoveryKey, request.session.UserID], (result, fields) => {
-                callback(null, result);
-              });
+                db.query(connection, getDisplayNameAndEmailQuery, [request.body.recoveryKey, request.session.UserID], (result, fields) => {
+                  callback(null, result);
+                });
+              },
+              // Change the password hash so the user can log in with their new one.
+              updatePassword: function (callback) {
+                let updatePasswordQuery = 'UPDATE User SET PasswordHash = ?, RecoveryKey = NULL, RecoveryKeyExpires = NULL WHERE RecoveryKey = ? OR UserID = ?;';
+
+                db.query(connection, updatePasswordQuery, [newHash, request.body.recoveryKey, request.session.UserID], (result, fields) => {
+                  callback(null, result);
+                });
+              },
             },
-            // Change the password hash so the user can log in with their new one.
-            updatePassword: function(callback) {
-              let updatePasswordQuery = 'UPDATE User SET PasswordHash = ?, RecoveryKey = NULL, RecoveryKeyExpires = NULL WHERE RecoveryKey = ? OR UserID = ?;';
+            (error, results) => {
+              if (error) throw error;
 
-              db.query(connection, updatePasswordQuery, [newHash, request.body.recoveryKey, request.session.UserID], (result, fields) => {
-                callback(null, result);
-              });
+              // Send the change notification email.
+              mailer.SendChangeNotification(results.nameAndEmail[0].DisplayName, results.nameAndEmail[0].EmailAddress);
+
+              // Let the client know that the password has been changed successfully.
+              response.json(
+                JSON.stringify({
+                  outcome: 'change',
+                })
+              );
             }
-          }, (error, results) => {
-            if (error) throw error;
-
-            // Send the change notification email.
-            mailer.SendChangeNotification(results.nameAndEmail[0].DisplayName, results.nameAndEmail[0].EmailAddress);
-
-            // Let the client know that the password has been changed successfully.
-            response.json(JSON.stringify({
-              outcome: 'change'
-            }));
-          });
+          );
         }
 
         connection.release();
@@ -154,15 +166,14 @@ module.exports.ChangePassword = async (request, response) => {
 };
 
 module.exports.LogIn = async (request, response) => {
-
   pool.getConnection(async (err, connection) => {
     if (err) throw err; // Connection failed.
 
     // Get the user from the database so we can authenticate them.
-    var sql = "SELECT * FROM User WHERE EmailAddress = ?";
+    var sql = 'SELECT * FROM User WHERE EmailAddress = ?';
 
     db.query(connection, sql, request.body.email, async (res, fields) => {
-      if (res.length > 0 && await cryptography.CompareHashes(res[0].PasswordHash, request.body.password) && res[0].Verified) {
+      if (res.length > 0 && (await cryptography.CompareHashes(res[0].PasswordHash, request.body.password)) && res[0].Verified) {
         // Authenticated.
 
         // Set the necessary session information so we can get it again elsewhere.
@@ -174,13 +185,13 @@ module.exports.LogIn = async (request, response) => {
           // We need to save the session to the database store, this might take a bit of time.
           // If we redirect straight away then we might get sent back here by the chat page if the session isn't initialised.
 
-          response.status(201).send("success");
+          response.status(201).send('success');
         });
       } else if (res[0] && !res[0].Verified) {
-        response.send("unverified");
+        response.send('unverified');
       } else {
         // Incorrect credentials.
-        response.send("fail");
+        response.send('fail');
       }
 
       connection.release();
@@ -204,14 +215,12 @@ function GetRecoveryKey(connection, callback) {
     let recoveryKey = require('crypto').randomBytes(16).toString('hex');
 
     db.query(connection, 'SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE RecoveryKey = ?;', recoveryKey, (result, fields) => {
-
       duplicates = result[0].NumberOfDuplicates;
 
       if (duplicates == 0) {
         return callback(recoveryKey); // Ensure callback is called after the async activity terminates, to prevent null errors.
       }
     });
-
   } while (duplicates != 0);
 }
 
@@ -222,7 +231,6 @@ function GetUserID(connection, callback) {
   let candidateID = require('crypto').randomBytes(16).toString('hex');
 
   do {
-
     db.query(connection, 'SELECT COUNT(*) AS NumberOfDuplicates FROM User WHERE VerificationKey = ?;', candidateID, (result, fields) => {
       duplicates = result[0].NumberOfDuplicates;
 

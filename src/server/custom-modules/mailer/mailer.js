@@ -32,12 +32,12 @@ module.exports.SendRecovery = (email, recoveryKey) => {
     to: email,
     subject: 'Recover Your Password',
     html: '<h1>Crosstalk</h1><p>Please click the link below to recover your account by resetting your password.</p><a href=\"localhost/account/change-password?recoveryKey=' + recoveryKey + '\">localhost/account/change-password?recoveryKey=' + recoveryKey + '</a><p><i>If you didn\'t request this, you can just ignore the email.</i></p><b>IMPORTANT NOTE: This project is my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create or use an account if you have stumbled upon this website without being permission to use or test it. Thank you.</b>'
-  }
+  };
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) throw error;
   });
-}
+};
 
 module.exports.SendChangeNotification = (displayName, email) => {
   const mailOptions = {
@@ -45,9 +45,9 @@ module.exports.SendChangeNotification = (displayName, email) => {
     to: email,
     subject: 'Notification of Password Change',
     html: '<h1>Crosstalk</h1><p>Dear ' + displayName + ',</p><p>This automated email is to let you know that the password associated with your account was just changed. If this was you, you do not need to take any further action.</p><b>IMPORTANT NOTE: This project is my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create or use an account if you have stumbled upon this website without being permission to use or test it. Thank you.</b>'
-  }
+  };
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) throw error;
   });
-}
+};
