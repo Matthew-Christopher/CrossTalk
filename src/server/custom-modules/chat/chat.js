@@ -303,15 +303,23 @@ module.exports.initialise = (instance) => {
               // Everything is valid and the users aren't already friends. Let's sent the request.
 
               async.waterfall([
-                function AddPendingFriendship(callback) {
+                function getSenderName(callback) {
+                  // Get the name of the user that send this request.
+                  let getSenderNameQuery = 'SELECT DisplayName FROM User WHERE UserID = ?;';
+
+                  db.query(connection, getSenderNameQuery, socket.request.session.UserID, (result, fields) => {
+                    callback(null, result[0].DisplayName);
+                  });
+                },
+                function AddPendingFriendship(name, callback) {
                   // Make a friendship, the status will be NULL for the moment, until the request is acted upon by the other party.
                   let addPendingFriendshipQuery = 'INSERT INTO Friendship (Status) VALUES (DEFAULT);';
 
                   db.query(connection, addPendingFriendshipQuery, [], (result, fields) => {
-                    callback(null, result.insertId); // The new FriendshipID.
+                    callback(null, name, result.insertId); // The new FriendshipID.
                   });
                 },
-                function AddUsersToFriendship(friendshipID, callback) {
+                function AddUsersToFriendship(name, friendshipID, callback) {
                   async.parallel({
                     // The user that requested to add.
                     insertRequestingUser: function(callback) {
@@ -332,14 +340,14 @@ module.exports.initialise = (instance) => {
                   }, (error, results) => {
                     if (error) throw error;
 
-                    callback(null);
+                    callback(null, name, friendshipID);
                   });
                 }
-              ], (error, results) => {
+              ], (error, name, friendshipID) => {
                 if (error) throw error;
 
                 // Send the data out to the group that the request was made in so we can update the member items.
-                io.sockets.in(data.ReferringGroup.toString()).emit('friend requested', data.NewFriend);
+                io.sockets.in(data.ReferringGroup.toString()).emit('friend requested', data.NewFriend, name);
               });
             }
 

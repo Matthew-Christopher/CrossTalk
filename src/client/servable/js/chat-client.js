@@ -281,11 +281,23 @@ $(window).on("load", () => {
   });
 
   // Incoming request! It might have come to us but if not then we need to update the member list buttons.
-  socket.on('friend requested', (toUser) => {
+  socket.on('friend requested', (toUser, name) => {
     if (toUser == id) {
       setFriends();
+
+      let friendButton = $('p.user-name:contains("' + name + '")').parents('li').find('.friend-add-button');
+      let friendContainer = $('p.user-name:contains("' + name + '")').parents('li');
+
+      friendButton.css('display', 'none');
+
+      if (friendContainer.find('.role-button').css('display') == 'none') {
+        friendContainer.find('.member-options-container').addClass('empty');
+      } else {
+        friendContainer.find('.member-options-container').addClass('single');
+      }
     } else {
-      let friendButton = $('#' + toUser).find('.friend-add-button')
+      let friendButton = $('#' + toUser).find('.friend-add-button');
+
       friendButton.text('Request sent!').css('background', '#8ffd9f');
 
       // Wait for a bit and then remove this button.
@@ -337,23 +349,6 @@ $(window).on("load", () => {
     $('#member-list-container').fadeOut(200); // Take 200ms to fade.
 
     unhidePopup();
-  }
-
-  // Ensure that the chatbox scroll doesn't jerk around because its size changes.
-  function handleUnpinInCurrentGroup() {
-    let beforeHideScrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
-
-    $('#pinned-message-container').hide();
-
-    // Ensure that, despite the chatbox changing dimensions, we keep the same scroll position relative to the bottom.
-    $('#chatbox').scrollTop(
-      $('#chatbox').scrollTop() -
-      (($('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight()) >= $('#pinned-message-container').height() ?
-      $('#pinned-message-container').outerHeight()
-      : beforeHideScrollOffset));
-
-    $('#pinned-message-label').text();
-    $('#pinned-message-text').text();
   }
 
   function setRecentMessage(groupID, messageString) {
@@ -613,6 +608,23 @@ function getMessageTimestamp(timestamp) {
     // The message was before yesterday, so just say the day.
     return date.toLocaleDateString();
   }
+}
+
+// Ensure that the chatbox scroll doesn't jerk around because its size changes.
+function handleUnpinInCurrentGroup() {
+  let beforeHideScrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
+
+  $('#pinned-message-container').hide();
+
+  // Ensure that, despite the chatbox changing dimensions, we keep the same scroll position relative to the bottom.
+  $('#chatbox').scrollTop(
+    $('#chatbox').scrollTop() -
+    (($('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight()) >= $('#pinned-message-container').height() ?
+    $('#pinned-message-container').outerHeight()
+    : beforeHideScrollOffset));
+
+  $('#pinned-message-label').text();
+  $('#pinned-message-text').text();
 }
 
 // We show more detail for this message, since it must be more important that other messages!
