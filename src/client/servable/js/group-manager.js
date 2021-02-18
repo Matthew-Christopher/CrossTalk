@@ -39,7 +39,7 @@ $(window).on('load', () => {
             // Select the new group and scroll to it.
             $('#' + newGroupID).trigger('click');
 
-            scrollTo(newGroupID);
+            scrollTo(newGroupID, false);
           });
 
           $('#group-join-code').val('');
@@ -51,7 +51,7 @@ $(window).on('load', () => {
           // Select the new group and scroll to it.
           $('#' + newGroupID).trigger('click');
 
-          scrollTo(newGroupID);
+          scrollTo(newGroupID, false);
 
           $('#group-join-code').val('');
           $('#group-join').removeClass('active-button');
@@ -96,7 +96,7 @@ $(window).on('load', () => {
           // Select the new group and scroll to it.
           $('#' + newGroupID).trigger('click');
 
-          scrollTo(newGroupID);
+          scrollTo(newGroupID, true);
         });
 
         $('#group-create').removeClass('active-button');
@@ -248,15 +248,23 @@ $(window).on('load', () => {
   }
 
   // Go to a group in the server selector, if we can't see it at the moment.
-  function scrollTo(newGroupID) {
-    $('#server-selector').scrollTop(
-      $('#' + newGroupID)[0].offsetTop - // The distance from the top of this element that the desired elemenent is.
-      $('#toggle-box').height() - // Account for height of the top toggle and buttons.
-      $('#server-buttons-container').height() - // Account for join buttons and tag filter input.
-      ($('#group-join-form .slide-back').height() + 1) - // The invite form will hide after executing and we need to account for its height.
-      $('#server-selector').height() + // Scroll so that the element is at the bottom of the window.
-      $('#' + newGroupID).height() // Scroll so the bottom of the button is at the bottom of the server selector.
-    ); // Account for the height of the element itself, so that its bottom edge is at the bottom of this element.
+  function scrollTo(newGroupID, create) {
+    if (create) { // Content of page is different if we used the create form so we need to calculate the desired scroll height differently.
+      $('#server-selector').scrollTop(
+        $('#' + newGroupID)[0].offsetTop - // The distance from the top of this element that the desired elemenent is.
+        $('#server-selector').height() + // Scroll so that the element is at the bottom of the window.
+        $('#' + newGroupID).height() // Scroll so the bottom of the button is at the bottom of the server selector.
+      );
+    } else {
+      $('#server-selector').scrollTop(
+        $('#' + newGroupID)[0].offsetTop - // The distance from the top of this element that the desired elemenent is.
+        $('#toggle-box').height() - // Account for height of the top toggle and buttons.
+        $('#server-buttons-container').height() - // Account for join buttons and tag filter input.
+        ($('#group-join-form .slide-back').height() + 1) - // The invite form will hide after executing and we need to account for its height.
+        $('#server-selector').height() + // Scroll so that the element is at the bottom of the window.
+        $('#' + newGroupID).height() // Scroll so the bottom of the button is at the bottom of the server selector.
+      );
+    }
   }
 
   function addCustomButtonBackground(group, colour) {
