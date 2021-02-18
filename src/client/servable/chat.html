@@ -66,6 +66,31 @@
       </div>
     </div>
 
+    <div id="tag-set-container" class="overlay blur-exclude">
+      <div id="tag-set-popup" class="popup-container">
+        <button id="tag-set-close-button" class="popup-close-button"></button>
+        <h1 id="tag-set-title"></h1>
+
+        <p style="text-align: center;">Set a custom tag to filter your groups by. You can also assign a personal colour here, or leave it as it is.</p>
+
+        <form id="tag-set-form" action="" method="POST">
+          <div class="input-field-container">
+            <input class="effect-20" type="text" autocomplete="off" name="tag" placeholder="" maxlength="14" required />
+            <label>Tag</label>
+            <span class="focus-border">
+              <i></i>
+            </span>
+          </div><br />
+
+          <input type="color" name="colour" style="cursor: pointer; margin-bottom: 50px; padding: 5px; height: 50px; box-sizing: border-box;" value="#6dd5ed" required><label for="color" style="float: right; height: 50px; line-height: 50px;">Group Colour</label></input><br />
+
+          <div class="input-submit-container">
+            <input id="tag-set-submit-button" type="submit" name="set" value="Set Tag" style="cursor: pointer;" required />
+          </div>
+        </form>
+      </div>
+    </div>
+
     <div id="server-container">
       <div id="chat-type-toggle-container">
         <label id="toggle-box">
@@ -102,6 +127,8 @@
             <button id="group-join-button" type="submit" form="group-join-form" value="Go">Go</button>
           </div>
         </form>
+
+        <input type="text" id="tags-search" autocomplete="off" placeholder="Filter tags..." />
       </div>
 
       <div id="group-prompt-container">

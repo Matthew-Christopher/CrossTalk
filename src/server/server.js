@@ -235,7 +235,7 @@ app.post('/CreateGroup', (req, res) => {
         },
         function AddMembership(inviteCode, firstResult, callback) {
           // Add the user to the group using the primary key from the record we just inserted.
-          let membershipInsertionQuery = 'INSERT INTO GroupMembership VALUES (?, ?, 2);';
+          let membershipInsertionQuery = 'INSERT INTO GroupMembership (UserID, GroupID, Role) VALUES (?, ?, 2);';
 
           db.query(connection, membershipInsertionQuery, [req.session.UserID, firstResult.insertId], (result, fields) => {
             callback(null, inviteCode, firstResult, result);
@@ -276,9 +276,13 @@ app.post('/api/GetMyGroups', (req, res, next) => {
       let sql = `
       SELECT GroupInfo.GroupID,
         GroupInfo.GroupName,
-        MessageInfo.LatestMessageString
+        MessageInfo.LatestMessageString,
+        GroupInfo.Tag,
+        GroupInfo.CustomColour
       FROM (SELECT \`Group\`.GroupID,
-            \`Group\`.GroupName
+            \`Group\`.GroupName,
+            GroupMembership.Tag,
+            GroupMembership.CustomColour
             FROM   \`Group\`
             JOIN GroupMembership
             ON \`Group\`.GroupID = GroupMembership.GroupID
@@ -648,6 +652,29 @@ app.post('/api/GetMyFriends', (req, res, next) => {
     });
   } else {
     next(); // Continue along routes, will serve a 404.
+  }
+});
+
+app.post('/api/SetTag', (req, res, next) => {
+  if (req.session.LoggedIn && req.body.GroupID && req.body.tag && req.body.colour && req.body.tag.length <= 14 && req.body.colour.replace('#', '').length == 6) {
+    pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
+
+      // We will update the user's group membership.
+      let updateTagInfoQuery = 'UPDATE GroupMembership SET Tag = ?, CustomColour = ? WHERE UserID = ? AND GroupID = ?;';
+
+      db.query(connection, updateTagInfoQuery, [req.body.tag, req.body.colour.replace('#', ''), req.session.UserID, req.body.GroupID], (result, fields) => {
+        res.status(200).json(JSON.stringify({
+          GroupID: req.body.GroupID,
+          Tag: req.body.tag,
+          Colour: req.body.colour
+        }));
+
+        connection.release();
+      });
+    });
+  } else {
+    res.status(422).send(); // Continue along routes, will serve a 404.
   }
 });
 

@@ -106,6 +106,8 @@ $(window).on('load', () => {
       closeCreateForm();
     } else if ($('#member-list-container').css('display') == 'block' && $('#member-list-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
       closeMemberList();
+    } else if ($('#tag-set-container').css('display') == 'block' && $('#tag-set-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
+      closeTagSetList();
     }
   });
 
@@ -382,6 +384,18 @@ $(window).on('load', () => {
     }
   });
 
+  // Load popup to set group tag.
+  $(document).on('click', '.tag-set-button', (event) => {
+    $('#tag-set-container').fadeIn(200); // Take 200ms to fade.
+    $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)'); // Blur background.
+
+    $('#tag-set-title').text($(event.target).parents('.server-button').find('.server-info-container h1').text());
+  });
+
+  $('#tag-set-close-button').click(() => {
+    closeTagSetList();
+  });
+
   function closeCreateForm() {
     $('#group-create').removeClass('active-button');
     $('#group-create-container').fadeOut(200); // Take 200ms to fade.
@@ -596,6 +610,12 @@ function appendSavedMessages(messageArray) {
         .append($('<p class="message-content" style="display: inline;">').text(message.MessageString))
     );
   });
+}
+
+function closeTagSetList() {
+  $('#tag-set-container').fadeOut(200); // Take 200ms to fade.
+
+  unhidePopup();
 }
 
 // Is a (new) message pinned in this chat?

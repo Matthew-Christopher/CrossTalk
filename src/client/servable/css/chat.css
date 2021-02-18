@@ -20,7 +20,8 @@ button {
 }
 
 #group-create-container,
-#member-list-container {
+#member-list-container,
+#tag-set-container {
   position: fixed;
   left: 0;
   top: 0;
@@ -31,12 +32,14 @@ button {
 }
 
 #group-create-container *:not(label),
-#member-list-container * {
+#member-list-container *,
+#tag-set-container *:not(label) {
   z-index: 5;
 }
 
 #group-create-container.overlay::after,
-#member-list-container.overlay::after {
+#member-list-container.overlay::after,
+#tag-set-container.overlay::after {
   opacity: 0.4;
   background: black;
   content: "";
@@ -119,7 +122,7 @@ button {
   transform: translate3d(0, 0, 0) scale(1.03);
 }
 
-.popup-container input:not([type="submit"]) {
+.popup-container input:not([type="submit"], [type="color"]) {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   outline: none;
@@ -503,6 +506,44 @@ button {
   cursor: pointer;
   text-align: left;
   border-bottom: solid 1px #555;
+}
+
+#server-selector .server-button .tag-set-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 28px;
+  width: 28px;
+  cursor: pointer;
+  background: none;
+  border-radius: 3px;
+  outline: none;
+  border: none;
+  -webkit-transition: background 0.1s linear;
+  -o-transition: background 0.1s linear;
+  transition: background 0.1s linear;
+}
+
+#server-selector .server-button .tag-set-button:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+#server-selector .server-button .tag-set-button .tag-image {
+  height: 100%;
+  width: 100%;
+}
+
+#tags-search {
+  border: none;
+  outline: none;
+  width: 100%;
+  border-bottom: 1px solid black;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+#tag-set-container #tag-set-title::before {
+  content: "Set Tag for ";
 }
 
 .friend-add-button:disabled {
