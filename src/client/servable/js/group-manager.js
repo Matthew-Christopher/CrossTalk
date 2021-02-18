@@ -183,7 +183,7 @@ $(window).on('load', () => {
     for (let i = 0; i < activeGroupTags.length; i++) {
       if (activeGroupTags[i].innerHTML.toLowerCase().indexOf(search) > -1) {
         nothingFound = false;
-        activeGroupTags[i].parentElement.style.display = 'inline-block';
+        activeGroupTags[i].parentElement.style.display = 'block';
       } else {
         activeGroupTags[i].parentElement.style.display = 'none';
       }
@@ -222,7 +222,7 @@ $(window).on('load', () => {
           // Construct HTML from the parsed JSON data. Using .text() escapes any malformed or malicious strings.
           let newGroup = $('<button class="server-button" type="button">')
             .attr('id', item.GroupID)
-            .append($('<p class="tag-text" style="position: absolute; bottom: 3px; right: 33px;">').text(item.Tag ? item.Tag : ''))
+            .append($('<p class="tag-text" style="position: absolute; bottom: 5px; right: 33px;">').text(item.Tag ? item.Tag : ''))
             .append('<button class="tag-set-button"><img class="tag-image" src="img/TagLo.png" alt="Set Tag" />')
             .append(
               $('<span class="server-info-container">')

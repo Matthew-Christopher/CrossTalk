@@ -506,14 +506,15 @@ button {
   cursor: pointer;
   text-align: left;
   border-bottom: solid 1px #555;
+  display: block;
 }
 
 #server-selector .server-button .tag-set-button {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  height: 28px;
-  width: 28px;
+  bottom: 3px;
+  right: 3px;
+  height: 25px;
+  width: 25px;
   cursor: pointer;
   background: none;
   border-radius: 3px;
