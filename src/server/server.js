@@ -64,8 +64,6 @@ const chat = require('./custom-modules/chat');
 const db = require('./custom-modules/db');
 // END CUSTOM MODULES
 
-app.set('etag', false);
-
 app.use(
   bodyParser.urlencoded({
     extended: true,
