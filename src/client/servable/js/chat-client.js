@@ -660,6 +660,10 @@ function appendSavedMessages(messageArray) {
         .append($('<p class="message-content" style="display: block;">').text(message.MessageString))
         .append(message.FileName ? fileElement : null)
     );
+
+    $('#chatbox img').on('load', () => {
+      stickScroll(scrollOffset);
+    });
   });
 }
 
