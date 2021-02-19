@@ -265,7 +265,7 @@ $(window).on('load', () => {
 
   // Someone just got promoted or demoted in one of our groups. We should check if that was us and move the user in the member list.
   socket.on('role update', (data) => {
-    if (data.InGroup == activeServerID) {
+    if (data.InGroup.toString() == activeServerID) {
       if (data.NewRole == 1) {
         // Change the text first, then move to the new list.
         $('#' + data.AffectsUser)

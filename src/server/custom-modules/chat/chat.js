@@ -229,14 +229,14 @@ module.exports.initialise = (instance) => {
               let confirmAuthorityQuery = 'SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
 
               db.query(connection, confirmAuthorityQuery, [requestData.UserToChange, requestData.GroupID], (result, fields) => {
-                callback(null, result[0].Role);
+                callback(null, result[0].Role ? result[0].Role : 0); // If null, treat as 0 because we haven't been assigned anything.
               });
             },
           },
           (error, results) => {
             if (error) throw error;
 
-            if (results.checkInGroup[0] == 1 && results.checkInGroup[1] > results.actingOnRole && results.checkInGroup[1] > (requestData.TargetRole == 'admin' ? 1 : null)) {
+            if (results.checkInGroup[0] == 1 && results.checkInGroup[1] > results.actingOnRole && results.checkInGroup[1] >= (requestData.TargetRole == 'admin' ? 1 : null)) {
               // Operation is permitted, update the user's role.
               let updateRoleQuery = 'UPDATE GroupMembership SET Role = ? WHERE UserID = ? AND GroupID = ?;';
 
@@ -244,7 +244,7 @@ module.exports.initialise = (instance) => {
                 io.sockets.in(requestData.GroupID.toString()).emit('role update', {
                   InGroup: requestData.GroupID,
                   AffectsUser: requestData.UserToChange,
-                  NewRole: requestData.TargetRole == 'admin' ? 1 : null,
+                  NewRole: requestData.TargetRole == 'admin' ? 1 : null
                 });
               });
             }
