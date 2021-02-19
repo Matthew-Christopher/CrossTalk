@@ -155,9 +155,9 @@ $(window).on('load', () => {
           .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
           .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(getMessageTimestamp(message.Timestamp)))
           .append(
-            $('<div class="message-options-container' + (!(role > 0 || message.AuthorID == id) ? " empty" : "") + '">')
-              .append($('<button class="message-pin-button" style="display: ' + (role > 0 ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
-              .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
+            $('<div class="message-options-container' + (!(role > 0 || message.AuthorID == id) || (groupIsPrivate && message.AuthorID != id) ? " empty" : "") + '">')
+              .append($('<button class="message-pin-button" style="display: ' + (role > 0 && !groupIsPrivate ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
+              .append($('<button class="message-bin-button" style="display: ' + ((role > 0 && !groupIsPrivate) || message.AuthorID == id ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
           )
           .append('<br />')
           .append($('<p class="message-content" style="display: block;">').text(message.MessageString))
@@ -504,28 +504,6 @@ $(window).on('load', () => {
     });
   }
 
-  // Alter button and content visibility to match permissions.
-  function refreshAdminContentDisplay() {
-    $('#chatbox li:not(.owned)').each(function () {
-      let toAlter = $(this).find('.message-options-container button');
-      if (role > 0) {
-        toAlter.css('display', 'inline-block');
-        $(this).find('.message-options-container').removeClass('empty');
-      } else {
-        toAlter.css('display', 'none');
-        $(this).find('.message-options-container').addClass('empty');
-      }
-    });
-
-    $('#chatbox li.owned').each(function () {
-      $(this)
-        .find('.message-options-container .message-pin-button')
-        .css('display', role > 0 ? 'inline-block' : 'none');
-    });
-
-    setGroupOptionButtonVisibility();
-  }
-
   function setUserID() {
     // Get the user's ID from their session cookie.
     $.ajax({
@@ -584,6 +562,28 @@ function setActiveServerID(id) {
   ).then(() => {
     $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
   });
+}
+
+// Alter button and content visibility to match permissions.
+function refreshAdminContentDisplay() {
+  $('#chatbox li:not(.owned)').each(function () {
+    let toAlter = $(this).find('.message-options-container button');
+    if (role > 0) {
+      toAlter.css('display', 'inline-block');
+      $(this).find('.message-options-container').removeClass('empty');
+    } else {
+      toAlter.css('display', 'none');
+      $(this).find('.message-options-container').addClass('empty');
+    }
+  });
+
+  $('#chatbox li.owned').each(function () {
+    $(this)
+      .find('.message-options-container .message-pin-button')
+      .css('display', role > 0 ? 'inline-block' : 'none');
+  });
+
+  setGroupOptionButtonVisibility();
 }
 
 // New private message picked, deal with the incoming server message data.

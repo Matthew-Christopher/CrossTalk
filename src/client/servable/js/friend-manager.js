@@ -46,6 +46,8 @@ $(window).on('load', () => {
 
           setActiveFriendID(friendshipID);
 
+          refreshAdminContentDisplay();
+
           $('#server-name-display').text(
             'Private Message: ' +
               $('#' + friendshipID)
@@ -155,9 +157,15 @@ function setFriends() {
 // The server has told us that another client did something to a request we sent them. We should update its appearance on our end, too.
 function oneOfMyFriendsUpdated(data) {
   if (data.Status == 1) {
-    $('#' + data.FriendshipID).remove();
+    $('#' + data.FriendshipID).remove().ready(() => {
+      // After current request dealt with, set visiblity of prompts.
+
+      setFriendPromptVisibilities();
+    });
   } else if (data.Status == 2) {
     $('#group-prompt-container').hide(); // Now there are friends to select.
+
+    let name = $('#' + data.FriendshipID).find('p').text();
 
     socket.emit('join private', data.FriendshipID);
 
@@ -168,18 +176,22 @@ function oneOfMyFriendsUpdated(data) {
           $('<span class="friend-info-container">')
             .append(
               $('<h1>').text(
-                $('#' + data.FriendshipID)
-                  .find('p')
-                  .text()
+                name
               )
             )
             .append($('<i>').text('No messages yet.'))
         )
     ).ready(() => {
-      $('#' + data.FriendshipID).remove();
+      $('#' + data.FriendshipID).remove().ready(() => {
+        // After current request dealt with, set visiblity of prompts.
+
+        setFriendPromptVisibilities();
+      });
     });
   }
+}
 
+function setFriendPromptVisibilities() {
   if ($('#friend-requests *').length == 0) {
     $('#friend-requests').append($('<p id="no-requests-prompt" style="width: 100%; text-align: center; padding: 10px 5px;">').text('Nothing to display.'));
   }
