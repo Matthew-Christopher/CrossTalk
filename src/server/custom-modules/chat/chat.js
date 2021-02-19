@@ -3,10 +3,11 @@
 const log = require('../logging');
 const db = require('../db');
 let io;
+const ss = require('socket.io-stream');
 
 const fs = require('fs');
 const path = require('path');
-const fileType = require('file-type');
+const fileType = require('stream-file-type');
 
 require('dotenv').config();
 const mysql = require('mysql');
@@ -105,23 +106,29 @@ module.exports.initialise = (instance) => {
       }
     });
 
-    socket.on('file stream', async (bytes) => {
+    ss(socket).on('file stream', async function(stream) {
       log.info('Received a file.');
 
-      let fileName;
-
-      const buffer = Buffer.from(bytes);
-      const extension = (await fileType.fromBuffer(buffer)).ext; // Get the file type from the magic bytes"
+      let magicBytesData, extension, name, detector;
 
       do {
-        fileName = require('crypto').randomBytes(32).toString('hex') + '.' + extension;
-      } while (fs.existsSync(path.join(__dirname, '../../../../user_files', fileName)));
+        name = require('crypto').randomBytes(16).toString('hex');
+      } while (fs.existsSync(path.join(__dirname, '../../../../user_files', name)));
 
-      await fs.writeFile(path.join(__dirname, '../../../../user_files', fileName), buffer, (error, result) => {
-        if (error) throw error;
+      detector = new fileType();
 
-        log.info('Wrote ' + fileName);
+      detector.on('file-type', (fileTypeData) => {
+        extension = fileTypeData.ext;
+        log.info(extension);
+
+        fs.rename(path.join(__dirname, '../../../../user_files', name + '.pending'), path.join(__dirname, '../../../../user_files', name + '.' + extension), () => {
+          log.info('User file path fully set.');
+        });
       });
+
+      stream.pipe(detector).resume().pipe(fs.createWriteStream(path.join(__dirname, '../../../../user_files', name + '.pending')));
+
+      log.info('Wrote ' + name);
     });
 
     socket.on('role change', (requestData) => {

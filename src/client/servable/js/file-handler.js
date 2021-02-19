@@ -41,19 +41,10 @@ $(window).on('load', () => {
 });
 
 function HandleUpload(file) {
-  console.log('Received upload request. Starting.');
+  stream = ss.createStream();
 
-  if (window.File && window.FileReader) { // The browser is up-to-date enough to allow us to do this.
-    console.log('Beginning upload of file.');
+  console.log('Beginning upload of file.');
 
-    const reader = new FileReader();
-    reader.onload = function() {
-      const bytes = new Uint8Array(this.result);
-
-      socket.emit('file stream', bytes);
-
-      console.log('Sent file.');
-    };
-    reader.readAsArrayBuffer(file);
-  }
+  ss(socket).emit('file stream', stream);
+  ss.createBlobReadStream(file).pipe(stream);
 }

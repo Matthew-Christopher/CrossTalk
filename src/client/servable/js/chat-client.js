@@ -1,6 +1,7 @@
 let activeServerID,
   role,
   id,
+  stream,
   groupIsPrivate = false;
 const socket = io.connect('/');
 
@@ -32,7 +33,7 @@ $(window).on('load', () => {
       if (activeServerID) {
         if ($('#file-input')[0].files.length > 0) {
           // We need to send a file as well as (potentially) a message.
-          
+
           HandleUpload($('#file-input')[0].files[0]);
         }
 
