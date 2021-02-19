@@ -93,6 +93,7 @@ A screenshot of the project chat screen.
 * [Nodemailer](https://www.npmjs.com/package/nodemailer)
 * [particles.js](https://github.com/VincentGarreau/particles.js/)
 * [Socket.IO](https://www.npmjs.com/package/socket.io)
+* [socket.io-stream](https://www.npmjs.com/package/socket.io-stream)
 
 <!-- GETTING STARTED -->
 ## Getting Started
