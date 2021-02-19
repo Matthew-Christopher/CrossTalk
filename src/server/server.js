@@ -409,8 +409,11 @@ app.post('/api/GetFriendMessages', (req, res, next) => {
         User.DisplayName AS AuthorDisplayName,
         Message.MessageString,
         Message.Timestamp,
-        Message.AuthorID = ? AS Owned
+        Message.AuthorID = ? AS Owned,
+        Media.FileName
       FROM Message
+      LEFT JOIN Media
+        ON Message.MessageID = Media.ReferencesMessageID
       JOIN Friendship
         ON Message.FriendshipID = Friendship.FriendshipID
       INNER JOIN UserFriend
