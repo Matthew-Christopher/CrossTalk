@@ -99,6 +99,8 @@ module.exports.initialise = (instance) => {
               // Send the message in the appropriate room. We add 'FG' to the start of a private message to indicate that it is so.
               io.sockets.in(message.GroupID ? message.GroupID.toString() : 'FG' + message.FriendshipID.toString()).emit('message return', message);
 
+              socket.emit('file bind', results.insertMessage.insertId);
+
               connection.release();
             }
           );
@@ -107,17 +109,72 @@ module.exports.initialise = (instance) => {
     });
 
     ss(socket).on('file stream', async function(stream) {
-      let extension, name;
+      let extension, name, size = 0, acceptableMimes = ['image/x-png', 'image/jpeg', 'application/pdf'];
 
-      const fileTypeStream = await fileType.stream(stream);
+      const fileTypeStream = await fileType.stream(stream.bytes),
+      maxFileSize = 15; // In MB.
 
-      extension = fileTypeStream.fileType.ext;
+      extension = fileTypeStream.fileType.ext.toLowerCase();
 
-      do {
-        name = require('crypto').randomBytes(16).toString('hex');
-      } while (fs.existsSync(path.join(__dirname, '../../../../user_files', name + '.' + extension)));
+      if (acceptableMimes.includes(fileTypeStream.fileType.mime)) {
+        do {
+          name = require('crypto').randomBytes(32).toString('hex');
+        } while (fs.existsSync(path.join(__dirname, '../../../../user_files', name + '.' + extension)));
 
-      fileTypeStream.pipe(fs.createWriteStream(path.join(__dirname, '../../../../user_files',  name + '.' + extension)));
+        fileTypeStream.pipe(fs.createWriteStream(path.join(__dirname, '../../../../user_files',  name + '.' + extension)));
+
+        fileTypeStream.on('data', (data) => {
+          size += data.length;
+
+          if (size / (1024 ** 2) > maxFileSize) {
+            fileTypeStream.end((error) => {
+              if (error) throw error;
+
+              fs.unlink(path.join(__dirname, '../../../../user_files',  name + '.' + extension), (error) => {
+                if (error) throw error;
+
+                log.info('File and stream destroyed as it was too large.');
+              });
+            });
+          }
+        });
+
+        fileTypeStream.on('end', () => {
+          if (fs.existsSync(path.join(__dirname, '../../../../user_files', name + '.' + extension))) { // Check exists, may have deleted.
+            pool.getConnection((err, connection) => {
+              async.waterfall(
+                [
+                  function (callback) {
+                    let referencesMessage;
+
+                    if (!stream.bind) {
+                      let sendFileMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, DEFAULT, ?);';
+
+                      db.query(connection, sendFileMessageQuery, [stream.group, socket.request.session.UserID, Date.now()], (result, fields) => {
+                        callback(null, result.insertId);
+                      });
+                    } else {
+                      callback(null, stream.bind);
+                    }
+                  },
+                  function (referencesMessage, callback) {
+                    let insertMediaQuery = 'INSERT INTO Media (ReferencesMessageID, FileName) VALUES (?, ?);';
+
+                    db.query(connection, insertMediaQuery, [referencesMessage, name + '.' + extension], (result, fields) => {
+                      callback(null)
+                    });
+                  },
+                ],
+                (error) => {
+                  if (error) throw error;
+
+                  connection.release();
+                }
+              );
+            });
+          }
+        });
+      }
     });
 
     socket.on('role change', (requestData) => {

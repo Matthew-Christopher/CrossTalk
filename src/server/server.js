@@ -54,6 +54,7 @@ app.use(sessionMiddleware); // Allow sessions to be saved to clients.
 
 const http = require('http');
 
+const fs = require('fs');
 const path = require('path');
 
 // CUSTOM MODULES
@@ -673,6 +674,19 @@ app.post('/api/SetTag', (req, res, next) => {
     });
   } else {
     res.status(422).send(); // Continue along routes, will serve a 404.
+  }
+});
+
+app.get('/user-file', (req, res, next) => {
+  if (req.query.fileName) {
+    if (fs.existsSync(path.join(__dirname, '../../user_files', req.query.fileName))) {
+      res.status(200).sendFile(path.join(__dirname, '../../user_files', req.query.fileName));
+    } else {
+      next();
+    }
+  } else {
+    log.info(2);
+    next();
   }
 });
 

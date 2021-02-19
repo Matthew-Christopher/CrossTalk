@@ -40,11 +40,14 @@ $(window).on('load', () => {
   });
 });
 
-function HandleUpload(file) {
+function HandleUpload(bindID, file) {
   stream = ss.createStream();
 
-  console.log('Beginning upload of file.');
+  ss(socket).emit('file stream', {
+    group: activeServerID,
+    bind: bindID,
+    bytes: stream
+  });
 
-  ss(socket).emit('file stream', stream);
   ss.createBlobReadStream(file).pipe(stream);
 }

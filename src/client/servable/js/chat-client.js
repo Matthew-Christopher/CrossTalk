@@ -24,21 +24,15 @@ $(window).on('load', () => {
   $('#message-form').submit((event) => {
     event.preventDefault(); // Don't refresh, we want a smooth experience.
 
-    // We trim whitespace from the start and end of the message before sending it.
-    let messageString = $('#message').val().trim();
+    if (activeServerID) {
+      // We trim whitespace from the start and end of the message before sending it.
+      let messageString = $('#message').val().trim();
 
-    if ((0 < messageString.length && messageString.length <= 2000) || $('#file-input')[0].files.length > 0) {
-      let userID;
-
-      if (activeServerID) {
-        if ($('#file-input')[0].files.length > 0) {
-          // We need to send a file as well as (potentially) a message.
-
-          HandleUpload($('#file-input')[0].files[0]);
-        }
+      if ((0 < messageString.length && messageString.length <= 2000)) {
+        let userID;
 
         // Message object format: (MessageID, GroupID, FriendshipID, AuthorID, AuthorDisplayName, MessageString, Timestamp)
-        let message = new Message(null, groupIsPrivate ? null : activeServerID, groupIsPrivate ? activeServerID : null, null, null, messageString, Date.now());
+        let message = new Message(null, groupIsPrivate ? null : activeServerID, groupIsPrivate ? activeServerID : null, null, null, messageString, Date.now(), null);
 
         // Don't send the message if it's blank.
         if (message) {
@@ -48,6 +42,19 @@ $(window).on('load', () => {
         $('#message').val(''); // Clear the message input so we can type again immediately.
 
         $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // Move to the most recent message if the client sent it themselves, independent of the current scroll position.
+
+        socket.on('file bind', (data) => {
+          // Bind our file to the message.
+          if ($('#file-input')[0].files.length > 0) {
+            // We need to send a file as well as (potentially) a message.
+
+            HandleUpload(data, $('#file-input')[0].files[0]);
+          }
+        });
+      } else if ($('#file-input')[0].files.length > 0) {
+         // This message will just be a file.
+
+         HandleUpload(null, $('#file-input')[0].files[0]);
       }
     }
   });

@@ -1,7 +1,7 @@
 // Message class to store the chat message and metadata.
 
 class Message {
-  constructor(messageID, groupID, friendshipID, authorID, authorDisplayName, messageString, timestamp) {
+  constructor(messageID, groupID, friendshipID, authorID, authorDisplayName, messageString, timestamp, filePath) {
     this.MessageID = messageID;
     this.GroupID = groupID;
     this.FriendshipID = friendshipID;
@@ -9,5 +9,6 @@ class Message {
     this.AuthorDisplayName = authorDisplayName;
     this.MessageString = messageString;
     this.Timestamp = timestamp;
+    this.FilePath = filePath;
   }
 }
