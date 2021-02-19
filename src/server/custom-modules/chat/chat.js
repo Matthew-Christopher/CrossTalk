@@ -164,9 +164,10 @@ module.exports.initialise = (instance) => {
 
                     if (!stream.bind) {
                       // No existing message, create a new one (we didn't type anything but did send a file).
-                      let sendFileMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, "A file.", ?);';
+                      let sendFileGroupMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, "A file.", ?);';
+                      let sendFilePrivateMessageQuery = 'INSERT INTO Message (FriendshipID, AuthorID, MessageString, Timestamp) VALUES (?, ?, "A file.", ?);';
 
-                      db.query(connection, sendFileMessageQuery, [stream.group, socket.request.session.UserID, Date.now()], (result, fields) => {
+                      db.query(connection, stream.message.GroupID ? sendFileGroupMessageQuery : sendFilePrivateMessageQuery, [stream.group, socket.request.session.UserID, Date.now()], (result, fields) => {
                         callback(null, result.insertId);
                       });
                     } else {

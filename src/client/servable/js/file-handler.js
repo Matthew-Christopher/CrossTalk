@@ -55,7 +55,7 @@ function HandleUpload(bindID, existingMessage, file) {
     group: activeServerID,
     bind: bindID,
     bytes: stream,
-    message: existingMessage ? existingMessage : new Message(null, activeServerID, null, null, null, 'A file.', Date.now(), true, null)
+    message: existingMessage ? existingMessage : new Message(null, !groupIsPrivate ? activeServerID : null, groupIsPrivate ? activeServerID : null, null, null, 'A file.', Date.now(), true, null)
   });
 
   // Start piping the file to the server. This shouldn't take more than about 5 seconds.
