@@ -40,13 +40,14 @@ $(window).on('load', () => {
   });
 });
 
-function HandleUpload(bindID, file) {
+function HandleUpload(bindID, existingMessage, file) {
   stream = ss.createStream();
 
   ss(socket).emit('file stream', {
     group: activeServerID,
     bind: bindID,
-    bytes: stream
+    bytes: stream,
+    message: existingMessage ? existingMessage : new Message(null, activeServerID, null, null, null, null, Date.now(), true, null)
   });
 
   ss.createBlobReadStream(file).pipe(stream);

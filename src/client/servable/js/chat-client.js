@@ -31,8 +31,8 @@ $(window).on('load', () => {
       if ((0 < messageString.length && messageString.length <= 2000)) {
         let userID;
 
-        // Message object format: (MessageID, GroupID, FriendshipID, AuthorID, AuthorDisplayName, MessageString, Timestamp)
-        let message = new Message(null, groupIsPrivate ? null : activeServerID, groupIsPrivate ? activeServerID : null, null, null, messageString, Date.now(), null);
+        // Message object format: (MessageID, GroupID, FriendshipID, AuthorID, AuthorDisplayName, MessageString, Timestamp, HasFile, FilePath)
+        let message = new Message(null, groupIsPrivate ? null : activeServerID, groupIsPrivate ? activeServerID : null, null, null, messageString, Date.now(), $('#file-input')[0].files.length > 0, null);
 
         // Don't send the message if it's blank.
         if (message) {
@@ -45,16 +45,12 @@ $(window).on('load', () => {
 
         socket.on('file bind', (data) => {
           // Bind our file to the message.
-          if ($('#file-input')[0].files.length > 0) {
-            // We need to send a file as well as (potentially) a message.
-
-            HandleUpload(data, $('#file-input')[0].files[0]);
-          }
+          HandleUpload(data.bindTo, data.existingMessage, $('#file-input')[0].files[0]);
         });
       } else if ($('#file-input')[0].files.length > 0) {
          // This message will just be a file.
 
-         HandleUpload(null, $('#file-input')[0].files[0]);
+         HandleUpload(null, null, $('#file-input')[0].files[0]);
       }
     }
   });
@@ -129,6 +125,7 @@ $(window).on('load', () => {
   socket.on('message return', (message) => {
     // Only render the message if we are on its group.
     if (message.GroupID ? message.GroupID : message.FriendshipID === activeServerID) {
+      console.log(message);
       $('#chatbox-reminder').hide();
       $('#invite-prompt').hide();
 

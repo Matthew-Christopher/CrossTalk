@@ -96,10 +96,15 @@ module.exports.initialise = (instance) => {
               message.AuthorDisplayName = results.getDisplayName;
               message.MessageID = results.insertMessage.insertId;
 
-              // Send the message in the appropriate room. We add 'FG' to the start of a private message to indicate that it is so.
-              io.sockets.in(message.GroupID ? message.GroupID.toString() : 'FG' + message.FriendshipID.toString()).emit('message return', message);
-
-              socket.emit('file bind', results.insertMessage.insertId);
+              if (!message.HasFile) {
+                // Send the message in the appropriate room. We add 'FG' to the start of a private message to indicate that it is so.
+                io.sockets.in(message.GroupID ? message.GroupID.toString() : 'FG' + message.FriendshipID.toString()).emit('message return', message);
+              } else {
+                socket.emit('file bind', {
+                  bindTo: results.insertMessage.insertId,
+                  existingMessage: message
+                });
+              }
 
               connection.release();
             }
@@ -161,14 +166,28 @@ module.exports.initialise = (instance) => {
                     let insertMediaQuery = 'INSERT INTO Media (ReferencesMessageID, FileName) VALUES (?, ?);';
 
                     db.query(connection, insertMediaQuery, [referencesMessage, name + '.' + extension], (result, fields) => {
-                      callback(null)
+                      callback(null, referencesMessage);
                     });
                   },
                 ],
-                (error) => {
+                (error, referencesMessage) => {
                   if (error) throw error;
 
-                  connection.release();
+                  // Get the user display name.
+                  db.query(connection, 'SELECT DisplayName FROM User WHERE UserID = ?;', socket.request.session.UserID, (result, fields) => {
+                    connection.release();
+
+                    stream.message.MessageID = referencesMessage;
+
+                    stream.message.AuthorID = socket.request.session.UserID;
+                    stream.message.AuthorDisplayName = result[0].DisplayName;
+
+                    stream.message.HasFile = true;
+                    stream.message.FilePath = name + '.' + extension;
+
+                    // Send the message in the appropriate room. We add 'FG' to the start of a private message to indicate that it is so.
+                    io.sockets.in(stream.message.GroupID ? stream.message.GroupID.toString() : 'FG' + stream.message.FriendshipID.toString()).emit('message return', stream.message);
+                  });
                 }
               );
             });
