@@ -47,7 +47,7 @@ function HandleUpload(bindID, existingMessage, file) {
     group: activeServerID,
     bind: bindID,
     bytes: stream,
-    message: existingMessage ? existingMessage : new Message(null, activeServerID, null, null, null, null, Date.now(), true, null)
+    message: existingMessage ? existingMessage : new Message(null, activeServerID, null, null, null, 'A file.', Date.now(), true, null)
   });
 
   ss.createBlobReadStream(file).pipe(stream);

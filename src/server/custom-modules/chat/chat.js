@@ -114,12 +114,13 @@ module.exports.initialise = (instance) => {
     });
 
     ss(socket).on('file stream', async function(stream) {
-      let extension, name, size = 0, acceptableMimes = ['image/x-png', 'image/jpeg', 'application/pdf'];
+      let extension, name, size = 0, acceptableMimes = ['image/png', 'image/x-png', 'image/jpeg', 'application/pdf'];
 
       const fileTypeStream = await fileType.stream(stream.bytes),
       maxFileSize = 15; // In MB.
 
       extension = fileTypeStream.fileType.ext.toLowerCase();
+      log.info(fileTypeStream.fileType.mime);
 
       if (acceptableMimes.includes(fileTypeStream.fileType.mime)) {
         do {

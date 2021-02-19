@@ -359,21 +359,25 @@ app.post('/api/GetMessages', (req, res, next) => {
           },
           messages: function GetMessageData(callback) {
             let getMessageDataQuery = `
-          SELECT Message.MessageID,
-            User.DisplayName AS AuthorDisplayName,
-            Message.MessageString,
-            Message.Timestamp,
-            Message.AuthorID = ? AS Owned
-          FROM Message
-          JOIN GroupMembership
-            ON Message.GroupID = GroupMembership.GroupID
-          JOIN User
-            ON User.UserID = Message.AuthorID
-          WHERE GroupMembership.UserID = ? AND GroupMembership.GroupID = ?
-          ORDER BY Message.Timestamp;`;
+            SELECT Message.MessageID,
+              User.DisplayName AS AuthorDisplayName,
+              Message.MessageString,
+              Message.Timestamp,
+              Message.AuthorID = ? AS Owned,
+              Media.FileName
+            FROM Message
+            LEFT JOIN Media
+              ON Message.MessageID = Media.ReferencesMessageID
+            JOIN GroupMembership
+              ON Message.GroupID = GroupMembership.GroupID
+            JOIN User
+              ON User.UserID = Message.AuthorID
+            WHERE GroupMembership.UserID = ? AND GroupMembership.GroupID = ?
+            ORDER BY Message.Timestamp;`;
 
             db.query(connection, getMessageDataQuery, [req.session.UserID, req.session.UserID, req.body.GroupID], (result, fields) => {
               callback(null, result);
+              log.info(result);
             });
           },
         },

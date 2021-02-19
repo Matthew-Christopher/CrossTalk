@@ -124,12 +124,27 @@ $(window).on('load', () => {
 
   socket.on('message return', (message) => {
     // Only render the message if we are on its group.
+    console.log(message);
     if (message.GroupID ? message.GroupID : message.FriendshipID === activeServerID) {
-      console.log(message);
       $('#chatbox-reminder').hide();
       $('#invite-prompt').hide();
 
       let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
+
+      let fileElement;
+      if (message.HasFile) {
+        let linkToFile = '/user-file?fileName=' + message.FilePath;
+
+        let extension = message.FilePath.split('.').pop();
+
+        if (extension == 'pdf') {
+          // We will need a link to the file.
+        } else {
+          // Pop the image straight into the chatbox.
+
+          fileElement = $('<img style="width: 40%; margin-top: 10px;">').attr('src', linkToFile);
+        }
+      }
 
       // Add the message to the chatbox.
       $('#chatbox').append(
@@ -143,7 +158,8 @@ $(window).on('load', () => {
               .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
           )
           .append('<br />')
-          .append($('<p class="message-content" style="display: inline;">').text(message.MessageString))
+          .append($('<p class="message-content" style="display: block;">').text(message.MessageString))
+          .append(message.HasFile ? fileElement : null)
       );
 
       // Handle scrollbar behaviour.
@@ -608,6 +624,21 @@ function appendSavedMessages(messageArray) {
   $('#chatbox').empty(); // Remove old messages.
 
   messageArray.forEach((message) => {
+    let fileElement;
+    if (message.FileName) {
+      let linkToFile = '/user-file?fileName=' + message.FileName;
+
+      let extension = message.FileName.split('.').pop();
+
+      if (extension == 'pdf') {
+        // We will need a link to the file.
+      } else {
+        // Pop the image straight into the chatbox.
+
+        fileElement = $('<img style="width: 40%; margin-top: 10px;">').attr('src', linkToFile);
+      }
+    }
+
     $('#chatbox').append(
       $('<li ' + (message.Owned ? 'class="owned" ' : '') + 'style="position: relative;">')
         .attr('id', message.MessageID)
@@ -619,7 +650,10 @@ function appendSavedMessages(messageArray) {
             .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
         )
         .append('<br />')
-        .append($('<p class="message-content" style="display: inline;">').text(message.MessageString))
+        .append($('<p class="message-content" style="display: block;">').text(message.MessageString ? message.MessageString : (
+          message.FileName ? 'A file.' : null
+        )))
+        .append(message.FileName ? fileElement : null)
     );
   });
 }
