@@ -377,7 +377,6 @@ app.post('/api/GetMessages', (req, res, next) => {
 
             db.query(connection, getMessageDataQuery, [req.session.UserID, req.session.UserID, req.body.GroupID], (result, fields) => {
               callback(null, result);
-              log.info(result);
             });
           },
         },

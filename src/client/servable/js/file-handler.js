@@ -51,4 +51,6 @@ function HandleUpload(bindID, existingMessage, file) {
   });
 
   ss.createBlobReadStream(file).pipe(stream);
+
+  $('#file-input').val('').trigger('change'); // Clear the file input.
 }

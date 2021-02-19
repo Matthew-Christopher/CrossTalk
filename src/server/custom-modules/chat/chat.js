@@ -154,7 +154,7 @@ module.exports.initialise = (instance) => {
                     let referencesMessage;
 
                     if (!stream.bind) {
-                      let sendFileMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, DEFAULT, ?);';
+                      let sendFileMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, "A file.", ?);';
 
                       db.query(connection, sendFileMessageQuery, [stream.group, socket.request.session.UserID, Date.now()], (result, fields) => {
                         callback(null, result.insertId);

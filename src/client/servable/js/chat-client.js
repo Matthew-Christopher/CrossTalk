@@ -124,7 +124,6 @@ $(window).on('load', () => {
 
   socket.on('message return', (message) => {
     // Only render the message if we are on its group.
-    console.log(message);
     if (message.GroupID ? message.GroupID : message.FriendshipID === activeServerID) {
       $('#chatbox-reminder').hide();
       $('#invite-prompt').hide();
@@ -139,10 +138,13 @@ $(window).on('load', () => {
 
         if (extension == 'pdf') {
           // We will need a link to the file.
+
+          fileElement = $('<a target="_blank">').attr('href', linkToFile).text('Click here to view.');
         } else {
           // Pop the image straight into the chatbox.
 
-          fileElement = $('<img style="width: 40%; margin-top: 10px;">').attr('src', linkToFile);
+          fileElement = $('<a target="_blank">').attr('href', linkToFile) // Make this clickable and openable in a new tab.
+            .append($('<img style="width: 40%; margin-top: 10px;">').attr('src', linkToFile));
         }
       }
 
@@ -632,10 +634,13 @@ function appendSavedMessages(messageArray) {
 
       if (extension == 'pdf') {
         // We will need a link to the file.
+
+        fileElement = $('<a target="_blank">').attr('href', linkToFile).text('Click here to view the file.');
       } else {
         // Pop the image straight into the chatbox.
 
-        fileElement = $('<img style="width: 40%; margin-top: 10px;">').attr('src', linkToFile);
+        fileElement = $('<a target="_blank">').attr('href', linkToFile) // Make this clickable.
+          .append($('<img style="width: 40%; margin-top: 10px;">').attr('src', linkToFile));
       }
     }
 
@@ -650,9 +655,7 @@ function appendSavedMessages(messageArray) {
             .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
         )
         .append('<br />')
-        .append($('<p class="message-content" style="display: block;">').text(message.MessageString ? message.MessageString : (
-          message.FileName ? 'A file.' : null
-        )))
+        .append($('<p class="message-content" style="display: block;">').text(message.MessageString))
         .append(message.FileName ? fileElement : null)
     );
   });
