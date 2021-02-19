@@ -37,7 +37,7 @@ $(window).on('load', () => {
 
       setTimeout(() => {
         $('#file-input').val('').trigger('change');
-      }, 3000);
+      }, 5000);
     }
   });
 
