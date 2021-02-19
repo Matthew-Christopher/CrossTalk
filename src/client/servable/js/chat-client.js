@@ -646,6 +646,8 @@ function appendSavedMessages(messageArray) {
       }
     }
 
+    let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
+
     $('#chatbox').append(
       $('<li ' + (message.Owned ? 'class="owned" ' : '') + 'style="position: relative;">')
         .attr('id', message.MessageID)

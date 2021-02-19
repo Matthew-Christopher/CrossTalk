@@ -175,13 +175,16 @@ function oneOfMyFriendsUpdated(data) {
             )
             .append($('<i>').text('No messages yet.'))
         )
-    );
-
-    $('#' + data.FriendshipID).remove();
+    ).ready(() => {
+      $('#' + data.FriendshipID).remove();
+    });
   }
 
   if ($('#friend-requests *').length == 0) {
     $('#friend-requests').append($('<p id="no-requests-prompt" style="width: 100%; text-align: center; padding: 10px 5px;">').text('Nothing to display.'));
+  }
+
+  if ($('#friend-requests .friend-request-display').length == 0) {
     $('#alert').css('display', 'none');
   }
 }
