@@ -4,6 +4,10 @@ const log = require('../logging');
 const db = require('../db');
 let io;
 
+const fs = require('fs');
+const path = require('path');
+const fileType = require('file-type');
+
 require('dotenv').config();
 const mysql = require('mysql');
 const async = require('async');
@@ -99,6 +103,25 @@ module.exports.initialise = (instance) => {
           );
         });
       }
+    });
+
+    socket.on('file stream', async (bytes) => {
+      log.info('Received a file.');
+
+      let fileName;
+
+      const buffer = Buffer.from(bytes);
+      const extension = (await fileType.fromBuffer(buffer)).ext; // Get the file type from the magic bytes"
+
+      do {
+        fileName = require('crypto').randomBytes(32).toString('hex') + '.' + extension;
+      } while (fs.existsSync(path.join(__dirname, '../../../../user_files', fileName)));
+
+      await fs.writeFile(path.join(__dirname, '../../../../user_files', fileName), buffer, (error, result) => {
+        if (error) throw error;
+
+        log.info('Wrote ' + fileName);
+      });
     });
 
     socket.on('role change', (requestData) => {

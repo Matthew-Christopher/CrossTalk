@@ -26,9 +26,16 @@ $(window).on('load', () => {
     // We trim whitespace from the start and end of the message before sending it.
     let messageString = $('#message').val().trim();
 
-    if (0 < messageString.length && messageString.length <= 2000) {
+    if ((0 < messageString.length && messageString.length <= 2000) || $('#file-input')[0].files.length > 0) {
       let userID;
+
       if (activeServerID) {
+        if ($('#file-input')[0].files.length > 0) {
+          // We need to send a file as well as (potentially) a message.
+          
+          HandleUpload($('#file-input')[0].files[0]);
+        }
+
         // Message object format: (MessageID, GroupID, FriendshipID, AuthorID, AuthorDisplayName, MessageString, Timestamp)
         let message = new Message(null, groupIsPrivate ? null : activeServerID, groupIsPrivate ? activeServerID : null, null, null, messageString, Date.now());
 
