@@ -187,10 +187,25 @@
       <form id="message-form" action="">
         <div class="input-field-container">
           <input type="text" id="message" class="effect-20" autocomplete="off" placeholder="Type a message..." />
-          <button id="message-send-tick" type="submit" form="message-form" value="Submit"><img src="img/TickLo.png" alt="Send" /></button>
           <span class="focus-border">
             <i></i>
           </span>
+
+          <div style="position: relative; right: 0;">
+            <!-- Allow PNG, JPEG, PDF, TXT files only. -->
+            <input type="file" id="file-input" name="file" accept="image/x-png, image/jpeg, application/pdf, text/plain" hidden />
+            <label for="file-input"></label>
+            <div id="file-info">
+              <button id="remove-file-button"></button>
+              <div id="file-chosen">
+                <span class="name"></span>
+                <span class="extension"></span>
+              </p>
+            </div>
+
+            <button id="message-send-tick" type="submit" form="message-form" value="Submit"><img src="img/TickLo.png" alt="Send" /></button>
+
+          </div>
         </div>
       </form>
     </div>
@@ -203,6 +218,8 @@
 
     <script src="js/group-manager.js"></script>
     <script src="js/friend-manager.js"></script>
+
+    <script src="js/file-handler.js"></script>
 
     <script src="/socket.io/socket.io.js"></script>
     <!-- Automatically served by the API, if we are listening correctly. -->
