@@ -78,6 +78,7 @@ module.exports.initialise = (instance) => {
                 let insertGroupMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
                 let insertPrivateMessageQuery = 'INSERT INTO Message (FriendshipID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
 
+                // Execute the correct query.
                 db.query(
                   connection,
                   message.GroupID ? insertGroupMessageQuery : insertPrivateMessageQuery,
@@ -100,6 +101,8 @@ module.exports.initialise = (instance) => {
                 // Send the message in the appropriate room. We add 'FG' to the start of a private message to indicate that it is so.
                 io.sockets.in(message.GroupID ? message.GroupID.toString() : 'FG' + message.FriendshipID.toString()).emit('message return', message);
               } else {
+                // We need to bind the file and its write stream to this message so we won't emit it yet.
+
                 socket.emit('file bind', {
                   bindTo: results.insertMessage.insertId,
                   existingMessage: message
@@ -114,21 +117,26 @@ module.exports.initialise = (instance) => {
     });
 
     ss(socket).on('file stream', async function(stream) {
-      let extension, name, size = 0, acceptableMimes = ['image/png', 'image/x-png', 'image/jpeg', 'application/pdf'];
+      let extension, // Initialise variables.
+        name,
+        size = 0,
+        acceptableMimes = ['image/png', 'image/x-png', 'image/jpeg', 'application/pdf'];
 
-      const fileTypeStream = await fileType.stream(stream.bytes),
+      const fileTypeStream = await fileType.stream(stream.bytes), // A slightly adapted file stream where we can extract file extensions/MIMEs directly from the magic bytes.
       maxFileSize = 15; // In MB.
 
       extension = fileTypeStream.fileType.ext.toLowerCase();
-      log.info(fileTypeStream.fileType.mime);
 
-      if (acceptableMimes.includes(fileTypeStream.fileType.mime)) {
+      if (acceptableMimes.includes(fileTypeStream.fileType.mime)) { // Can proceed with upload.
         do {
           name = require('crypto').randomBytes(32).toString('hex');
         } while (fs.existsSync(path.join(__dirname, '../../../../user_files', name + '.' + extension)));
+        // Highly unlikely to be any collisions, but we will recalculate a new name if so.
 
+        // Start writing the file as the blocks come in. This is a very efficient process.
         fileTypeStream.pipe(fs.createWriteStream(path.join(__dirname, '../../../../user_files',  name + '.' + extension)));
 
+        // A block has arrived. Add its size onto the total and terminate everything if the size goes over our limit.
         fileTypeStream.on('data', (data) => {
           size += data.length;
 
@@ -145,6 +153,7 @@ module.exports.initialise = (instance) => {
           }
         });
 
+        // Process has terminated, clean up and send the message with the file.
         fileTypeStream.on('end', () => {
           if (fs.existsSync(path.join(__dirname, '../../../../user_files', name + '.' + extension))) { // Check exists, may have deleted.
             pool.getConnection((err, connection) => {
@@ -154,6 +163,7 @@ module.exports.initialise = (instance) => {
                     let referencesMessage;
 
                     if (!stream.bind) {
+                      // No existing message, create a new one (we didn't type anything but did send a file).
                       let sendFileMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, "A file.", ?);';
 
                       db.query(connection, sendFileMessageQuery, [stream.group, socket.request.session.UserID, Date.now()], (result, fields) => {
@@ -164,6 +174,7 @@ module.exports.initialise = (instance) => {
                     }
                   },
                   function (referencesMessage, callback) {
+                    // Link the file to its message.
                     let insertMediaQuery = 'INSERT INTO Media (ReferencesMessageID, FileName) VALUES (?, ?);';
 
                     db.query(connection, insertMediaQuery, [referencesMessage, name + '.' + extension], (result, fields) => {
@@ -178,6 +189,7 @@ module.exports.initialise = (instance) => {
                   db.query(connection, 'SELECT DisplayName FROM User WHERE UserID = ?;', socket.request.session.UserID, (result, fields) => {
                     connection.release();
 
+                    // Alter the message and then send it out.
                     stream.message.MessageID = referencesMessage;
 
                     stream.message.AuthorID = socket.request.session.UserID;

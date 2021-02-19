@@ -164,6 +164,7 @@ $(window).on('load', () => {
           .append(message.HasFile ? fileElement : null)
       );
 
+      // Wait for images to load as we may, otherwise, not have correct scroll behaviour.
       $('#chatbox img').on('load', () => {
         stickScroll(scrollOffset);
       });

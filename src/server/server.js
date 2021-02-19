@@ -683,12 +683,12 @@ app.post('/api/SetTag', (req, res, next) => {
 app.get('/user-file', (req, res, next) => {
   if (req.query.fileName) {
     if (fs.existsSync(path.join(__dirname, '../../user_files', req.query.fileName))) {
+      // Serve the file from the random name.
       res.status(200).sendFile(path.join(__dirname, '../../user_files', req.query.fileName));
     } else {
       next();
     }
   } else {
-    log.info(2);
     next();
   }
 });
