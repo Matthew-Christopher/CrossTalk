@@ -164,8 +164,9 @@ $(window).on('load', () => {
           .append(message.HasFile ? fileElement : null)
       );
 
-      // Handle scrollbar behaviour.
-      stickScroll(scrollOffset);
+      $('#chatbox img').on('load', () => {
+        stickScroll(scrollOffset);
+      });
     }
 
     // Update the new most recent message in the server selector.
