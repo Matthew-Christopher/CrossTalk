@@ -18,7 +18,7 @@ $(window).on('load', () => {
         let JSONData = $.parseJSON(data);
 
         if (JSONData.outcome == 'mismatch') {
-          // Password did not password confirmation field.
+          // Password did not match its confirmation field.
           $('#result').text('Passwords did not match.');
         } else if (JSONData.outcome == 'invalid') {
           // The recovery key was not valid.
