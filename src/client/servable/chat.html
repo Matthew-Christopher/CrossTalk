@@ -195,7 +195,7 @@
             <!-- Allow PNG, JPEG, PDF, TXT files only. -->
             <input type="file" id="file-input" name="file" accept="image/x-png, image/jpeg, application/pdf" hidden />
             <label for="file-input"></label>
-            <div id="file-info">
+            <div id="file-info" class="blur-exclude">
               <button id="remove-file-button" type="button"></button>
               <div id="file-chosen">
                 <span class="name"></span>
@@ -224,7 +224,7 @@
     <!-- Automatically served by the API, if we are listening correctly. -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/socket.io-stream.js"></script>
-    
+
     <script src="js/Message.js"></script>
     <script src="js/chat-client.js"></script>
     <script src="js/empty-input.js"></script>
