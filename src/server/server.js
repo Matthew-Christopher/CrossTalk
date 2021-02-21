@@ -282,22 +282,22 @@ app.post('/api/GetMyGroups', (req, res, next) => {
             \`Group\`.GroupName,
             GroupMembership.Tag,
             GroupMembership.CustomColour
-            FROM   \`Group\`
+            FROM \`Group\`
             JOIN GroupMembership
             ON \`Group\`.GroupID = GroupMembership.GroupID
             WHERE  GroupMembership.UserID = ?) AS GroupInfo
       LEFT JOIN (SELECT Message.MessageString AS LatestMessageString,
                         LatestMessage.GroupID,
                         LatestMessage.Timestamp
-                 FROM   Message
+                 FROM Message
                  JOIN (SELECT GroupID, MAX(Timestamp) AS Timestamp
-                      FROM   Message
-                      GROUP  BY GroupID) AS LatestMessage
+                      FROM Message
+                      GROUP BY GroupID) AS LatestMessage
                       ON Message.GroupID = LatestMessage.GroupID
                       AND Message.Timestamp = LatestMessage.Timestamp
-                      ORDER  BY LatestMessage.Timestamp DESC) AS MessageInfo
+                      ORDER BY LatestMessage.Timestamp DESC) AS MessageInfo
       ON GroupInfo.GroupID = MessageInfo.GroupID
-      ORDER  BY MessageInfo.Timestamp DESC, GroupInfo.GroupName;
+      ORDER BY MessageInfo.Timestamp DESC, GroupInfo.GroupName;
       `;
 
       db.query(connection, sql, req.session.UserID, (result, fields) => {
