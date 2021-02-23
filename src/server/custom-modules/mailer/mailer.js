@@ -30,7 +30,7 @@ module.exports.SendRecovery = (email, recoveryKey) => {
   const mailOptions = {
     from: process.env.NM_USER,
     to: email,
-    subject: 'Recover Your Password',
+    subject: 'Recover Your Account',
     html: '<h1>Crosstalk</h1><p>Please click the link below to recover your account by resetting your password.</p><a href=\"localhost/account/change-password?recoveryKey=' + recoveryKey + '\">localhost/account/change-password?recoveryKey=' + recoveryKey + '</a><p><i>If you didn\'t request this, you can just ignore the email.</i></p><b>IMPORTANT NOTE: This project is my Computer Science A Level NEA. Please do not mistake this for an actual commericial service or product. You should not create or use an account if you have stumbled upon this website without being permission to use or test it. Thank you.</b>'
   };
 
