@@ -267,16 +267,16 @@ module.exports.initialise = (instance) => {
             (
               SELECT Message.*
               FROM Message
-              JOIN GroupMembership
+              INNER JOIN GroupMembership
                 ON Message.GroupID = GroupMembership.GroupID
               WHERE (Message.AuthorID = GroupMembership.UserID OR GroupMembership.Role > 0)
                 AND Message.MessageID = ?
                 AND GroupMembership.UserID = ?
               UNION SELECT Message.*
               FROM Message
-              JOIN (
+              INNER JOIN (
                 SELECT UserFriend.FriendshipID FROM UserFriend
-                JOIN (SELECT FriendshipID FROM UserFriend WHERE UserInFriendship = ?) AS MyFriendships
+                INNER JOIN (SELECT FriendshipID FROM UserFriend WHERE UserInFriendship = ?) AS MyFriendships
                   ON UserFriend.FriendshipID = MyFriendships.FriendshipID
                 WHERE UserFriend.UserInFriendship != ?) AS SecondDerivedTable
               ON Message.FriendshipID = SecondDerivedTable.FriendshipID WHERE MessageID = ?)
@@ -341,7 +341,7 @@ module.exports.initialise = (instance) => {
           if (err) throw err; // Connection failed.
 
           // Does the requesting user have the authority to pin the message?
-          let checkValidQuery = 'SELECT COUNT(*) AS Matches FROM Message JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
+          let checkValidQuery = 'SELECT COUNT(*) AS Matches FROM Message INNER JOIN GroupMembership ON Message.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND Message.MessageID = ? AND GroupMembership.UserID = ?;';
 
           db.query(connection, checkValidQuery, [messageID, socket.request.session.UserID], (result, fields) => {
             if (result[0].Matches == 1) {
@@ -383,7 +383,7 @@ module.exports.initialise = (instance) => {
 
           // Is the requesting user allowed to pin the message?
           let checkValidQuery =
-            'SELECT COUNT(*) AS Matches, `Group`.GroupID, `Group`.PinnedMessageID AS MessageID FROM `Group` JOIN GroupMembership ON `Group`.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND `Group`.GroupID = ? AND GroupMembership.UserID = ?;';
+            'SELECT COUNT(*) AS Matches, `Group`.GroupID, `Group`.PinnedMessageID AS MessageID FROM `Group` INNER JOIN GroupMembership ON `Group`.GroupID = GroupMembership.GroupID WHERE GroupMembership.Role > 0 AND `Group`.GroupID = ? AND GroupMembership.UserID = ?;';
 
           db.query(connection, checkValidQuery, [groupID, socket.request.session.UserID], (result, fields) => {
             if (result[0].Matches == 1) {
@@ -421,7 +421,7 @@ module.exports.initialise = (instance) => {
               LEFT JOIN
             (SELECT COUNT(*) AS AlreadyFriendMatches FROM
               (SELECT FriendshipID FROM UserFriend WHERE UserInFriendship = ?) AS ThirdDerivedTable
-              JOIN UserFriend
+              INNER JOIN UserFriend
                 ON ThirdDerivedTable.FriendshipID = UserFriend.FriendshipID
               WHERE UserInFriendship = ?)
               AS FourthDerivedTable
@@ -501,7 +501,7 @@ module.exports.initialise = (instance) => {
           let checkValidQuery = `
           SELECT Friendship.FriendshipID, Friendship.Status, FirstDerivedTable.OtherUserID
           FROM Friendship
-            JOIN (SELECT UF1.FriendshipID, UF2.UserInFriendship AS OtherUserID FROM UserFriend UF1
+            INNER JOIN (SELECT UF1.FriendshipID, UF2.UserInFriendship AS OtherUserID FROM UserFriend UF1
                     INNER JOIN UserFriend UF2
                       ON UF1.FriendshipID = UF2.FriendshipID AND UF1.UserInFriendship != UF2.UserInFriendship
                     WHERE UF1.UserInFriendship = ? AND UF1.FriendshipID = ?)

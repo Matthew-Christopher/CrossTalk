@@ -136,16 +136,18 @@ app.post('/JoinGroup', (req, res) => {
 
       let checkValid = `
       SELECT *
-      FROM   (SELECT \`Group\`.GroupID AS JoinID
-        FROM   \`Group\`
-        WHERE  InviteCode = ?) AS FirstDerivedTable
-        LEFT JOIN (SELECT GroupMembership.GroupID AS MembershipJoinID
-                  FROM   GroupMembership
-                         JOIN \`Group\`
-                         ON GroupMembership.GroupID = \`Group\`.GroupID
-                  WHERE  UserID = ?
-                         AND \`Group\`.InviteCode = ?) AS SecondDerivedTable
-                  ON TRUE;`;
+      FROM (SELECT \`Group\`.GroupID AS JoinID
+        FROM \`Group\`
+        WHERE  InviteCode = ?)
+        AS FirstDerivedTable
+      LEFT JOIN (SELECT GroupMembership.GroupID AS MembershipJoinID
+        FROM GroupMembership
+        INNER JOIN \`Group\`
+          ON GroupMembership.GroupID = \`Group\`.GroupID
+        WHERE  UserID = ?
+        AND \`Group\`.InviteCode = ?) AS SecondDerivedTable
+      ON TRUE;`;
+
       db.query(connection, checkValid, [req.body.code, req.session.UserID, req.body.code], (firstResult, fields) => {
         if (firstResult[0] && firstResult[0].JoinID && !firstResult[0].MembershipJoinID) {
           let joinGroup = `INSERT INTO GroupMembership (UserID, GroupID) VALUES (?, ?);`; // Add the user to the group.
@@ -283,14 +285,14 @@ app.post('/api/GetMyGroups', (req, res, next) => {
             GroupMembership.Tag,
             GroupMembership.CustomColour
             FROM \`Group\`
-            JOIN GroupMembership
+            INNER JOIN GroupMembership
             ON \`Group\`.GroupID = GroupMembership.GroupID
             WHERE  GroupMembership.UserID = ?) AS GroupInfo
       LEFT JOIN (SELECT Message.MessageString AS LatestMessageString,
                         LatestMessage.GroupID,
                         LatestMessage.Timestamp
                  FROM Message
-                 JOIN (SELECT GroupID, MAX(Timestamp) AS Timestamp
+                 INNER JOIN (SELECT GroupID, MAX(Timestamp) AS Timestamp
                       FROM Message
                       GROUP BY GroupID) AS LatestMessage
                       ON Message.GroupID = LatestMessage.GroupID
@@ -368,9 +370,9 @@ app.post('/api/GetMessages', (req, res, next) => {
             FROM Message
             LEFT JOIN Media
               ON Message.MessageID = Media.ReferencesMessageID
-            JOIN GroupMembership
+            INNER JOIN GroupMembership
               ON Message.GroupID = GroupMembership.GroupID
-            JOIN User
+            INNER JOIN User
               ON User.UserID = Message.AuthorID
             WHERE GroupMembership.UserID = ? AND GroupMembership.GroupID = ?
             ORDER BY Message.Timestamp;`;
@@ -414,11 +416,11 @@ app.post('/api/GetFriendMessages', (req, res, next) => {
       FROM Message
       LEFT JOIN Media
         ON Message.MessageID = Media.ReferencesMessageID
-      JOIN Friendship
+      INNER JOIN Friendship
         ON Message.FriendshipID = Friendship.FriendshipID
       INNER JOIN UserFriend
         ON Friendship.FriendshipID = UserFriend.FriendshipID
-      JOIN User
+      INNER JOIN User
         ON User.UserID = Message.AuthorID
       WHERE UserFriend.UserInFriendship = ? AND Friendship.FriendshipID = ?
       ORDER BY Message.Timestamp;`;
@@ -443,12 +445,12 @@ app.post('/api/GetPinnedMessage', (req, res, next) => {
       SELECT Message.MessageID, User.DisplayName AS AuthorDisplayName,
         Message.MessageString, Message.Timestamp
       FROM Message
-        JOIN User
-          ON Message.AuthorID = User.UserID
-        JOIN \`Group\`
-          ON \`Group\`.PinnedMessageID = Message.MessageID
-        JOIN GroupMembership
-          ON \`Group\`.GroupID = GroupMembership.GroupID
+      INNER JOIN User
+        ON Message.AuthorID = User.UserID
+      INNER JOIN \`Group\`
+        ON \`Group\`.PinnedMessageID = Message.MessageID
+      INNER JOIN GroupMembership
+        ON \`Group\`.GroupID = GroupMembership.GroupID
       WHERE  Groupmembership.UserID = ?
         AND \`Group\`.GroupID = ?;`;
 
@@ -496,13 +498,13 @@ app.post('/api/GetGroupMemberList', (req, res, next) => {
             GroupMembership.Role,
             SecondDerivedTable.IsAFriend
           FROM GroupMembership
-          JOIN User
+          INNER JOIN User
             ON User.UserID = GroupMembership.UserID
           LEFT JOIN
             (SELECT UserInFriendship, COUNT(FirstDerivedTable.FriendshipID) > 0 AS IsAFriend
               FROM
                 (SELECT FriendshipID FROM UserFriend WHERE UserInFriendship = ?) AS FirstDerivedTable
-                JOIN UserFriend
+                INNER JOIN UserFriend
                   ON UserFriend.FriendshipID = FirstDerivedTable.FriendshipID
                 WHERE UserInFriendship != ?
               GROUP BY FirstDerivedTable.FriendshipID) AS SecondDerivedTable
@@ -564,7 +566,7 @@ app.post('/api/GetGroupData', (req, res) => {
                 });
               },
               members: function GetMemberData(callback) {
-                let getMemberListQuery = 'SELECT User.UserID, User.DisplayName, GroupMembership.Role FROM GroupMembership JOIN User ON User.UserID = GroupMembership.UserID WHERE GroupMembership.GroupID = ? ORDER BY User.DisplayName;';
+                let getMemberListQuery = 'SELECT User.UserID, User.DisplayName, GroupMembership.Role FROM GroupMembership INNER JOIN User ON User.UserID = GroupMembership.UserID WHERE GroupMembership.GroupID = ? ORDER BY User.DisplayName;';
                 db.query(connection, getMemberListQuery, req.body.GroupID, (result, fields) => {
                   callback(null, result);
                 });
@@ -621,17 +623,17 @@ app.post('/api/GetMyFriends', (req, res, next) => {
         (
           SELECT * FROM UserFriend
           WHERE UserInFriendship = ?) AS MyFriendships
-          JOIN UserFriend
+          INNER JOIN UserFriend
             ON MyFriendships.FriendshipID = UserFriend.FriendshipID
-          JOIN Friendship
+          INNER JOIN Friendship
             ON MyFriendships.FriendshipID = Friendship.FriendshipID
-          JOIN User
+          INNER JOIN User
             ON UserFriend.UserInFriendship = User.UserID
           LEFT JOIN
             (
               SELECT Message.MessageString AS LatestMessageString, LatestMessage.FriendshipID, LatestMessage.Timestamp
               FROM Message
-              JOIN (SELECT FriendshipID, MAX(Timestamp) AS Timestamp FROM Message GROUP BY FriendshipID) AS LatestMessage
+              INNER JOIN (SELECT FriendshipID, MAX(Timestamp) AS Timestamp FROM Message GROUP BY FriendshipID) AS LatestMessage
                 ON Message.FriendshipID = LatestMessage.FriendshipID AND Message.Timestamp = LatestMessage.Timestamp
             )
             AS LatestMessageInFriendship
