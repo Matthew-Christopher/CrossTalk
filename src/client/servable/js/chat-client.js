@@ -2,6 +2,7 @@ let activeServerID,
   role,
   id,
   stream,
+  pinnedMessageID,
   groupIsPrivate = false;
 const socket = io.connect('/');
 
@@ -517,6 +518,11 @@ $(window).on('load', () => {
       },
     });
   }
+
+  $('#pinned-message').click(() => {
+    // Scroll to the message that is pinned.
+    $('#chatbox').scrollTop($('#' + pinnedMessageID)[0].offsetTop - $('#pinned-message-container').height() - $('#info-container').height() + 8);
+  });
 });
 
 // New group picked, handle incoming message data from the server.
@@ -687,9 +693,12 @@ function checkPinnedMessage() {
       },
       success: (data) => {
         let JSONData = $.parseJSON(data);
+
         let mustAdjustScroll = $('#pinned-message-container').css('display') == 'none';
 
         if (JSONData.length > 0) {
+          pinnedMessageID = JSONData[0].MessageID;
+
           $('#pinned-message-container').css('display', 'flex');
 
           $('#pinned-message-label').text('Pinned message from ' + JSONData[0].AuthorDisplayName + ', sent ' + getPinnedMessageTimestamp(JSONData[0].Timestamp) + '.');

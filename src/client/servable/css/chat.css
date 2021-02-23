@@ -636,7 +636,7 @@ button {
 #chat-container #pinned-message-container #pinned-message {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  margin: 10px;
+  padding: 10px;
   max-width: calc(100% - 40px);
   height: 100%;
   display: -webkit-box;
@@ -652,6 +652,10 @@ button {
   -webkit-box-flex: 1;
   -ms-flex: 1;
   flex: 1;
+}
+
+#chat-container #pinned-message-container #pinned-message {
+  cursor: pointer;
 }
 
 #chat-container #pinned-message-container #pinned-message-text::before {
