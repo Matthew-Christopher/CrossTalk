@@ -133,16 +133,6 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 See the [open issues](https://github.com/Matthew-Christopher/Crosstalk/issues) for a list of known issues and requested features.
 
 
-
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the GPLv3 License. See `LICENSE` for more information.
-
-
-
 <!-- CONTACT -->
 ## Contact
 
