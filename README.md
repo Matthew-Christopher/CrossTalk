@@ -122,21 +122,6 @@ Use this space to show useful examples of how a project can be used. Additional 
 _For more examples, please refer to the [Documentation](https://example.com)_
 
 
-
-<!-- ROADMAP -->
-## Roadmap
-
-See the [open issues](https://github.com/Matthew-Christopher/Crosstalk/issues) for a list of known issues and requested features.
-
-
-<!-- CONTACT -->
-## Contact
-
-My GitHub Profile: [https://github.com/Matthew-Christopher](https://github.com/Matthew-Christopher)
-
-Project Link: [https://github.com/Matthew-Christopher/Crosstalk](https://github.com/Matthew-Christopher/Crosstalk)
-
-
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
 
