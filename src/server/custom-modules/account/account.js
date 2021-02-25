@@ -76,12 +76,12 @@ module.exports.Register = async (request, response) => {
 
   function validPassword(password) {
     let lengthCondition = password.length >= 8;
-    let capsCondition = password.match(/^(?=.*[A-Z])/g);
-    let lowerCondition = password.match(/^(?=.*[a-z])/g);
-    let digitCondition = password.match(/^(?=.*[0-9])/g);
-    let symbolCondition = password.match(/^(?=.*[\!"£\$%\^&\*\(\)\-\=_\+\[\]\\\{\\\}\\;'#\:@~,\.\/\<\>\?'"\\`¬¦])/g);
+    let capsCondition = password.match(/^(?=.*[A-Z])/g); // Contains an upper case character.
+    let lowerCondition = password.match(/^(?=.*[a-z])/g); // Contains a lower case character.
+    let digitCondition = password.match(/^(?=.*[0-9])/g); // Contains a digit.
+    let symbolCondition = password.match(/^(?=.*[\!"£\$%\^&\*\(\)\-\=_\+\[\]\\\{\\\}\\;'#\:@~,\.\/\<\>\?'"\\`¬¦])/g); // Contains a special symbol.
 
-    return lengthCondition && capsCondition && lowerCondition && digitCondition && symbolCondition;
+    return lengthCondition && capsCondition && lowerCondition && digitCondition && symbolCondition; // Must meet all conditions.
   }
 };
 
