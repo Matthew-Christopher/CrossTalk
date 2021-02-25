@@ -20,6 +20,8 @@ $(window).on('load', () => {
         if (JSONData.outcome == 'mismatch') {
           // Password did not match its confirmation field.
           $('#result').text('Passwords did not match.');
+        } else if (JSONData.outcome == 'password') {
+          $('#result').text('Password does not meet the security requirements. It needs to be at least 8 characters long and contain an upper case letter, digit and a symbol. It must also not contain more than 2 repeated characters next to each other, like in "passwooord".');
         } else if (JSONData.outcome == 'invalid') {
           // The recovery key was not valid.
           $('#result').text('Invalid recovery key; it may have expired. Redirecting...');
