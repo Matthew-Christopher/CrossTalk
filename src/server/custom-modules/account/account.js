@@ -52,7 +52,7 @@ module.exports.Register = async (request, response) => {
           response.send('display');
         } else if (result[0].EmailDuplicates > 0) {
           response.send('email');
-        } else if (request.body.password.length < 8) {
+        } else if (!validPassword(request.body.password)) {
           response.send('password');
         } else {
           // The registration can proceed because the data are all valid.
@@ -72,6 +72,16 @@ module.exports.Register = async (request, response) => {
 
       connection.release();
     });
+  }
+
+  function validPassword(password) {
+    let lengthCondition = password.length >= 8;
+    let capsCondition = password.match(/^(?=.*[A-Z])/g);
+    let lowerCondition = password.match(/^(?=.*[a-z])/g);
+    let digitCondition = password.match(/^(?=.*[0-9])/g);
+    let symbolCondition = password.match(/^(?=.*[\!"£\$%\^&\*\(\)\-\=_\+\[\]\\\{\\\}\\;'#\:@~,\.\/\<\>\?'"\\`¬¦])/g);
+
+    return lengthCondition && capsCondition && lowerCondition && digitCondition && symbolCondition;
   }
 };
 

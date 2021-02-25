@@ -18,7 +18,7 @@ $(window).on('load', () => {
           $('input[name="email"]').val('').focus();
           $('input[name="confirm-email"]').removeClass('non-empty').val('');
         } else if (data == 'password') {
-          $('#result').text('Password does not meet the security requirements. It needs to be at least 8 characters long.');
+          $('#result').text('Password does not meet the security requirements. It needs to be at least 8 characters long and contain an upper case letter, digit and a symbol.');
           $('input[name="password"]').val('').focus();
           $('input[name="confirm-password"]').removeClass('non-empty').val('');
         } else {
