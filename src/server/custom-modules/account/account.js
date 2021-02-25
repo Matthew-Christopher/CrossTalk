@@ -82,8 +82,9 @@ module.exports.Register = async (request, response) => {
     let lowerCondition = password.match(/^(?=.*[a-z])/g); // Contains a lower case character.
     let digitCondition = password.match(/^(?=.*[0-9])/g); // Contains a digit.
     let symbolCondition = password.match(/^(?=.*[\!"£\$%\^&\*\(\)\-\=_\+\[\]\\\{\\\}\\;'#\:@~,\.\/\<\>\?'"\\`¬¦])/g); // Contains a special symbol.
+    let repeatsCondition = password.match(/^(?!.*([A-Za-z0-9])\1{2})/g); // Allow a maximum of two repeating characters in a row, disallows things like 'Paaaaaaasssword1!'.
 
-    return lengthCondition && capsCondition && lowerCondition && digitCondition && symbolCondition; // Must meet all conditions.
+    return lengthCondition && capsCondition && lowerCondition && digitCondition && symbolCondition && repeatsCondition; // Must meet all conditions.
   }
 };
 
