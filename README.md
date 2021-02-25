@@ -17,7 +17,6 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![GPLv3 License][license-shield]][license-url]
 
 <!-- PROJECT LOGO -->
 <br />
@@ -58,9 +57,6 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
 </details>
@@ -131,16 +127,6 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 ## Roadmap
 
 See the [open issues](https://github.com/Matthew-Christopher/Crosstalk/issues) for a list of known issues and requested features.
-
-
-
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the GPLv3 License. See `LICENSE` for more information.
-
 
 
 <!-- CONTACT -->
