@@ -128,7 +128,7 @@ app.get('/logout', async (req, res) => {
 });
 
 app.post('/JoinGroup', (req, res) => {
-  if (!req.session.LoggedIn || !req.body.code) {
+  if (!req.session.LoggedIn || !req.body.code || !(req.body.code.length == 12)) {
     res.json(JSON.stringify({ status: 'invalid' }));
   } else {
     pool.getConnection(async (err, connection) => {
@@ -213,49 +213,51 @@ app.post('/account/change-password', async (req, res) => {
 });
 
 app.post('/CreateGroup', (req, res) => {
-  log.info('Creating a new group called ' + req.body.group);
+  if (req.body.group.length <= 70) {
+    log.info('Creating a new group called ' + req.body.group);
 
-  pool.getConnection(async (err, connection) => {
-    if (err) throw err; // Connection failed.
+    pool.getConnection(async (err, connection) => {
+      if (err) throw err; // Connection failed.
 
-    async.waterfall(
-      [
-        function GetID(callback) {
-          // Get a unique invite code.
-          GetNewGroupID(connection, (inviteCode) => {
-            callback(null, inviteCode);
-          });
-        },
-        function InsertID(inviteCode, callback) {
-          // Create the group.
-          let idInsertionQuery = 'INSERT INTO `Group` (GroupName, InviteCode) VALUES (?, ?);';
+      async.waterfall(
+        [
+          function GetID(callback) {
+            // Get a unique invite code.
+            GetNewGroupID(connection, (inviteCode) => {
+              callback(null, inviteCode);
+            });
+          },
+          function InsertID(inviteCode, callback) {
+            // Create the group.
+            let idInsertionQuery = 'INSERT INTO `Group` (GroupName, InviteCode) VALUES (?, ?);';
 
-          db.query(connection, idInsertionQuery, [req.body.group, inviteCode], (result, fields) => {
-            callback(null, inviteCode, result);
-          });
-        },
-        function AddMembership(inviteCode, firstResult, callback) {
-          // Add the user to the group using the primary key from the record we just inserted.
-          let membershipInsertionQuery = 'INSERT INTO GroupMembership (UserID, GroupID, Role) VALUES (?, ?, 2);';
+            db.query(connection, idInsertionQuery, [req.body.group, inviteCode], (result, fields) => {
+              callback(null, inviteCode, result);
+            });
+          },
+          function AddMembership(inviteCode, firstResult, callback) {
+            // Add the user to the group using the primary key from the record we just inserted.
+            let membershipInsertionQuery = 'INSERT INTO GroupMembership (UserID, GroupID, Role) VALUES (?, ?, 2);';
 
-          db.query(connection, membershipInsertionQuery, [req.session.UserID, firstResult.insertId], (result, fields) => {
-            callback(null, inviteCode, firstResult, result);
-          });
-        },
-      ],
-      (error, inviteCode, firstResult, secondResult) => {
-        res.status(200).json(
-          JSON.stringify([
-            {
-              GroupID: firstResult.insertId,
-            },
-          ])
-        );
+            db.query(connection, membershipInsertionQuery, [req.session.UserID, firstResult.insertId], (result, fields) => {
+              callback(null, inviteCode, firstResult, result);
+            });
+          },
+        ],
+        (error, inviteCode, firstResult, secondResult) => {
+          res.status(200).json(
+            JSON.stringify([
+              {
+                GroupID: firstResult.insertId,
+              },
+            ])
+          );
 
-        connection.release();
-      }
-    );
-  });
+          connection.release();
+        }
+      );
+    });
+  }
 });
 
 app.get('/chat(.html)?', (req, res) => {

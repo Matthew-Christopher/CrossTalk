@@ -28,7 +28,9 @@ module.exports.Register = async (request, response) => {
     emailCheckRegex.exec(request.body.email) === null ||
     !request.body.password.trim() ||
     request.body.email != request.body['confirm-email'] ||
-    !(await cryptography.CompareHashes(hash, request.body['confirm-password']))
+    !(await cryptography.CompareHashes(hash, request.body['confirm-password'])
+    || request.body['display-name'].length > 70
+    || request.body.email.length > 70)
   ) {
     response.send('fail');
   } else {
