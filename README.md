@@ -49,14 +49,6 @@
         <li><a href="#built-with">Built With</a></li>
       </ul>
     </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
     <li><a href="#acknowledgements">Acknowledgements</a></li>
   </ol>
 </details>
@@ -87,40 +79,6 @@ A screenshot of the project chat screen.
 * [particles.js](https://github.com/VincentGarreau/particles.js/)
 * [Socket.IO](https://www.npmjs.com/package/socket.io)
 * [socket.io-stream](https://www.npmjs.com/package/socket.io-stream)
-
-<!-- GETTING STARTED -->
-## Getting Started
-
-To get a local copy up and running follow these simple steps. The code assumes that these steps have been completed correctly and is not likely to function without you doing so.
-
-### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-* Update npm
-  ```sh
-  npm install npm@latest -g
-  ```
-
-### Installation
-
-1. Clone the repo
-   ```sh
-   git clone https://github.com/Matthew-Christopher/Crosstalk.git
-   ```
-2. Install dependencies
-   ```sh
-   npm install
-   ```
-
-
-
-<!-- USAGE EXAMPLES -->
-## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
