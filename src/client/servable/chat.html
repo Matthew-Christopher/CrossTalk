@@ -30,7 +30,7 @@
 
         <form id="group-create-form" action="" method="POST">
           <div class="input-field-container">
-            <input class="effect-20" type="text" autocomplete="off" name="group" placeholder="" required />
+            <input class="effect-20" type="text" autocomplete="off" name="group" placeholder="" maxlength="70" required />
             <label>Group Name</label>
             <span class="focus-border">
               <i></i>
@@ -118,7 +118,7 @@
         <form id="group-join-form" class="input-fadein" action="">
           <div class="slide-back">
             <div class="input-field-container">
-              <input id="group-join-code" class="effect-20" type="text" name="code" autocomplete="off" placeholder="Invite Code" />
+              <input id="group-join-code" class="effect-20" type="text" name="code" autocomplete="off" pattern=".{12}" title="Invite code must be 12 characters." placeholder="Invite Code" />
               <span class="focus-border">
                 <i></i>
               </span>
@@ -186,7 +186,7 @@
       <ul id="chatbox"></ul>
       <form id="message-form" action="">
         <div class="input-field-container">
-          <input type="text" id="message" class="effect-20" autocomplete="off" placeholder="Type a message..." />
+          <input type="text" id="message" class="effect-20" autocomplete="off" maxlength="2000" placeholder="Type a message..." />
           <span class="focus-border">
             <i></i>
           </span>
