@@ -75,17 +75,6 @@ module.exports.Register = async (request, response) => {
       connection.release();
     });
   }
-
-  function validPassword(password) {
-    let lengthCondition = password.length >= 8;
-    let capsCondition = password.match(/^(?=.*[A-Z])/g); // Contains an upper case character.
-    let lowerCondition = password.match(/^(?=.*[a-z])/g); // Contains a lower case character.
-    let digitCondition = password.match(/^(?=.*[0-9])/g); // Contains a digit.
-    let symbolCondition = password.match(/^(?=.*[\!"£\$%\^&\*\(\)\-\=_\+\[\]\\\{\\\}\\;'#\:@~,\.\/\<\>\?'"\\`¬¦])/g); // Contains a special symbol.
-    let repeatsCondition = password.match(/^(?!.*([A-Za-z0-9])\1{2})/g); // Allow a maximum of two repeating characters in a row, disallows things like 'Paaaaaaasssword1!'.
-
-    return lengthCondition && capsCondition && lowerCondition && digitCondition && symbolCondition && repeatsCondition; // Must meet all conditions.
-  }
 };
 
 module.exports.Recover = (request, response) => {
@@ -126,6 +115,12 @@ module.exports.ChangePassword = async (request, response) => {
         outcome: 'mismatch', // The password and confirmation field did not match.
       })
     );
+  } else if (!request.body.formData.newPassword.trim() || !validPassword(request.body.formData.newPassword)) {
+    response.json(
+      JSON.stringify({
+        outcome: 'password', // The password and confirmation field did not match.
+      })
+    );
   } else {
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
@@ -163,7 +158,7 @@ module.exports.ChangePassword = async (request, response) => {
               mailer.SendChangeNotification(results.nameAndEmail[0].DisplayName, results.nameAndEmail[0].EmailAddress);
 
               // Let the client know that the password has been changed successfully.
-              response.json(
+              response.status(200).json(
                 JSON.stringify({
                   outcome: 'change',
                 })
@@ -218,6 +213,17 @@ module.exports.LogOut = async (request, response) => {
     response.redirect('/');
   });
 };
+
+function validPassword(password) {
+  let lengthCondition = password.length >= 8;
+  let capsCondition = password.match(/^(?=.*[A-Z])/g); // Contains an upper case character.
+  let lowerCondition = password.match(/^(?=.*[a-z])/g); // Contains a lower case character.
+  let digitCondition = password.match(/^(?=.*[0-9])/g); // Contains a digit.
+  let symbolCondition = password.match(/^(?=.*[\\\|`¬¦\!"£\$%\^&\*\(\)\-\=_\+\[\]\{\};'#\:@~,\.\/\<\>\?])/g); // Contains a special symbol.
+  let repeatsCondition = !password.match(/^(?=.*([A-Za-z0-9])\1{2})/g); // Allow a maximum of two repeating characters in a row; disallows things like 'Paaaaaaasssword1!'. This matches iff there are 3 or more repeats, so "not" it.
+
+  return lengthCondition && capsCondition && lowerCondition && digitCondition && symbolCondition && repeatsCondition; // Must meet all conditions.
+}
 
 function GetRecoveryKey(connection, callback) {
   // Generate a recovery key of 16 bytes and regenerate it if it already exists (this is very unlikely).
