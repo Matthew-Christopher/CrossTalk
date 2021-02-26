@@ -18,7 +18,7 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 
-NO LICENSE. All rights reserved.
+**NO LICENSE. All rights reserved.**
 
 <!-- PROJECT LOGO -->
 <br />
