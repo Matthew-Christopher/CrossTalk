@@ -18,6 +18,8 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 
+NO LICENSE. All rights reserved.
+
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
