@@ -125,7 +125,7 @@ $(window).on('load', () => {
 
   socket.on('message return', (message) => {
     // Only render the message if we are on its group.
-    if (message.GroupID ? message.GroupID : message.FriendshipID === activeServerID) {
+    if (message.GroupID == activeServerID || (message.friendshipID = activeServerID && groupIsPrivate)) {
       $('#chatbox-reminder').hide();
       $('#invite-prompt').hide();
 
