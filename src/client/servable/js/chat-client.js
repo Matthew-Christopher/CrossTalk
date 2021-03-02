@@ -120,6 +120,10 @@ $(window).on('load', () => {
       closeMemberList();
     } else if ($('#tag-set-container').css('display') == 'block' && $('#tag-set-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
       closeTagSetList();
+    } else if ($('#leave-container').css('display') == 'block' && $('#leave-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
+      $('#leave-container').fadeOut(200); // Take 200ms to fade.
+
+      unhidePopup();
     }
   });
 

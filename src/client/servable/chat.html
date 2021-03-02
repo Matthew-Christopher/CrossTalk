@@ -91,6 +91,21 @@
       </div>
     </div>
 
+    <div id="leave-container" class="overlay blur-exclude">
+      <div id="leave-popup" class="popup-container">
+        <button id="leave-close-button" class="popup-close-button"></button>
+        <h1 id="leave-title">Are you sure?</h1>
+
+        <div id="leave-info-container"><p id="leave-name" style="text-align: center;"></p></div>
+
+        <form id="close-form" action="" method="POST">
+          <div class="input-submit-container">
+            <input id="leave-group-button" type="submit" name="set" value="Yes, leave" style="cursor: pointer; padding: 0 25px;" required />
+          </div>
+        </form>
+      </div>
+    </div>
+
     <div id="server-container">
       <div id="chat-type-toggle-container">
         <label id="toggle-box">
