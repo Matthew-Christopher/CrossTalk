@@ -641,8 +641,9 @@ app.post('/api/GetMyFriends', (req, res, next) => {
             AS LatestMessageInFriendship
 
             ON MyFriendships.FriendshipID = LatestMessageInFriendship.FriendshipID
+
         WHERE UserFriend.UserInFriendship != ?
-        ORDER BY LatestMessageInFriendship.Timestamp, User.DisplayName;`;
+        ORDER BY LatestMessageInFriendship.Timestamp DESC, User.DisplayName;`;
 
       db.query(connection, getFriendsQuery, [req.session.UserID, req.session.UserID], (result, fields) => {
         res.json(
