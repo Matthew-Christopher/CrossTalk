@@ -318,6 +318,17 @@ $(window).on('load', () => {
 
     $('#' + $('#leave-group-button').attr('group')).remove();
 
+    $('#server-name-display').text('Crosstalk');
+    $('#chatbox').empty();
+    $('#chatbox-reminder').text(chatboxReminder).show();
+
+    if ($('#server-selector button').length == 0) {
+      $('#group-prompt').text('No groups yet. Join or create one.');
+      $('#group-prompt-container').css('display', 'block');
+    }
+
+    $('#pinned-message-container').hide();
+
     closeLeaveForm();
   });
 

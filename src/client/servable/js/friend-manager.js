@@ -1,6 +1,6 @@
 $(window).on('load', () => {
   // What text should we show in the chatbox?
-  const chatBoxReminder = 'Select or add a friend first.';
+  const chatboxReminder = 'Select or add a friend first.';
 
   // Toggle expansion of the box that has our pending requests in it.
   $('#friend-requests-toggle').click(function (event) {
@@ -16,7 +16,7 @@ $(window).on('load', () => {
 
     if (event.target.checked) {
       // Friends view.
-      $('#chatbox-reminder').text(chatBoxReminder); // Update the chatbox reminder to show text relevant to friends.
+      $('#chatbox-reminder').text(chatboxReminder); // Update the chatbox reminder to show text relevant to friends.
       $('#group-prompt').text('No friends yet.'); // Update the selector prompt to be friend-specific.
 
       $('#options').addClass('friends'); // Ensure the correct border radii are displayed for the visible elements.
@@ -76,6 +76,50 @@ $(window).on('load', () => {
       IsAccepting: isAccepting,
     });
   }
+
+  $(document).on('click', '.unfriend-button', (event) => {
+    // Tell the user which group they might be about to leave.
+    $('#unfriend-name').text($(event.target).closest('.friend-button').find('h1').text());
+
+    $('#unfriend-button').attr('friendship', $(event.target).closest('.friend-button').attr('id'));
+
+    $('#unfriend-container').fadeIn(200); // Take 200ms to fade.
+    $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)'); // Blur background.
+  });
+
+  $('#unfriend-close-button').click(() => {
+    closeUnFriendForm();
+  });
+
+  $('#unfriend-form').submit((event) => {
+    event.preventDefault(); // Don't refresh, we want a smooth experience.
+
+    socket.emit('unfriend', {
+      friendshipID: $('#unfriend-button').attr('friendship'),
+      type: $('#unfriend-type-select').val()
+    });
+
+    closeUnfriendForm();
+  });
+
+  function closeUnfriendForm() {
+    $('#unfriend-container').fadeOut(200); // Take 200ms to fade.
+
+    unhidePopup();
+  }
+
+  socket.on('removed', (friendshipID) => {
+    $('#' + friendshipID).remove();
+
+    $('#server-name-display').text('Crosstalk');
+    $('#chatbox').empty();
+    $('#chatbox-reminder').text(chatboxReminder).show();
+
+    if ($('#server-selector button').length == 0) {
+      $('#group-prompt').text('No friends yet.');
+      $('#group-prompt-container').css('display', 'block');
+    }
+  });
 });
 
 // Get and display our friends in the right areas.
@@ -153,41 +197,6 @@ function setFriends() {
       },
     });
   }
-
-  $(document).on('click', '.unfriend-button', (event) => {
-    // Tell the user which group they might be about to leave.
-    $('#unfriend-name').text($(event.target).closest('.friend-button').find('h1').text());
-
-    $('#unfriend-button').attr('friendship', $(event.target).closest('.friend-button').attr('id'));
-
-    $('#unfriend-container').fadeIn(200); // Take 200ms to fade.
-    $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)'); // Blur background.
-  });
-
-  $('#unfriend-close-button').click(() => {
-    closeUnFriendForm();
-  });
-
-  $('#unfriend-form').submit((event) => {
-    event.preventDefault(); // Don't refresh, we want a smooth experience.
-
-    socket.emit('unfriend', {
-      friendshipID: $('#unfriend-button').attr('friendship'),
-      type: $('#unfriend-type-select').val()
-    });
-
-    closeUnfriendForm();
-  });
-
-  function closeUnfriendForm() {
-    $('#unfriend-container').fadeOut(200); // Take 200ms to fade.
-
-    unhidePopup();
-  }
-
-  socket.on('removed', (friendshipID) => {
-    $('#' + friendshipID).remove();
-  });
 }
 
 // The server has told us that another client did something to a request we sent them. We should update its appearance on our end, too.
@@ -208,6 +217,7 @@ function oneOfMyFriendsUpdated(data) {
     $('#server-selector').append(
       $('<button class="friend-button" type="button">')
         .attr('id', data.FriendshipID)
+        .append('<button class="unfriend-button">')
         .append(
           $('<span class="friend-info-container">')
             .append(
