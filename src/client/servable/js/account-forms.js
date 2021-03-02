@@ -10,6 +10,10 @@ $(window).on('load', () => {
       success: (data) => {
         if (data == 'success') {
           $('#result').text('A link has been sent to your email. Click it to verify your account.');
+
+          $('#register-form')[0].reset();
+          $('#register-form :focus').blur();
+          $('#register-form input.non-empty').removeClass('non-empty');
         } else if (data == 'display') {
           $('#result').text('An account already exists with that display name.');
           $('input[name="display-name"]').val('').focus();
@@ -22,7 +26,7 @@ $(window).on('load', () => {
           $('input[name="password"]').val('').focus();
           $('input[name="confirm-password"]').removeClass('non-empty').val('');
         } else {
-          $('#result').text('Data entered was not valid.');
+          $('#result').text('Data entered was not valid. Check that the confirmation fields match the normal fields.');
         }
       },
       error: () => {
