@@ -117,7 +117,7 @@ $(window).on('load', () => {
 
   // We have opened a new group. Let's change the styling of the buttons and load up the group data and messages.
   $(document).on('click', '.server-button', (event) => {
-    if ($(event.target).closest('.server-button').attr('id') != activeServerID) {
+    if ($(event.target).closest('.server-button').attr('id') != activeServerID && !$(event.target).hasClass('group-leave-button')) {
       // Only do something if we are not clicking the currently active button.
       // If the event target is the text in the button, we actually want the parent button.
       // Match by just the GroupID property.
@@ -224,6 +224,7 @@ $(window).on('load', () => {
             .attr('id', item.GroupID)
             .append($('<p class="tag-text" style="position: absolute; bottom: 5px; right: 33px;">').text(item.Tag ? item.Tag : ''))
             .append('<button class="tag-set-button"><img class="tag-image" src="img/TagLo.png" alt="Set Tag" />')
+            .append('<button class="group-leave-button">')
             .append(
               $('<span class="server-info-container">')
                 .append($('<h1>').text(item.GroupName))
@@ -294,5 +295,35 @@ $(window).on('load', () => {
     } else {
       console.warn('Malformed colour.');
     }
+  }
+
+  $(document).on('click', '.group-leave-button', (event) => {
+    // Tell the user which group they might be about to leave.
+    $('#leave-name').text($(event.target).closest('.server-button').find('h1').text());
+
+    $('#leave-group-button').attr('group', '1');
+
+    $('#leave-container').fadeIn(200); // Take 200ms to fade.
+    $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)'); // Blur background.
+  });
+
+  $('#leave-close-button').click(() => {
+    closeLeaveForm();
+  });
+
+  $('#close-form').submit((event) => {
+    event.preventDefault(); // Don't refresh, we want a smooth experience.
+
+    socket.emit('leave', $('#leave-group-button').attr('group'));
+
+    $('#' + $('#leave-group-button').attr('group')).remove();
+
+    closeLeaveForm();
+  });
+
+  function closeLeaveForm() {
+    $('#leave-container').fadeOut(200); // Take 200ms to fade.
+
+    unhidePopup();
   }
 });

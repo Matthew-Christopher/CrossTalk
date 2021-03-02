@@ -545,6 +545,18 @@ module.exports.initialise = (instance) => {
         });
       }
     });
+
+    socket.on('leave', (data) => {
+      if (socket.request.session.LoggedIn && data) {
+        pool.getConnection(async (err, connection) => {
+          db.query(connection, 'DELETE FROM GroupMembership WHERE UserID = ? AND GroupID = ?;', [socket.request.session.UserID, data], (result, fields) => {
+            log.info(socket.request.session.UserID + ' left ' + data);
+
+            socket.leave(data.toString());
+          });
+        });
+      }
+    });
   });
 
   // What are the clients that are online in this room/group?
