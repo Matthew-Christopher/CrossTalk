@@ -364,10 +364,6 @@ button {
   margin-top: -2px;
   right: 0;
   bottom: 8px;
-  -webkit-animation-name: bounce;
-  animation-name: bounce;
-  -webkit-animation-timing-function: ease;
-  animation-timing-function: ease;
 }
 
 #server-container #friend-requests-container #friend-requests-toggle:hover {
@@ -1460,6 +1456,13 @@ button {
 
 .empty {
   border: none !important;
+}
+
+.bounce {
+  -webkit-animation-name: bounce;
+  animation-name: bounce;
+  -webkit-animation-timing-function: ease;
+  animation-timing-function: ease;
 }
 
 @-webkit-keyframes bounce {
