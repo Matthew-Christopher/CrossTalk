@@ -124,6 +124,10 @@ $(window).on('load', () => {
       $('#leave-container').fadeOut(200); // Take 200ms to fade.
 
       unhidePopup();
+    } else if ($('#unfriend-container').css('display') == 'block' && $('#unfriend-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
+      $('#unfriend-container').fadeOut(200); // Take 200ms to fade.
+
+      unhidePopup();
     }
   });
 

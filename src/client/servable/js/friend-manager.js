@@ -36,7 +36,7 @@ $(window).on('load', () => {
 
       // We have clicked on a private message. Change button styling and load up the messages.
       $(document).on('click', '.friend-button', (event) => {
-        if ($(event.target).closest('.friend-button').attr('id') != activeServerID || !$(event.target).closest('.friend-button').hasClass('active-button')) {
+        if (($(event.target).closest('.friend-button').attr('id') != activeServerID || !$(event.target).closest('.friend-button').hasClass('active-button')) && !$(event.target).hasClass('unfriend-button')) {
           // Only do something if we are not clicking the currently active button.
           // If the event target is the text in the button, we actually want the parent button.
 
@@ -136,6 +136,7 @@ function setFriends() {
           // Construct HTML from the parsed JSON data. Using .text() escapes any malformed or malicious strings.
           let newGroup = $('<button class="friend-button" type="button">')
             .attr('id', item.FriendshipID)
+            .append('<button class="unfriend-button">')
             .append(
               $('<span class="friend-info-container">')
                 .append($('<h1>').text(item.DisplayName))
@@ -152,6 +153,41 @@ function setFriends() {
       },
     });
   }
+
+  $(document).on('click', '.unfriend-button', (event) => {
+    // Tell the user which group they might be about to leave.
+    $('#unfriend-name').text($(event.target).closest('.friend-button').find('h1').text());
+
+    $('#unfriend-button').attr('friendship', $(event.target).closest('.friend-button').attr('id'));
+
+    $('#unfriend-container').fadeIn(200); // Take 200ms to fade.
+    $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)'); // Blur background.
+  });
+
+  $('#unfriend-close-button').click(() => {
+    closeUnFriendForm();
+  });
+
+  $('#unfriend-form').submit((event) => {
+    event.preventDefault(); // Don't refresh, we want a smooth experience.
+
+    socket.emit('unfriend', {
+      friendshipID: $('#unfriend-button').attr('friendship'),
+      type: $('#unfriend-type-select').val()
+    });
+
+    closeUnfriendForm();
+  });
+
+  function closeUnfriendForm() {
+    $('#unfriend-container').fadeOut(200); // Take 200ms to fade.
+
+    unhidePopup();
+  }
+
+  socket.on('removed', (friendshipID) => {
+    $('#' + friendshipID).remove();
+  });
 }
 
 // The server has told us that another client did something to a request we sent them. We should update its appearance on our end, too.

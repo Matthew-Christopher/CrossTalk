@@ -301,7 +301,7 @@ $(window).on('load', () => {
     // Tell the user which group they might be about to leave.
     $('#leave-name').text($(event.target).closest('.server-button').find('h1').text());
 
-    $('#leave-group-button').attr('group', '1');
+    $('#leave-group-button').attr('group', $(event.target).closest('.server-button').attr('id'));
 
     $('#leave-container').fadeIn(200); // Take 200ms to fade.
     $('body *:not(.blur-exclude):not(.blur-exclude *)').css('-webkit-filter', 'blur(3px)'); // Blur background.
@@ -311,7 +311,7 @@ $(window).on('load', () => {
     closeLeaveForm();
   });
 
-  $('#close-form').submit((event) => {
+  $('#leave-form').submit((event) => {
     event.preventDefault(); // Don't refresh, we want a smooth experience.
 
     socket.emit('leave', $('#leave-group-button').attr('group'));

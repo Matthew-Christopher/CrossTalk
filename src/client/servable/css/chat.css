@@ -22,7 +22,8 @@ button {
 #group-create-container,
 #member-list-container,
 #tag-set-container,
-#leave-container {
+#leave-container,
+#unfriend-container {
   position: fixed;
   left: 0;
   top: 0;
@@ -35,14 +36,16 @@ button {
 #group-create-container *:not(label),
 #member-list-container *,
 #tag-set-container *:not(label),
-#leave-container *:not(label) {
+#leave-container *:not(label),
+#unfriend-container *:not(label) {
   z-index: 5;
 }
 
 #group-create-container.overlay::after,
 #member-list-container.overlay::after,
 #tag-set-container.overlay::after,
-#leave-container.overlay::after {
+#leave-container.overlay::after,
+#unfriend-container.overlay::after {
   opacity: 0.4;
   background: black;
   content: "";
@@ -66,6 +69,25 @@ button {
 
 #leave-container #leave-name::after {
   content: '?';
+}
+
+#unfriend-container #unfriend-info-container {
+  width: 100%;
+}
+
+#unfriend-container #unfriend-name::before {
+  content: 'Do you definitely want unfriend ';
+}
+
+#unfriend-container #unfriend-name::after {
+  content: '?';
+}
+
+#unfriend-container #unfriend-type-select {
+  margin-bottom: 50px;
+  font-family: inherit;
+  font-weight: bold;
+  padding: 15px;
 }
 
 .popup-container {
@@ -137,7 +159,7 @@ button {
   transform: translate3d(0, 0, 0) scale(1.03);
 }
 
-.popup-container input:not([type="submit"], [type="color"]) {
+.popup-container input:not([type="submit"], [type="color"], [type="select"]) {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   outline: none;
@@ -169,7 +191,7 @@ button {
   transition: all 0.2s ease-in-out;
 }
 
-.group-leave-button {
+.group-leave-button, .unfriend-button {
   font-weight: 100;
   line-height: 0.65;
   font-size: 2em;
@@ -179,14 +201,14 @@ button {
   border: none;
   cursor: pointer;
   opacity: 0.5;
-  -webkit-transition: all 0.2s ease-in-out;
-  -o-transition: all 0.2s ease-in-out;
-  transition: all 0.2s ease-in-out;
+  -webkit-transition: all 0.2s ease-in-out !important;
+  -o-transition: all 0.2s ease-in-out !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
 .popup-container .popup-close-button:after,
 #chat-container #pinned-message-container #pinned-message-delete-button:after,
-.group-leave-button:after {
+.group-leave-button:after, .unfriend-button:after {
   content: "\00d7"; /* Cross */
 }
 
@@ -198,7 +220,7 @@ button {
   transform: scale(1.1);
 }
 
-.group-leave-button:hover {
+.group-leave-button:hover, .unfriend-button:hover {
   opacity: 1;
   -webkit-transform: scale(1.3);
   -ms-transform: scale(1.3);
@@ -549,7 +571,8 @@ button {
 }
 
 #server-selector .server-button .tag-set-button,
-#server-selector .server-button .group-leave-button {
+#server-selector .server-button .group-leave-button,
+.unfriend-button {
   position: absolute;
   bottom: 3px;
   right: 3px;
@@ -565,7 +588,7 @@ button {
   transition: all 0.1s linear;
 }
 
-#server-selector .server-button .group-leave-button {
+#server-selector .server-button .group-leave-button, .unfriend-button {
   top: 3px;
 }
 
