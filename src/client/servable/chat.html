@@ -98,9 +98,29 @@
 
         <div id="leave-info-container"><p id="leave-name" style="text-align: center;"></p></div>
 
-        <form id="close-form" action="" method="POST">
+        <form id="leave-form" action="" method="POST">
           <div class="input-submit-container">
             <input id="leave-group-button" type="submit" name="set" value="Yes, leave" style="cursor: pointer; padding: 0 25px;" required />
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="unfriend-container" class="overlay blur-exclude">
+      <div id="unfriend-popup" class="popup-container">
+        <button id="unfriend-close-button" class="popup-close-button"></button>
+        <h1 id="unfriend-title">Are you sure?</h1>
+
+        <div id="unfriend-info-container"><p id="unfriend-name" style="text-align: center;"></p></div>
+
+        <form id="unfriend-form" action="" method="POST">
+          <select name="unfriend-type" id="unfriend-type-select">
+            <option value="block">Don't allow them to send me a request ever again (block).</option>
+            <option value="remove">Allow them to send me a request in the future.</option>
+          </select>
+
+          <div class="input-submit-container">
+            <input id="unfriend-button" type="submit" name="set" value="Yes, unfriend" style="cursor: pointer; padding: 0 25px;" required />
           </div>
         </form>
       </div>

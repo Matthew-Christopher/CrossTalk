@@ -557,6 +557,41 @@ module.exports.initialise = (instance) => {
         });
       }
     });
+
+    socket.on('unfriend', (data) => {
+      if (socket.request.session.LoggedIn && data) {
+        pool.getConnection(async (err, connection) => {
+          // First we check that there is an existing friend request to update.
+          let checkValidQuery = `
+          SELECT Friendship.FriendshipID
+          FROM Friendship
+            INNER JOIN (SELECT UF1.FriendshipID, UF2.UserInFriendship AS OtherUserID FROM UserFriend UF1
+                    INNER JOIN UserFriend UF2
+                      ON UF1.FriendshipID = UF2.FriendshipID AND UF1.UserInFriendship != UF2.UserInFriendship
+                    WHERE UF1.UserInFriendship = ? AND UF1.FriendshipID = ?)
+                    AS FirstDerivedTable
+              ON Friendship.FriendshipID = FirstDerivedTable.FriendshipID;`; // Perform a self join on UserFriend.
+              
+          db.query(connection, checkValidQuery, [socket.request.session.UserID, data.friendshipID], (result, fields) => {
+            if (result.length == 1) {
+              // Request valid, proceed with processing it.
+
+              if (data.type == 'block') {
+                db.query(connection, 'UPDATE Friendship SET Status = 1 WHERE FriendshipID = ?;', data.friendshipID, (result, fields) => {
+                  log.info(socket.request.session.UserID + ' unfriended (blocked) in ' + data.friendshipID);
+                });
+              } else if (data.type == 'remove') {
+                db.query(connection, 'DELETE FROM Friendship WHERE FriendshipID = ?;', data.friendshipID, (result, fields) => {
+                  log.info(socket.request.session.UserID + ' unfriended (future requests possible) in ' + data.friendshipID);
+                });
+              }
+
+              io.sockets.in('FG' + data.friendshipID.toString()).emit('removed', data.friendshipID);
+            }
+          });
+        });
+      }
+    });
   });
 
   // What are the clients that are online in this room/group?
