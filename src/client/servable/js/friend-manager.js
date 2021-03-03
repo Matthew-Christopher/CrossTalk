@@ -136,7 +136,7 @@ function setFriends() {
         $('#friend-requests').empty(); // Clear out any old data.
         $('#server-selector').empty(); // Clear out any old data.
 
-        if (friends.sentPending.length + friends.notSentPending.length == 0) {
+        if (friends.sentPending.length == 0 && friends.notSentPending.length == 0) {
           $('#friend-requests').append($('<p id="no-requests-prompt" style="width: 100%; text-align: center; padding: 10px 5px;">').text("Nothing to display."));
         } else {
           $('#no-requests-prompt').remove();
@@ -244,5 +244,6 @@ function setFriendPromptVisibilities() {
 
   if ($('#friend-requests .friend-request-display').length == 0) {
     $('#alert').css('display', 'none');
+    $('#toggle-box p:last-child').removeClass('bounce');
   }
 }

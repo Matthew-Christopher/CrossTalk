@@ -553,6 +553,46 @@ module.exports.initialise = (instance) => {
             log.info(socket.request.session.UserID + ' left ' + data);
 
             socket.leave(data.toString());
+
+            connection.release();
+          });
+        });
+      }
+    });
+
+    socket.on('check pending friends', () => {
+      if (socket.request.session.LoggedIn) {
+        pool.getConnection(async (err, connection) => {
+          let checkIfPendingFriendsQuery = `
+          SELECT MyFriendships.FriendshipID, User.DisplayName, MyFriendships.UserSentRequest AS SentRequest, Friendship.Status, LatestMessageInFriendship.LatestMessageString
+          FROM
+            (
+              SELECT * FROM UserFriend
+              WHERE UserInFriendship = ?) AS MyFriendships
+              INNER JOIN UserFriend
+                ON MyFriendships.FriendshipID = UserFriend.FriendshipID
+              INNER JOIN Friendship
+                ON MyFriendships.FriendshipID = Friendship.FriendshipID
+              INNER JOIN User
+                ON UserFriend.UserInFriendship = User.UserID
+              LEFT JOIN
+                (
+                  SELECT Message.MessageString AS LatestMessageString, LatestMessage.FriendshipID, LatestMessage.Timestamp
+                  FROM Message
+                  INNER JOIN (SELECT FriendshipID, MAX(Timestamp) AS Timestamp FROM Message GROUP BY FriendshipID) AS LatestMessage
+                    ON Message.FriendshipID = LatestMessage.FriendshipID AND Message.Timestamp = LatestMessage.Timestamp
+                )
+                AS LatestMessageInFriendship
+
+                ON MyFriendships.FriendshipID = LatestMessageInFriendship.FriendshipID
+
+            WHERE UserFriend.UserInFriendship != ?
+            ORDER BY LatestMessageInFriendship.Timestamp DESC, User.DisplayName;`;
+
+          db.query(connection, checkIfPendingFriendsQuery, [socket.request.session.UserID, socket.request.session.UserID], (result, fields) => {
+            socket.emit('pending friends result', result.filter((element) => element.SentRequest != true && !(element.Status > 0)).length > 0);
+
+            connection.release();
           });
         });
       }
@@ -571,7 +611,7 @@ module.exports.initialise = (instance) => {
                     WHERE UF1.UserInFriendship = ? AND UF1.FriendshipID = ?)
                     AS FirstDerivedTable
               ON Friendship.FriendshipID = FirstDerivedTable.FriendshipID;`; // Perform a self join on UserFriend.
-              
+
           db.query(connection, checkValidQuery, [socket.request.session.UserID, data.friendshipID], (result, fields) => {
             if (result.length == 1) {
               // Request valid, proceed with processing it.
@@ -587,6 +627,8 @@ module.exports.initialise = (instance) => {
               }
 
               io.sockets.in('FG' + data.friendshipID.toString()).emit('removed', data.friendshipID);
+
+              connection.release();
             }
           });
         });
