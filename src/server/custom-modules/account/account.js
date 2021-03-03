@@ -118,7 +118,7 @@ module.exports.ChangePassword = async (request, response) => {
   } else if (!request.body.formData.newPassword.trim() || !validPassword(request.body.formData.newPassword)) {
     response.json(
       JSON.stringify({
-        outcome: 'password', // The password and confirmation field did not match.
+        outcome: 'password', // The password isn't valid.
       })
     );
   } else {

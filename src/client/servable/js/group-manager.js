@@ -284,7 +284,7 @@ $(window).on('load', () => {
 
       brightness *= 100 / 255; // 0 - 100;
 
-      const brightnessThreshold = 65;
+      const brightnessThreshold = 60;
 
       if (brightness < brightnessThreshold) {
         // Text might not be legible, switch to white.
