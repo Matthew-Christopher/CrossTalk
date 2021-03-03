@@ -259,7 +259,7 @@ $(window).on('load', () => {
     } else {
       $('#server-selector').scrollTop(
         $('#' + newGroupID)[0].offsetTop - // The distance from the top of this element that the desired elemenent is.
-        $('#toggle-box').height() - // Account for height of the top toggle and buttons.
+        $('.toggle-box').height() - // Account for height of the top toggle and buttons.
         $('#server-buttons-container').height() - // Account for join buttons and tag filter input.
         ($('#group-join-form .slide-back').height() + 1) - // The invite form will hide after executing and we need to account for its height.
         $('#server-selector').height() + // Scroll so that the element is at the bottom of the window.

@@ -11,7 +11,7 @@ $(window).on('load', () => {
   socket.on('pending friends result', (havePendingFriends) => {
     // Animate the friends text to alert the user.
     if (havePendingFriends) {
-      $('#toggle-box p:last-child').addClass('bounce');
+      $('.toggle-box p:last-child').addClass('bounce');
     }
   });
 
@@ -335,7 +335,7 @@ $(window).on('load', () => {
       setFriends();
 
       // Show this even if we are not in the friends section.
-      $('#toggle-box p:last-child').addClass('bounce');
+      $('.toggle-box p:last-child').addClass('bounce');
 
       let friendButton = $('p.user-name:contains("' + name + '")')
         .parents('li')
