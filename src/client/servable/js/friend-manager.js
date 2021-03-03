@@ -244,6 +244,6 @@ function setFriendPromptVisibilities() {
 
   if ($('#friend-requests .friend-request-display').length == 0) {
     $('#alert').css('display', 'none');
-    $('#toggle-box p:last-child').removeClass('bounce');
+    $('.toggle-box p:last-child').removeClass('bounce');
   }
 }
