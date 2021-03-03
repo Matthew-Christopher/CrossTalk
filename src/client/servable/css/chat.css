@@ -271,13 +271,13 @@ button {
   overflow-y: auto; /* Only show the scroll bar when necessary */
 }
 
-#server-container #chat-type-toggle-container {
+#server-container #chat-type-toggle-container, #options #message-type-toggle-container {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   width: 100%;
 }
 
-#server-container #chat-type-toggle-container #toggle-box {
+.toggle-box {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   display: -webkit-box;
@@ -293,14 +293,14 @@ button {
   position: relative;
 }
 
-#server-container #chat-type-toggle-container #chat-type-toggle {
+#server-container #chat-type-toggle-container #chat-type-toggle, #options #message-type-toggle-container #message-type-toggle {
   width: 0;
   height: 0;
   visibility: none;
 }
 
 /* SOURCE: https://www.w3schools.com/howto/howto_css_switch.asp [Accessed 08/02/2021] */
-#server-container #chat-type-toggle-container #chat-type-toggle-slider-visual {
+#server-container #chat-type-toggle-container #chat-type-toggle-slider-visual, #options #message-type-toggle-container #message-type-toggle-slider-visual {
   position: relative;
   -webkit-transition: background 0.3s linear;
   -o-transition: background 0.3s linear;
@@ -313,7 +313,7 @@ button {
 }
 
 /* The white circle that we will slide. */
-#server-container #chat-type-toggle-container #chat-type-toggle-slider-visual::after {
+#server-container #chat-type-toggle-container #chat-type-toggle-slider-visual::after, #options #message-type-toggle-container #message-type-toggle-slider-visual::after {
   content: "";
   position: absolute;
   -webkit-transition: left 0.2s ease-in-out;
@@ -332,7 +332,7 @@ button {
   background: #62f577 !important; /* Override the unchecked colour. */
 }
 
-#chat-type-toggle:checked + #chat-type-toggle-slider-visual::after {
+#chat-type-toggle:checked + #chat-type-toggle-slider-visual::after, #message-type-toggle:checked + #message-type-toggle-slider-visual::after {
   left: calc(100% - (24px + 6px)) !important; /* 24px is our width, 6px is the desired right so that it matches the initial left. */
 }
 /* END SOURCE */
