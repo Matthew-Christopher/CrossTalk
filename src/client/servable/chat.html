@@ -128,7 +128,7 @@
 
     <div id="server-container">
       <div id="chat-type-toggle-container">
-        <label id="toggle-box">
+        <label class="toggle-box">
           <!-- Wrap in a label so a click toggles the checkbox -->
           <p style="position: absolute; left: 0; padding: 5px;">Groups</p>
           <input id="chat-type-toggle" type="checkbox" />
@@ -196,6 +196,17 @@
       <ul id="options">
         <li><p id="group-options-label"></p></li>
         <li><input type="text" id="search" autocomplete="off" placeholder="Search messages..." /></li>
+        <li style="padding: 0 !important;">
+          <div id="message-type-toggle-container">
+            <label class="toggle-box">
+              <!-- Wrap in a label so a click toggles the checkbox -->
+              <p style="position: absolute; left: 0; padding: 5px;">All</p>
+              <input id="message-type-toggle" type="checkbox" />
+              <span id="message-type-toggle-slider-visual"></span>
+              <p style="position: absolute; right: 0; padding: 5px; z-index: 1;">Files</p>
+            </label>
+          </div>
+        </li>
         <li><button id="view-members" style="cursor: pointer; background: none; border: none; outline: none;">View members</button></li>
         <li><a id="show-invite-code">Get invite code</a></li>
         <li id="invite-code-display">

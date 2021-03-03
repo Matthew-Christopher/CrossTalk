@@ -169,6 +169,7 @@ $(window).on('load', () => {
       $('#chatbox').append(
         $('<li ' + (message.AuthorID == id ? 'class="owned" ' : "") + 'style="position: relative;">')
           .attr('id', message.MessageID)
+          .attr('has-file', message.HasFile)
           .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
           .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(getMessageTimestamp(message.Timestamp)))
           .append(
@@ -189,41 +190,6 @@ $(window).on('load', () => {
 
     // Update the new most recent message in the server selector.
     setRecentMessage(message.GroupID ? message.GroupID : message.FriendshipID, message.MessageString);
-  });
-
-  // We have changed whatever was typed into the search bar.
-  $('#search').on('input', () => {
-    if ($('#search').val()) {
-      $('#server-name-display').attr('data-before', 'Search in ');
-    } else {
-      $('#server-name-display').attr('data-before', '');
-    }
-
-    let search = $('#search').val().toLowerCase();
-
-    let listItems = $('#chatbox li p.message-content');
-    let nothingFound = true;
-
-    let scrollOffsetBeforeFilter = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
-
-    for (let i = 0; i < listItems.length; i++) {
-      if (listItems[i].innerHTML.toLowerCase().indexOf(search) > -1) {
-        nothingFound = false;
-        listItems[i].parentElement.style.display = 'list-item';
-      } else {
-        listItems[i].parentElement.style.display = 'none';
-      }
-    }
-
-    stickScroll(scrollOffsetBeforeFilter);
-
-    if (nothingFound) {
-      $('#chatbox-reminder')
-        .css('display', 'block')
-        .text('No messages ' + (listItems.length > 0 ? 'found' : 'yet'));
-    } else {
-      $('#chatbox-reminder').css('display', 'none');
-    }
   });
 
   // Request that the server deletes a message in the group/private message.
@@ -542,6 +508,55 @@ $(window).on('load', () => {
     // Scroll to the message that is pinned.
     $('#chatbox').scrollTop($('#' + pinnedMessageID)[0].offsetTop - $('#pinned-message-container').height() - $('#info-container').height() + 8);
   });
+
+  // We have changed whatever was typed into the search bar.
+  $('#search').on('input', () => {
+    messageSearch($('#search').val().toLowerCase(), $('#message-type-toggle:checked').length > 0);
+  });
+
+  // We are swapping between groups and friends.
+  $('#message-type-toggle').change(function (event) {
+    messageSearch($('#search').val().toLowerCase(), event.target.checked);
+  });
+
+  function messageSearch(query, files) {
+    if (query || files) {
+      $('#server-name-display').attr('data-before', 'Search in ');
+    } else {
+      $('#server-name-display').attr('data-before', '');
+    }
+
+    let listItems = $('#chatbox li');
+    let noQueryMatches = true;
+    let noTypeMatches = true;
+
+    let scrollOffsetBeforeFilter = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
+
+    listItems.each(function() {
+      if ($(this).find('p.message-content').text().toLowerCase().indexOf(query) > -1) {
+        noQueryMatches = false;
+        $(this).css('display', 'list-item');
+      } else {
+        $(this).css('display', 'none');
+      }
+
+      if ($(this).attr('has-file') == 'false' && files) {
+        $(this).css('display', 'none');
+      } else {
+        noTypeMatches = false;
+      }
+    });
+
+    stickScroll(scrollOffsetBeforeFilter);
+
+    if (noQueryMatches || noTypeMatches) {
+      $('#chatbox-reminder')
+        .css('display', 'block')
+        .text('No messages ' + (listItems.length > 0 ? 'found' : 'yet'));
+    } else {
+      $('#chatbox-reminder').css('display', 'none');
+    }
+  }
 });
 
 // New group picked, handle incoming message data from the server.
@@ -676,6 +691,7 @@ function appendSavedMessages(messageArray) {
     $('#chatbox').append(
       $('<li ' + (message.Owned ? 'class="owned" ' : '') + 'style="position: relative;">')
         .attr('id', message.MessageID)
+        .attr('has-file', message.FileName != null)
         .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
         .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(getMessageTimestamp(message.Timestamp)))
         .append(

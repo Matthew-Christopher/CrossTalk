@@ -97,6 +97,7 @@ function toggleVisiblity(name) {
     if (name == '#options-nav-container') {
       hideInviteCode();
       $('#search').val('').trigger('input');
+      $('#message-type-toggle').prop('checked', false).trigger('change');
     }
   } else {
     let otherContainer = name == '#profile-options-nav-container' ? '#options-nav-container' : '#profile-options-nav-container';
