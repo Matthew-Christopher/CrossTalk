@@ -7,6 +7,14 @@ let activeServerID,
 const socket = io.connect('/');
 
 $(window).on('load', () => {
+  socket.emit('check pending friends'); // Send a quick request to see if we have any friends to accept. We don't need to waste time getting a list of them for this simple test.
+  socket.on('pending friends result', (havePendingFriends) => {
+    // Animate the friends text to alert the user.
+    if (havePendingFriends) {
+      $('#toggle-box p:last-child').addClass('bounce');
+    }
+  });
+
   // Get the user's display name from their session cookie and the database.
   $.ajax({
     type: 'POST',
@@ -359,6 +367,9 @@ $(window).on('load', () => {
   socket.on('friend requested', (toUser, name) => {
     if (toUser == id) {
       setFriends();
+
+      // Show this even if we are not in the friends section.
+      $('#toggle-box p:last-child').addClass('bounce');
 
       let friendButton = $('p.user-name:contains("' + name + '")')
         .parents('li')

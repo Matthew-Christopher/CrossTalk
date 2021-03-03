@@ -180,14 +180,14 @@ module.exports.LogIn = async (request, response) => {
     // Get the user from the database so we can authenticate them.
     var sql = 'SELECT * FROM User WHERE EmailAddress = ?';
 
-    db.query(connection, sql, request.body.email, async (res, fields) => {
-      if (res.length > 0 && (await cryptography.CompareHashes(res[0].PasswordHash, request.body.password)) && res[0].Verified) {
+    db.query(connection, sql, request.body.email, async (result, fields) => {
+      if (result.length > 0 && (await cryptography.CompareHashes(result[0].PasswordHash, request.body.password)) && result[0].Verified) {
         // Authenticated.
 
         // Set the necessary session information so we can get it again elsewhere.
         request.session.LoggedIn = true;
-        request.session.UserID = res[0].UserID;
-        request.session.DisplayName = res[0].DisplayName;
+        request.session.UserID = result[0].UserID;
+        request.session.DisplayName = result[0].DisplayName;
         request.session.save((err) => {
           // Let's wait until the session is all set before redirecting.
           // We need to save the session to the database store, this might take a bit of time.

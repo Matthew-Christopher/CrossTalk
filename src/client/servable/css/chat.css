@@ -64,11 +64,11 @@ button {
 }
 
 #leave-container #leave-name::before {
-  content: 'Do you definitely want to leave the group ';
+  content: 'Do you definitely want to leave the group ' open-quote;
 }
 
 #leave-container #leave-name::after {
-  content: '?';
+  content: close-quote '?';
 }
 
 #unfriend-container #unfriend-info-container {
@@ -352,10 +352,6 @@ button {
 
 #server-container #friend-requests-container #friend-requests-toggle #alert {
   display: none;
-  -webkit-animation-duration: 1.5s;
-  animation-duration: 1.5s;
-  -webkit-animation-iteration-count: infinite;
-  animation-iteration-count: infinite;
   vertical-align: middle;
   height: 30px;
   width: 30px;
@@ -1463,6 +1459,12 @@ button {
   animation-name: bounce;
   -webkit-animation-timing-function: ease;
   animation-timing-function: ease;
+  -webkit-animation-duration: 1.5s;
+  animation-duration: 1.5s;
+  -webkit-animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
+  font-weight: bold;
+  transform: none;
 }
 
 @-webkit-keyframes bounce {
