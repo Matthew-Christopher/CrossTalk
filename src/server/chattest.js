@@ -32,12 +32,12 @@ var demoServers = [
   new AvailableGroup('TEST10', 'Test Chat 10', 'This is to check the overflow behaviour of the container.'),
 ];
 
-app.get('/', (request, response) => {
-  response.sendFile(path.join(__dirname + '/../client/chat.html'));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname + '/../client/chat.html'));
 });
 
-app.get('/api/GetMyGroups', (request, response) => {
-  response.json(JSON.stringify(demoServers));
+app.get('/api/GetMyGroups', (req, res) => {
+  res.json(JSON.stringify(demoServers));
 });
 
 app.use(
