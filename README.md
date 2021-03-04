@@ -99,5 +99,5 @@ A screenshot of the project chat screen.
 [issues-url]: https://github.com/Matthew-Christopher/Crosstalk/issues
 [license-shield]: https://img.shields.io/github/license/Matthew-Christopher/Crosstalk.svg?style=for-the-badge
 [license-url]: https://github.com/Matthew-Christopher/Crosstalk/blob/master/LICENSE.txt
-[login-screenshot]: https://github.com/Matthew-Christopher/Crosstalk/blob/master/Documentation/Images/login.html.png?raw=true
+[login-screenshot]: https://github.com/Matthew-Christopher/Crosstalk/blob/master/Documentation/Images/login.html.blank.png?raw=true
 [chat-screenshot]: https://github.com/Matthew-Christopher/Crosstalk/blob/master/Documentation/Images/chat.html.png?raw=true
