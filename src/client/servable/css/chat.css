@@ -1464,7 +1464,9 @@ button {
   -webkit-animation-iteration-count: infinite;
   animation-iteration-count: infinite;
   font-weight: bold;
-  transform: none;
+  -webkit-transform: none;
+      -ms-transform: none;
+          transform: none;
 }
 
 @-webkit-keyframes bounce {
