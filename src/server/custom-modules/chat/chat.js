@@ -262,24 +262,29 @@ module.exports.initialise = (instance) => {
 
           // We will handle deletion in groups and private messages together. Let's check that the message should be able to be deleted based on the requesting user's permissions or friendships.
           let checkValidQuery = `
-          SELECT COUNT(*) AS Matches, GroupID, FriendshipID
+          SELECT COUNT(*) AS Matches, GroupID, FriendshipID, FileName
           FROM
             (
-              SELECT Message.*
+              SELECT Message.*, Media.FileName
               FROM Message
               INNER JOIN GroupMembership
                 ON Message.GroupID = GroupMembership.GroupID
+              LEFT JOIN Media
+                ON Message.MessageID = Media.ReferencesMessageID
               WHERE (Message.AuthorID = GroupMembership.UserID OR GroupMembership.Role > 0)
                 AND Message.MessageID = ?
                 AND GroupMembership.UserID = ?
-              UNION SELECT Message.*
+              UNION SELECT Message.*, Media.FileName
               FROM Message
               INNER JOIN (
                 SELECT UserFriend.FriendshipID FROM UserFriend
                 INNER JOIN (SELECT FriendshipID FROM UserFriend WHERE UserInFriendship = ?) AS MyFriendships
                   ON UserFriend.FriendshipID = MyFriendships.FriendshipID
                 WHERE UserFriend.UserInFriendship != ?) AS SecondDerivedTable
-              ON Message.FriendshipID = SecondDerivedTable.FriendshipID WHERE MessageID = ?)
+              ON Message.FriendshipID = SecondDerivedTable.FriendshipID
+              LEFT JOIN Media
+                ON Message.MessageID = Media.ReferencesMessageID
+              WHERE MessageID = ?)
             AS AllMessageMatches;`;
 
           db.query(connection, checkValidQuery, [messageID, socket.request.session.UserID, socket.request.session.UserID, socket.request.session.UserID, messageID], (firstResult, fields) => {
@@ -323,6 +328,14 @@ module.exports.initialise = (instance) => {
                       group: firstResult[0].FriendshipID,
                       message: messageID,
                       newLatestMessage: results.thirdResult[0] ? results.thirdResult[0].LatestMessageString : 'No messages yet.',
+                    });
+                  }
+
+                  if (firstResult[0] && fs.existsSync(path.join(__dirname, '../../../../user_files', firstResult[0].FileName))) {
+                    fs.unlink(path.join(__dirname, '../../../../user_files', firstResult[0].FileName), (error) => {
+                      if (error) throw error;
+
+                      log.info('File bound to message has been permanently deleted.');
                     });
                   }
                 }
