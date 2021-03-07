@@ -59,7 +59,16 @@ function HandleUpload(bindID, existingMessage, file) {
   });
 
   // Start piping the file to the server. This shouldn't take more than about 5 seconds.
-  ss.createBlobReadStream(file).pipe(stream);
+  let monitor = ss.createBlobReadStream(file);
+  monitor.pipe(stream);
+
+  let progress = 0;
+
+  monitor.on('data', (chunk) => {
+    progress += chunk.length;
+    
+    console.log('Uploaded ' + ((progress / file.size) * 100).toFixed(1) + '%');
+  });
 
   $('#file-input').val('').trigger('change'); // Clear the file input.
 }
