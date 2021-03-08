@@ -3,7 +3,7 @@
 const log = require('../logging');
 const cryptography = require('../cryptography');
 const mailer = require('../mailer');
-const db = require('../db');
+const db = require('../database');
 
 const mysql = require('mysql');
 const async = require('async');
