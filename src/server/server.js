@@ -62,7 +62,7 @@ const account = require('./custom-modules/account');
 const cryptography = require('./custom-modules/cryptography');
 const log = require('./custom-modules/logging');
 const chat = require('./custom-modules/chat');
-const db = require('./custom-modules/db');
+const db = require('./custom-modules/database');
 // END CUSTOM MODULES
 
 app.use(
