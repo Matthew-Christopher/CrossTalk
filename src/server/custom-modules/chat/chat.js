@@ -331,7 +331,7 @@ module.exports.initialise = (instance) => {
                     });
                   }
 
-                  if (firstResult[0] && fs.existsSync(path.join(__dirname, '../../../../user_files', firstResult[0].FileName ? firstResult[0].FileName : ''))) {
+                  if (firstResult[0].FileName && fs.existsSync(path.join(__dirname, '../../../../user_files', firstResult[0].FileName))) {
                     fs.unlink(path.join(__dirname, '../../../../user_files', firstResult[0].FileName), (error) => {
                       if (error) throw error;
 
