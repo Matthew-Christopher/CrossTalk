@@ -3,10 +3,21 @@ let activeServerID,
   id,
   stream,
   pinnedMessageID,
-  groupIsPrivate = false;
+  groupIsPrivate = false,
+  showNotifications = false;
 const socket = io.connect('/');
 
 $(window).on('load', () => {
+  document.addEventListener("visibilitychange", visiblityChanged); // Allow us to check if a notification should be displayed.
+
+  function visiblityChanged() {
+    showNotifications = (document.visibilityState == "hidden");
+  }
+
+  if (Notification.permission == "default") {
+    Notification.requestPermission();
+  }
+
   socket.emit('check pending friends'); // Send a quick request to see if we have any friends to accept. We don't need to waste time getting a list of them for this simple test.
   socket.on('pending friends result', (havePendingFriends) => {
     // Animate the friends text to alert the user.
@@ -140,6 +151,19 @@ $(window).on('load', () => {
   });
 
   socket.on('message return', (message) => {
+    if (message.AuthorID != id && showNotifications) {
+      let messageNotification = new Notification('New chat message in ' + $('#' + message.GroupID).find('h1').text() + ' from ' + message.AuthorDisplayName, {
+        icon: '/img/LogoShaded.png',
+        body: message.MessageString,
+        image: message.HasFile && message.FilePath.split('.').pop().toLowerCase() != 'pdf' ? '/user-file?fileName=' + message.FilePath : ''
+      });
+
+      messageNotification.onclick = () => {
+        $(window).focus();
+        $('#' + message.GroupID).trigger('click');
+      };
+    }
+
     // Only render the message if we are on its group.
     if (message.GroupID == activeServerID || (message.friendshipID = activeServerID && groupIsPrivate)) {
       $('#chatbox-reminder').hide();
