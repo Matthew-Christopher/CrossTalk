@@ -1,7 +1,9 @@
 # Do not use this implementation in a secure context.
 
-import binascii
+import binascii, sys
 from base64 import b64encode
+
+sys.stdout.reconfigure(encoding='utf-8')
 
 
 def hextobase64(hexstring):
@@ -37,28 +39,28 @@ def euclidlcm(a, b):
 
 
 p = 169006138109910516166492915207105157959
-print('p: ', hex(p))
+print('p:', hex(p))
 
 q = 36667241895256263705295135957180769531
-print('q: ', hex(q))
+print('q:', hex(q))
 
 e = 65537
 
 n = p * q
-print('n: ', hex(n))
+print('n:', hex(n))
 carmichael = euclidlcm(p - 1, q - 1)
-print('λ(n): ', hex(carmichael))
-print('Computing private key exponent (d) ≡', e, '^{-1} ( mod', hex(carmichael), ')')
+print('λ(n):', hex(carmichael))
+print('Computing private key exponent (d) ≡', e, '^{-1} (mod', hex(carmichael) + ')')
 d = extendedeuclidbezout(e, carmichael)[0] % carmichael
-print('Obtained ', hex(d))
+print('Obtained', hex(d))
 
 plaintext = 'Attack at dawn.'
-print('Plaintext, m: ', binascii.hexlify(plaintext.encode()))
+print('Plaintext, m:', binascii.hexlify(plaintext.encode()))
 
 plaintext = binascii.hexlify(plaintext.encode()).decode()
 
 c = pow(int(plaintext, 16), e, n)
-print('Ciphertext, c: ', hex(c))
+print('Ciphertext, c:', hex(c))
 
 m = pow(c, d, n)
 print('Decrypted plaintext, m:', hex(m))
