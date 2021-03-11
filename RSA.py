@@ -50,12 +50,12 @@ n = p * q
 print('n:', hex(n))
 carmichael = euclidlcm(p - 1, q - 1)
 print('λ(n):', hex(carmichael))
-print('Computing private key exponent (d) ≡', e, '^{-1} (mod', hex(carmichael) + ')')
+print('Computing private key exponent (d) ≡', str(e) + '^{-1} (mod', hex(carmichael) + ')')
 d = extendedeuclidbezout(e, carmichael)[0] % carmichael
 print('Obtained', hex(d))
 
 plaintext = 'Attack at dawn.'
-print('Plaintext, m:', binascii.hexlify(plaintext.encode()))
+print('Plaintext, m:', '0x' + plaintext.encode('ascii').hex())
 
 plaintext = binascii.hexlify(plaintext.encode()).decode()
 
