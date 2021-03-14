@@ -67,3 +67,4 @@ print('Ciphertext, c:', hex(c))
 
 m = pow(c, d, n)
 print('Decrypted plaintext, m:', hex(m))
+print('Decrypted plaintext, m:', binascii.unhexlify(hex(m)[2:]).decode())
