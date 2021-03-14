@@ -55,7 +55,7 @@ if n % firstFactor == 0:
 	print('Obtained', hex(d))
 	
 	m = pow(c, d, n)
-	print('Plaintext, m:', hex(m))
+	print('Decrypted plaintext, m:', hex(m))
 	print('Decrypted plaintext, m:', binascii.unhexlify(hex(m)[2:]).decode())
 else:
 	print('First factor is invalid, recompute it.')
