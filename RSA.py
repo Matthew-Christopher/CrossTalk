@@ -1,6 +1,8 @@
 # Do not use this implementation in a secure context.
 
-import binascii, sys
+import binascii
+import sys
+
 from base64 import b64encode
 
 sys.stdout.reconfigure(encoding='utf-8')
