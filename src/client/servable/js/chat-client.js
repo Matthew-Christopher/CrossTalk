@@ -58,12 +58,12 @@ $(window).on('load', () => {
 
         socket.on('file bind', (data) => {
           // Bind our file to the message.
-          HandleUpload(data.bindTo, data.existingMessage, $('#file-input')[0].files[0]);
+          fileHandlerInstance.HandleUpload(data.bindTo, data.existingMessage, $('#file-input')[0].files[0]);
         });
       } else if ($('#file-input')[0].files.length > 0) {
          // This message will just be a file.
 
-         HandleUpload(null, null, $('#file-input')[0].files[0]);
+         fileHandlerInstance.HandleUpload(null, null, $('#file-input')[0].files[0]);
       }
     }
   });
