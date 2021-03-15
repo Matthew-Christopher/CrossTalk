@@ -1,3 +1,5 @@
+'use strict';
+
 $(window).on('load', () => {
   // What text should we show in the chatbox?
   const chatboxReminder = 'Select or add a friend first.';
@@ -231,7 +233,7 @@ let friendManagerInstance = {
         $('#' + data.FriendshipID).remove().ready(() => {
           // After current request dealt with, set visiblity of prompts.
 
-          setFriendPromptVisibilities();
+          friendManagerInstance.setFriendPromptVisibilities();
         });
       });
     }

@@ -1,3 +1,5 @@
+'use strict';
+
 $(window).on('load', () => {
   const fileSizeLimit = 15; // Maximum file size.
 
@@ -49,7 +51,7 @@ $(window).on('load', () => {
 
 let fileHandlerInstance = {
   HandleUpload: function(bindID, existingMessage, file) {
-    stream = ss.createStream();
+    let stream = ss.createStream();
 
     // Send the server all of the information that it needs through the stream. We create a new message if the message box was blank.
     ss(socket).emit('file stream', {

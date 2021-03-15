@@ -1,3 +1,5 @@
+'use strict';
+
 $(window).on('load', () => {
   // Handle data submission and display an appropriate message once the server gets back to us.
   $('#register-form').submit((e) => {

@@ -1,3 +1,5 @@
+'use strict';
+
 // Message class to store the chat message and metadata.
 
 class Message {

@@ -1,3 +1,5 @@
+'use strict';
+
 $(window).on('load', () => {
   // What text should we show in the chatbox?
   const chatboxReminder = 'Select or join a group first.';
@@ -121,11 +123,11 @@ $(window).on('load', () => {
       // Only do something if we are not clicking the currently active button.
       // If the event target is the text in the button, we actually want the parent button.
       // Match by just the GroupID property.
-      targetIndex = JSONData.findIndex((x) => x.GroupID == $(event.target).closest('button.server-button').attr('id'));
+      let targetIndex = JSONData.findIndex((x) => x.GroupID == $(event.target).closest('button.server-button').attr('id'));
 
       $('#' + JSONData[targetIndex].GroupID).addClass('active-button');
 
-      groupIsPrivate = false;
+      chatInstance.groupIsPrivate = false;
 
       JSONData.forEach((item, i) => {
         if (i != targetIndex) {

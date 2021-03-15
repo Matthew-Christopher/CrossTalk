@@ -1,3 +1,5 @@
+'use strict';
+
 const socket = io.connect('/');
 
 $(window).on('load', () => {
@@ -144,7 +146,7 @@ $(window).on('load', () => {
   });
 
   socket.on('message return', (message) => {
-    if (message.AuthorID != id && chatInstance.showNotifications) {
+    if (message.AuthorID != chatInstance.id && chatInstance.showNotifications) {
       let messageNotification = new Notification('New chat message in ' + $('#' + message.GroupID).find('h1').text() + ' from ' + message.AuthorDisplayName, {
         icon: '/img/LogoShaded.png',
         body: message.MessageString,
@@ -184,15 +186,15 @@ $(window).on('load', () => {
 
       // Add the message to the chatbox.
       $('#chatbox').append(
-        $('<li ' + (message.AuthorID == id ? 'class="owned" ' : "") + 'style="position: relative;">')
+        $('<li ' + (message.AuthorID == chatInstance.id ? 'class="owned" ' : "") + 'style="position: relative;">')
           .attr('id', message.MessageID)
           .attr('has-file', message.HasFile)
           .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
           .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(chatInstance.getMessageTimestamp(message.Timestamp)))
           .append(
-            $('<div class="message-options-container' + (!(chatInstance.role > 0 || message.AuthorID == id) || (chatInstance.groupIsPrivate && message.AuthorID != id) ? " empty" : "") + '">')
+            $('<div class="message-options-container' + (!(chatInstance.role > 0 || message.AuthorID == chatInstance.id) || (chatInstance.groupIsPrivate && message.AuthorID != chatInstance.id) ? " empty" : "") + '">')
               .append($('<button class="message-pin-button" style="display: ' + (chatInstance.role > 0 && !chatInstance.groupIsPrivate ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
-              .append($('<button class="message-bin-button" style="display: ' + ((chatInstance.role > 0 && !chatInstance.groupIsPrivate) || message.AuthorID == id ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
+              .append($('<button class="message-bin-button" style="display: ' + ((chatInstance.role > 0 && !chatInstance.groupIsPrivate) || message.AuthorID == chatInstance.id ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
           )
           .append('<br />')
           .append($('<p class="message-content" style="display: block;">').text(message.MessageString))
@@ -325,7 +327,7 @@ $(window).on('load', () => {
     }
 
     // That user was us, so we need to change what buttons we have access to because if we don't then clicking them won't do anything; the server will ignore our request.
-    if (data.AffectsUser == id) {
+    if (data.AffectsUser == chatInstance.id) {
       chatInstance.role = data.NewRole;
 
       chatInstance.refreshAdminContentDisplay();
@@ -513,7 +515,7 @@ $(window).on('load', () => {
       type: 'POST',
       url: '/api/GetMyUserID',
       success: (data) => {
-        id = $.parseJSON(data)[0].UserID;
+        chatInstance.id = $.parseJSON(data)[0].UserID;
       },
       failure: () => {
         console.error('Could not retreive ID. Try again later.');
@@ -757,7 +759,7 @@ let chatInstance = {
           let mustAdjustScroll = $('#pinned-message-container').css('display') == 'none';
 
           if (JSONData.length > 0) {
-            pinnedMessageID = JSONData[0].MessageID;
+            chatInstance.pinnedMessageID = JSONData[0].MessageID;
 
             $('#pinned-message-container').css('display', 'flex');
 
@@ -770,7 +772,7 @@ let chatInstance = {
             if (mustAdjustScroll) $('#chatbox').scrollTop($('#chatbox').scrollTop() + $('#pinned-message-container').outerHeight());
           } else {
             if ($('#pinned-message-container').css('display') == 'flex') {
-              handleUnpinInCurrentGroup();
+              chatInstance.handleUnpinInCurrentGroup();
             }
           }
         },
