@@ -160,7 +160,7 @@ $(window).on('load', () => {
     }
 
     // Only render the message if we are on its group.
-    if (message.GroupID == chatInstance.activeServerID || (message.friendshipID = chatInstance.activeServerID && chatInstance.groupIsPrivate)) {
+    if ((message.GroupID == chatInstance.activeServerID && !chatInstance.groupIsPrivate) || (message.FriendshipID == chatInstance.activeServerID && chatInstance.groupIsPrivate)) {
       $('#chatbox-reminder').hide();
       $('#invite-prompt').hide();
 
