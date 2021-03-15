@@ -47,28 +47,30 @@ $(window).on('load', () => {
   });
 });
 
-function HandleUpload(bindID, existingMessage, file) {
-  stream = ss.createStream();
+let fileHandlerInstance = {
+  HandleUpload: function(bindID, existingMessage, file) {
+    stream = ss.createStream();
 
-  // Send the server all of the information that it needs through the stream. We create a new message if the message box was blank.
-  ss(socket).emit('file stream', {
-    group: chatInstance.activeServerID,
-    bind: bindID,
-    bytes: stream,
-    message: existingMessage ? existingMessage : new Message(null, !chatInstance.groupIsPrivate ? chatInstance.activeServerID : null, chatInstance.groupIsPrivate ? chatInstance.activeServerID : null, null, null, 'A file.', Date.now(), true, null)
-  });
+    // Send the server all of the information that it needs through the stream. We create a new message if the message box was blank.
+    ss(socket).emit('file stream', {
+      group: chatInstance.activeServerID,
+      bind: bindID,
+      bytes: stream,
+      message: existingMessage ? existingMessage : new Message(null, !chatInstance.groupIsPrivate ? chatInstance.activeServerID : null, chatInstance.groupIsPrivate ? chatInstance.activeServerID : null, null, null, 'A file.', Date.now(), true, null)
+    });
 
-  // Start piping the file to the server. This shouldn't take more than about 5 seconds.
-  let monitor = ss.createBlobReadStream(file);
-  monitor.pipe(stream);
+    // Start piping the file to the server. This shouldn't take more than about 5 seconds.
+    let monitor = ss.createBlobReadStream(file);
+    monitor.pipe(stream);
 
-  let progress = 0;
+    let progress = 0;
 
-  monitor.on('data', (chunk) => {
-    progress += chunk.length;
+    monitor.on('data', (chunk) => {
+      progress += chunk.length;
 
-    console.log('Uploaded ' + ((progress / file.size) * 100).toFixed(1) + '%');
-  });
+      console.log('Uploaded ' + ((progress / file.size) * 100).toFixed(1) + '%');
+    });
 
-  $('#file-input').val('').trigger('change'); // Clear the file input.
-}
+    $('#file-input').val('').trigger('change'); // Clear the file input.
+  }
+};
