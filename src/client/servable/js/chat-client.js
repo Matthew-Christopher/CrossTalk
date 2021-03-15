@@ -221,7 +221,7 @@ $(window).on('load', () => {
 
     if ($('#chatbox li').length == 0) {
       $('#chatbox-reminder').show();
-      if (!groupIsPrivate) $('#invite-prompt').show();
+      if (!chatInstance.groupIsPrivate) $('#invite-prompt').show();
       $('#chatbox-reminder').text('No messages yet');
     }
 
@@ -343,13 +343,13 @@ $(window).on('load', () => {
   });
 
   socket.on('friend update', (data) => {
-    oneOfMyFriendsUpdated(data);
+    friendManagerInstance.oneOfMyFriendsUpdated(data);
   });
 
   // Incoming request! It might have come to us but if not then we need to update the member list buttons.
   socket.on('friend requested', (toUser, name) => {
     if (toUser == id) {
-      setFriends();
+      friendManagerInstance.setFriends();
 
       // Show this even if we are not in the friends section.
       $('.toggle-box p:last-child').addClass('bounce');
