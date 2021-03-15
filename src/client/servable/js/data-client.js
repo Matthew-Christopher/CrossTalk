@@ -1,3 +1,5 @@
+'use strict';
+
 $(window).on('load', () => {
   // Get the GroupID.
   let searchParams = new URLSearchParams(window.location.search);

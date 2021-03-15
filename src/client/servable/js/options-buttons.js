@@ -1,3 +1,5 @@
+'use strict';
+
 $(window).on('load', () => {
   $(document).click((event) => {
     // Handle click events. We should hide the nav container if it's visible and we click outside of it.

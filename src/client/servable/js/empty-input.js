@@ -1,3 +1,5 @@
+'use strict';
+
 $(window).on('load', () => {
   $('.input-field-container input').focusout((event) => {
     // If we lose focus on an input field, don't move the label back over if any user content is present.
