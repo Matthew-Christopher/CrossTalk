@@ -1,17 +1,10 @@
-let activeServerID,
-  role,
-  id,
-  stream,
-  pinnedMessageID,
-  groupIsPrivate = false,
-  showNotifications = false;
 const socket = io.connect('/');
 
 $(window).on('load', () => {
   document.addEventListener("visibilitychange", visiblityChanged); // Allow us to check if a notification should be displayed.
 
   function visiblityChanged() {
-    showNotifications = (document.visibilityState == "hidden");
+    chatInstance.showNotifications = (document.visibilityState == "hidden");
   }
 
   if (Notification.permission == "default") {
@@ -44,7 +37,7 @@ $(window).on('load', () => {
   $('#message-form').submit((event) => {
     event.preventDefault(); // Don't refresh, we want a smooth experience.
 
-    if (activeServerID) {
+    if (chatInstance.activeServerID) {
       // We trim whitespace from the start and end of the message before sending it.
       let messageString = $('#message').val().trim();
 
@@ -52,7 +45,7 @@ $(window).on('load', () => {
         let userID;
 
         // Message object format: (MessageID, GroupID, FriendshipID, AuthorID, AuthorDisplayName, MessageString, Timestamp, HasFile, FilePath)
-        let message = new Message(null, groupIsPrivate ? null : activeServerID, groupIsPrivate ? activeServerID : null, null, null, messageString, Date.now(), $('#file-input')[0].files.length > 0, null);
+        let message = new Message(null, chatInstance.groupIsPrivate ? null : chatInstance.activeServerID, chatInstance.groupIsPrivate ? chatInstance.activeServerID : null, null, null, messageString, Date.now(), $('#file-input')[0].files.length > 0, null);
 
         // Don't send the message if it's blank.
         if (message) {
@@ -128,7 +121,7 @@ $(window).on('load', () => {
 
   // Redirect to the correct page.
   $('#group-info-admin-button').click(() => {
-    window.location.href = '/group-info?GroupID=' + activeServerID;
+    window.location.href = '/group-info?GroupID=' + chatInstance.activeServerID;
   });
 
   $(document).click((event) => {
@@ -138,20 +131,20 @@ $(window).on('load', () => {
     } else if ($('#member-list-container').css('display') == 'block' && $('#member-list-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
       closeMemberList();
     } else if ($('#tag-set-container').css('display') == 'block' && $('#tag-set-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
-      closeTagSetList();
+      chatInstance.closeTagSetList();
     } else if ($('#leave-container').css('display') == 'block' && $('#leave-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
       $('#leave-container').fadeOut(200); // Take 200ms to fade.
 
-      unhidePopup();
+      chatInstance.unhidePopup();
     } else if ($('#unfriend-container').css('display') == 'block' && $('#unfriend-container').css('opacity') == 1 && !$(event.target).is('.popup-container') && !$(event.target).is('.popup-container *')) {
       $('#unfriend-container').fadeOut(200); // Take 200ms to fade.
 
-      unhidePopup();
+      chatInstance.unhidePopup();
     }
   });
 
   socket.on('message return', (message) => {
-    if (message.AuthorID != id && showNotifications) {
+    if (message.AuthorID != id && chatInstance.showNotifications) {
       let messageNotification = new Notification('New chat message in ' + $('#' + message.GroupID).find('h1').text() + ' from ' + message.AuthorDisplayName, {
         icon: '/img/LogoShaded.png',
         body: message.MessageString,
@@ -165,7 +158,7 @@ $(window).on('load', () => {
     }
 
     // Only render the message if we are on its group.
-    if (message.GroupID == activeServerID || (message.friendshipID = activeServerID && groupIsPrivate)) {
+    if (message.GroupID == chatInstance.activeServerID || (message.friendshipID = chatInstance.activeServerID && chatInstance.groupIsPrivate)) {
       $('#chatbox-reminder').hide();
       $('#invite-prompt').hide();
 
@@ -195,11 +188,11 @@ $(window).on('load', () => {
           .attr('id', message.MessageID)
           .attr('has-file', message.HasFile)
           .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
-          .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(getMessageTimestamp(message.Timestamp)))
+          .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(chatInstance.getMessageTimestamp(message.Timestamp)))
           .append(
-            $('<div class="message-options-container' + (!(role > 0 || message.AuthorID == id) || (groupIsPrivate && message.AuthorID != id) ? " empty" : "") + '">')
-              .append($('<button class="message-pin-button" style="display: ' + (role > 0 && !groupIsPrivate ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
-              .append($('<button class="message-bin-button" style="display: ' + ((role > 0 && !groupIsPrivate) || message.AuthorID == id ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
+            $('<div class="message-options-container' + (!(chatInstance.role > 0 || message.AuthorID == id) || (chatInstance.groupIsPrivate && message.AuthorID != id) ? " empty" : "") + '">')
+              .append($('<button class="message-pin-button" style="display: ' + (chatInstance.role > 0 && !chatInstance.groupIsPrivate ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
+              .append($('<button class="message-bin-button" style="display: ' + ((chatInstance.role > 0 && !chatInstance.groupIsPrivate) || message.AuthorID == id ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
           )
           .append('<br />')
           .append($('<p class="message-content" style="display: block;">').text(message.MessageString))
@@ -208,7 +201,7 @@ $(window).on('load', () => {
 
       // Wait for images to load as we may, otherwise, not have correct scroll behaviour.
       $('#chatbox img').on('load', () => {
-        stickScroll(scrollOffset);
+        chatInstance.stickScroll(scrollOffset);
       });
     }
 
@@ -224,7 +217,7 @@ $(window).on('load', () => {
   // A message got deleted so we should handle that.
   socket.on('binned', (data) => {
     $('#' + data.message).remove();
-    checkPinnedMessage(); // The deleted message may have been binned, so check and remove it, if necessary.
+    chatInstance.checkPinnedMessage(); // The deleted message may have been binned, so check and remove it, if necessary.
 
     if ($('#chatbox li').length == 0) {
       $('#chatbox-reminder').show();
@@ -242,20 +235,20 @@ $(window).on('load', () => {
 
   // A message just got pinned in one of our groups so we should show it if that group is open at the moment.
   socket.on('pinned', (groupID) => {
-    if (groupID == activeServerID) {
-      checkPinnedMessage();
+    if (groupID == chatInstance.activeServerID) {
+      chatInstance.checkPinnedMessage();
     }
   });
 
   // Request that the server unpins a message.
   $(document).on('click', '#pinned-message-delete-button', (event) => {
-    socket.emit('message unpin', activeServerID);
+    socket.emit('message unpin', chatInstance.activeServerID);
   });
 
   // A message just got unpinned in one of our groups so we should remove it if that group is currently open.
   socket.on('unpinned', (data) => {
-    if (data.group == activeServerID) {
-      handleUnpinInCurrentGroup();
+    if (data.group == chatInstance.activeServerID) {
+      chatInstance.handleUnpinInCurrentGroup();
 
       $('#' + data.message).removeClass('pinned');
     }
@@ -264,7 +257,7 @@ $(window).on('load', () => {
   // Request that the server promotes or demotes someone that we clicked on.
   $(document).on('click', '.role-button', (event) => {
     socket.emit('role change', {
-      GroupID: activeServerID,
+      GroupID: chatInstance.activeServerID,
       UserToChange: $(event.target).closest('li').attr('id'),
       TargetRole: $(event.target).attr('value'),
     });
@@ -272,7 +265,7 @@ $(window).on('load', () => {
 
   // Someone just got promoted or demoted in one of our groups. We should check if that was us and move the user in the member list.
   socket.on('role update', (data) => {
-    if (data.InGroup.toString() == activeServerID) {
+    if (data.InGroup.toString() == chatInstance.activeServerID) {
       if (data.NewRole == 1) {
         // Change the text first, then move to the new list.
         $('#' + data.AffectsUser)
@@ -292,7 +285,7 @@ $(window).on('load', () => {
       }
 
       // Remove buttons to change role if they are now our rank or higher.
-      if (data.NewRole < role) {
+      if (data.NewRole < chatInstance.role) {
         $('#' + data.AffectsUser)
           .find('.role-button')
           .css('display', 'inline-block');
@@ -333,9 +326,9 @@ $(window).on('load', () => {
 
     // That user was us, so we need to change what buttons we have access to because if we don't then clicking them won't do anything; the server will ignore our request.
     if (data.AffectsUser == id) {
-      role = data.NewRole;
+      chatInstance.role = data.NewRole;
 
-      refreshAdminContentDisplay();
+      chatInstance.refreshAdminContentDisplay();
     }
   });
 
@@ -344,7 +337,7 @@ $(window).on('load', () => {
     $(event.target).closest('.friend-add-button').prop('disabled', true);
 
     socket.emit('friend add', {
-      ReferringGroup: activeServerID,
+      ReferringGroup: chatInstance.activeServerID,
       NewFriend: $(event.target).closest('li').attr('id'),
     });
   });
@@ -402,7 +395,7 @@ $(window).on('load', () => {
 
   // We are swapping between groups and friends.
   $('#chat-type-toggle').change(function (event) {
-    activeServerID = '';
+    chatInstance.activeServerID = '';
 
     $('#options-button').hide(); // Hide the cog button until a group or friend is selected.
 
@@ -435,20 +428,20 @@ $(window).on('load', () => {
   });
 
   $('#tag-set-close-button').click(() => {
-    closeTagSetList();
+    chatInstance.closeTagSetList();
   });
 
   function closeCreateForm() {
     $('#group-create').removeClass('active-button');
     $('#group-create-container').fadeOut(200); // Take 200ms to fade.
 
-    unhidePopup();
+    chatInstance.unhidePopup();
   }
 
   function closeMemberList() {
     $('#member-list-container').fadeOut(200); // Take 200ms to fade.
 
-    unhidePopup();
+    chatInstance.unhidePopup();
   }
 
   function setRecentMessage(groupID, messageString) {
@@ -461,11 +454,11 @@ $(window).on('load', () => {
       type: 'POST',
       url: '/api/GetGroupMemberList',
       data: {
-        GroupID: activeServerID,
+        GroupID: chatInstance.activeServerID,
       },
       success: (data) => {
         $('#member-list #owner, #member-list #admins, #member-list #members').empty(); // Empty before we append to avoid any duplicates.
-        $('#member-list-title').text($('#' + activeServerID + ' .server-info-container h1').text()); // Set the title of the dialogue to the group name.
+        $('#member-list-title').text($('#' + chatInstance.activeServerID + ' .server-info-container h1').text()); // Set the title of the dialogue to the group name.
 
         let memberList = $.parseJSON(data);
 
@@ -478,9 +471,9 @@ $(window).on('load', () => {
           }
 
           let optionsContainerClass = '';
-          if (!(role > memberList[i].Role) && memberList[i].IsAFriend) {
+          if (!(chatInstance.role > memberList[i].Role) && memberList[i].IsAFriend) {
             optionsContainerClass = ' empty';
-          } else if (memberList[i].IsAFriend || !(role > memberList[i].Role)) {
+          } else if (memberList[i].IsAFriend || !(chatInstance.role > memberList[i].Role)) {
             optionsContainerClass = ' single';
           }
 
@@ -488,7 +481,7 @@ $(window).on('load', () => {
             .append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName))
             .append(
               $('<div class="member-options-container' + optionsContainerClass + '">')
-                .append($('<button class="role-button" style="display: ' + (role > memberList[i].Role && roleButtonAction ? "inline-block" : "none") + ';" value="' + roleButtonAction + '">').text("Make " + roleButtonAction))
+                .append($('<button class="role-button" style="display: ' + (chatInstance.role > memberList[i].Role && roleButtonAction ? "inline-block" : "none") + ';" value="' + roleButtonAction + '">').text("Make " + roleButtonAction))
                 .append($('<button class="friend-add-button" style="display: ' + (!memberList[i].IsAFriend ? "inline-block" : "none") + ';">').text("Add friend "))
             );
 
@@ -571,7 +564,7 @@ $(window).on('load', () => {
       }
     });
 
-    stickScroll(scrollOffsetBeforeFilter);
+    chatInstance.stickScroll(scrollOffsetBeforeFilter);
 
     if (noQueryMatches || noTypeMatches) {
       $('#chatbox-reminder')
@@ -583,279 +576,285 @@ $(window).on('load', () => {
   }
 });
 
-// New group picked, handle incoming message data from the server.
-function setActiveServerID(id) {
-  activeServerID = id;
+let chatInstance = {
+  activeServerID: null,
+  role: null,
+  id: null,
+  stream: null,
+  pinnedMessageID: null,
+  groupIsPrivate: false,
+  showNotifications: false,
+  setActiveServerID: function(id) {
+    // New group picked, handle incoming message data from the server.
 
-  $('.requires-group-selection').show();
+    chatInstance.activeServerID = id;
 
-  $('#message').focus();
-  $('#chatbox').empty();
+    $('.requires-group-selection').show();
 
-  $.when(
-    $.ajax({
-      type: 'POST',
-      url: '/api/GetMessages',
-      data: {
-        GroupID: activeServerID,
-      },
-      success: (data) => {
-        let JSONData = $.parseJSON(data);
+    $('#message').focus();
+    $('#chatbox').empty();
 
-        if (JSONData.messageData.length > 0) {
-          $('#chatbox-reminder').hide();
-          $('#invite-prompt').hide();
-        } else {
-          $('#chatbox-reminder').show();
-          $('#invite-prompt').show();
-          $('#chatbox-reminder').text('No messages yet');
-        }
+    $.when(
+      $.ajax({
+        type: 'POST',
+        url: '/api/GetMessages',
+        data: {
+          GroupID: chatInstance.activeServerID,
+        },
+        success: (data) => {
+          let JSONData = $.parseJSON(data);
 
-        role = JSONData.role;
+          if (JSONData.messageData.length > 0) {
+            $('#chatbox-reminder').hide();
+            $('#invite-prompt').hide();
+          } else {
+            $('#chatbox-reminder').show();
+            $('#invite-prompt').show();
+            $('#chatbox-reminder').text('No messages yet');
+          }
 
-        setGroupOptionButtonVisibility();
+          chatInstance.role = JSONData.role;
 
-        appendSavedMessages($.parseJSON(data).messageData);
+          chatInstance.setGroupOptionButtonVisibility();
 
-        checkPinnedMessage();
-      },
-      failure: () => {
-        console.error('Could not retreive messages. Try again later.');
-      },
-    })
-  ).then(() => {
-    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
-  });
-}
+          chatInstance.appendSavedMessages($.parseJSON(data).messageData);
 
-// Alter button and content visibility to match permissions.
-function refreshAdminContentDisplay() {
-  $('#chatbox li:not(.owned)').each(function () {
-    let toAlter = $(this).find('.message-options-container button');
-    if (role > 0) {
-      toAlter.css('display', 'inline-block');
-      $(this).find('.message-options-container').removeClass('empty');
-    } else {
-      toAlter.css('display', 'none');
-      $(this).find('.message-options-container').addClass('empty');
-    }
-  });
+          chatInstance.checkPinnedMessage();
+        },
+        failure: () => {
+          console.error('Could not retreive messages. Try again later.');
+        },
+      })
+    ).then(() => {
+      $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
+    });
+  },
+  refreshAdminContentDisplay: function() {
+    // Alter button and content visibility to match permissions.
 
-  $('#chatbox li.owned').each(function () {
-    $(this)
-      .find('.message-options-container .message-pin-button')
-      .css('display', role > 0 ? 'inline-block' : 'none');
-  });
-
-  setGroupOptionButtonVisibility();
-}
-
-// New private message picked, deal with the incoming server message data.
-function setActiveFriendID(id) {
-  activeServerID = id;
-
-  $('.requires-group-selection').show();
-
-  $('#message').focus();
-  $('#chatbox').empty();
-
-  $.when(
-    $.ajax({
-      type: 'POST',
-      url: '/api/GetFriendMessages',
-      data: {
-        FriendshipID: id,
-      },
-      success: (data) => {
-        let friendMessages = $.parseJSON(data);
-
-        if (friendMessages.length > 0) {
-          $('#chatbox-reminder').hide();
-        } else {
-          $('#chatbox-reminder').show();
-          $('#chatbox-reminder').text('No messages yet');
-        }
-
-        appendSavedMessages(friendMessages);
-      },
-      failure: () => {
-        console.error('Could not retreive messages. Try again later.');
-      },
-    })
-  ).then(() => {
-    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
-  });
-}
-
-// Add the saved messages to the chatbox that we just got from the server.
-function appendSavedMessages(messageArray) {
-  $('#chatbox').empty(); // Remove old messages.
-
-  messageArray.forEach((message) => {
-    let fileElement;
-    if (message.FileName) {
-      let linkToFile = '/user-file?fileName=' + message.FileName;
-
-      let extension = message.FileName.split('.').pop();
-
-      if (extension == 'pdf') {
-        // We will need a link to the file.
-
-        fileElement = $('<a target="_blank">').attr('href', linkToFile).text('Click here to view the file.');
+    $('#chatbox li:not(.owned)').each(function () {
+      let toAlter = $(this).find('.message-options-container button');
+      if (chatInstance.role > 0) {
+        toAlter.css('display', 'inline-block');
+        $(this).find('.message-options-container').removeClass('empty');
       } else {
-        // Pop the image straight into the chatbox.
-
-        fileElement = $('<a target="_blank">').attr('href', linkToFile) // Make this clickable.
-          .append($('<img style="width: 40%; margin-top: 10px;">').attr('src', linkToFile));
+        toAlter.css('display', 'none');
+        $(this).find('.message-options-container').addClass('empty');
       }
+    });
+
+    $('#chatbox li.owned').each(function () {
+      $(this)
+        .find('.message-options-container .message-pin-button')
+        .css('display', chatInstance.role > 0 ? 'inline-block' : 'none');
+    });
+
+    chatInstance.setGroupOptionButtonVisibility();
+  },
+  setActiveFriendID: function(id) {
+    // New private message picked, deal with the incoming server message data.
+
+    chatInstance.activeServerID = id;
+
+    $('.requires-group-selection').show();
+
+    $('#message').focus();
+    $('#chatbox').empty();
+
+    $.when(
+      $.ajax({
+        type: 'POST',
+        url: '/api/GetFriendMessages',
+        data: {
+          FriendshipID: id,
+        },
+        success: (data) => {
+          let friendMessages = $.parseJSON(data);
+
+          if (friendMessages.length > 0) {
+            $('#chatbox-reminder').hide();
+          } else {
+            $('#chatbox-reminder').show();
+            $('#chatbox-reminder').text('No messages yet');
+          }
+
+          chatInstance.appendSavedMessages(friendMessages);
+        },
+        failure: () => {
+          console.error('Could not retreive messages. Try again later.');
+        },
+      })
+    ).then(() => {
+      $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent messages.
+    });
+  },
+  appendSavedMessages: function(messageArray) {
+    // Add the saved messages to the chatbox that we just got from the server.
+
+    $('#chatbox').empty(); // Remove old messages.
+
+    messageArray.forEach((message) => {
+      let fileElement;
+      if (message.FileName) {
+        let linkToFile = '/user-file?fileName=' + message.FileName;
+
+        let extension = message.FileName.split('.').pop();
+
+        if (extension == 'pdf') {
+          // We will need a link to the file.
+
+          fileElement = $('<a target="_blank">').attr('href', linkToFile).text('Click here to view the file.');
+        } else {
+          // Pop the image straight into the chatbox.
+
+          fileElement = $('<a target="_blank">').attr('href', linkToFile) // Make this clickable.
+            .append($('<img style="width: 40%; margin-top: 10px;">').attr('src', linkToFile));
+        }
+      }
+
+      let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
+
+      $('#chatbox').append(
+        $('<li ' + (message.Owned ? 'class="owned" ' : '') + 'style="position: relative;">')
+          .attr('id', message.MessageID)
+          .attr('has-file', message.FileName != null)
+          .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
+          .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(chatInstance.getMessageTimestamp(message.Timestamp)))
+          .append(
+            $('<div class="message-options-container' + (!(chatInstance.role > 0 || message.Owned) ? " empty" : "") + '">')
+              .append($('<button class="message-pin-button" style="display: ' + (chatInstance.role > 0 ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
+              .append($('<button class="message-bin-button" style="display: ' + (chatInstance.role > 0 ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
+          )
+          .append('<br />')
+          .append($('<p class="message-content" style="display: block;">').text(message.MessageString))
+          .append(message.FileName ? fileElement : null)
+      );
+
+      $('#chatbox img').on('load', () => {
+        chatInstance.stickScroll(scrollOffset);
+      });
+    });
+  },
+  closeTagSetList: function() {
+    $('#tag-set-container').fadeOut(200); // Take 200ms to fade.
+
+    chatInstance.unhidePopup();
+  },
+  checkPinnedMessage: function() {
+    // Is a (new) message pinned in this chat?
+
+    if (!chatInstance.groupIsPrivate) {
+      // We can't pin messages in private chats.
+      $.ajax({
+        type: 'POST',
+        url: '/api/GetPinnedMessage',
+        data: {
+          GroupID: chatInstance.activeServerID,
+        },
+        success: (data) => {
+          let JSONData = $.parseJSON(data);
+
+          let mustAdjustScroll = $('#pinned-message-container').css('display') == 'none';
+
+          if (JSONData.length > 0) {
+            pinnedMessageID = JSONData[0].MessageID;
+
+            $('#pinned-message-container').css('display', 'flex');
+
+            $('#pinned-message-label').text('Pinned message from ' + JSONData[0].AuthorDisplayName + ', sent ' + chatInstance.getPinnedMessageTimestamp(JSONData[0].Timestamp) + '.');
+            $('#pinned-message-text').text(JSONData[0].MessageString);
+
+            $('#chatbox li').removeClass('pinned');
+            $('#' + JSONData[0].MessageID).addClass('pinned');
+
+            if (mustAdjustScroll) $('#chatbox').scrollTop($('#chatbox').scrollTop() + $('#pinned-message-container').outerHeight());
+          } else {
+            if ($('#pinned-message-container').css('display') == 'flex') {
+              handleUnpinInCurrentGroup();
+            }
+          }
+        },
+        failure: () => {
+          console.error('Could not retreive messages. Try again later.');
+        },
+      });
     }
+  },
+  unhidePopup: function() {
+    $('#message').focus();
+    $('body *:not(.blur-exclude)').css('-webkit-filter', '');
+  },
+  getMessageTimestamp: function(timestamp) {
+    // When did we send/receive this? Let's get that information in a nice format.
 
-    let scrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
+    let date = new Date(eval(timestamp));
+    let today = new Date();
 
-    $('#chatbox').append(
-      $('<li ' + (message.Owned ? 'class="owned" ' : '') + 'style="position: relative;">')
-        .attr('id', message.MessageID)
-        .attr('has-file', message.FileName != null)
-        .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
-        .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(getMessageTimestamp(message.Timestamp)))
-        .append(
-          $('<div class="message-options-container' + (!(role > 0 || message.Owned) ? " empty" : "") + '">')
-            .append($('<button class="message-pin-button" style="display: ' + (role > 0 ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
-            .append($('<button class="message-bin-button" style="display: ' + (role > 0 ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
-        )
-        .append('<br />')
-        .append($('<p class="message-content" style="display: block;">').text(message.MessageString))
-        .append(message.FileName ? fileElement : null)
+    if (date.getDate() == today.getDate()) {
+      // The message was sent today, so we'll just say the time.
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (date.getDate() == today.getDate() - 1) {
+      // The date is yesterday.
+      return 'Yesterday';
+    } else {
+      // The message was before yesterday, so just say the day.
+      return date.toLocaleDateString();
+    }
+  },
+  getPinnedMessageTimestamp: function(timestamp) {
+    // We show more detail for this message, since it must be more important that other messages!
+    // A more contextualised timestamp function for the pinned message box.
+
+    let date = new Date(eval(timestamp));
+    let today = new Date();
+
+    let atTimeString = ' at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (date.getDate() == today.getDate()) {
+      // The message was sent today, so we'll just say the time.
+      return 'today' + atTimeString;
+    } else if (date.getDate() == today.getDate() - 1) {
+      // The date is yesterday.
+      return 'yesterday' + atTimeString;
+    } else {
+      // The message was before yesterday, so just say the day.
+      return 'on ' + date.toLocaleDateString() + atTimeString;
+    }
+  },
+  handleUnpinInCurrentGroup: function() {
+    // Ensure that the chatbox scroll doesn't jerk around because its size changes.
+
+    let beforeHideScrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
+
+    $('#pinned-message-container').hide();
+
+    // Ensure that, despite the chatbox changing dimensions, we keep the same scroll position relative to the bottom.
+    $('#chatbox').scrollTop(
+      $('#chatbox').scrollTop() - ($('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight() >= $('#pinned-message-container').height() ? $('#pinned-message-container').outerHeight() : beforeHideScrollOffset)
     );
 
-    $('#chatbox img').on('load', () => {
-      stickScroll(scrollOffset);
-    });
-  });
-}
+    $('#pinned-message-label').text();
+    $('#pinned-message-text').text();
+  },
+  stickScroll: function(scrollOffset) {
+    // Stay at the bottom of the chat box with the most recent messages unless we really wanted to scroll up.
 
-function closeTagSetList() {
-  $('#tag-set-container').fadeOut(200); // Take 200ms to fade.
+    const pixelsStickScrollThreshold = 150;
 
-  unhidePopup();
-}
-
-// Is a (new) message pinned in this chat?
-function checkPinnedMessage() {
-  if (!groupIsPrivate) {
-    // We can't pin messages in private chats.
-    $.ajax({
-      type: 'POST',
-      url: '/api/GetPinnedMessage',
-      data: {
-        GroupID: activeServerID,
-      },
-      success: (data) => {
-        let JSONData = $.parseJSON(data);
-
-        let mustAdjustScroll = $('#pinned-message-container').css('display') == 'none';
-
-        if (JSONData.length > 0) {
-          pinnedMessageID = JSONData[0].MessageID;
-
-          $('#pinned-message-container').css('display', 'flex');
-
-          $('#pinned-message-label').text('Pinned message from ' + JSONData[0].AuthorDisplayName + ', sent ' + getPinnedMessageTimestamp(JSONData[0].Timestamp) + '.');
-          $('#pinned-message-text').text(JSONData[0].MessageString);
-
-          $('#chatbox li').removeClass('pinned');
-          $('#' + JSONData[0].MessageID).addClass('pinned');
-
-          if (mustAdjustScroll) $('#chatbox').scrollTop($('#chatbox').scrollTop() + $('#pinned-message-container').outerHeight());
-        } else {
-          if ($('#pinned-message-container').css('display') == 'flex') {
-            handleUnpinInCurrentGroup();
-          }
-        }
-      },
-      failure: () => {
-        console.error('Could not retreive messages. Try again later.');
-      },
-    });
+    if (scrollOffset <= pixelsStickScrollThreshold) {
+      $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent message, but only if we haven't already scrolled up to view something older (outside of a certain threshold).
+    }
+  },
+  setGroupOptionButtonVisibility: function() {
+    if (chatInstance.role > 0) {
+      $('#pinned-message-delete-button').css('display', 'block');
+      $('#group-info-admin-button-item').css('display', 'list-item');
+      $('#group-info-admin-button-item').addClass('round-bottom');
+      $('#show-invite-code').closest('li').removeClass('round-bottom');
+    } else {
+      $('#pinned-message-delete-button').css('display', 'none');
+      $('#group-info-admin-button-item').css('display', 'none');
+      $('#group-info-admin-button-item').removeClass('round-bottom');
+      $('#show-invite-code').closest('li').addClass('round-bottom');
+    }
   }
-}
-
-function unhidePopup() {
-  $('#message').focus();
-  $('body *:not(.blur-exclude)').css('-webkit-filter', '');
-}
-
-// When did we send/receive this? Let's get that information in a nice format.
-function getMessageTimestamp(timestamp) {
-  let date = new Date(eval(timestamp));
-  let today = new Date();
-
-  if (date.getDate() == today.getDate()) {
-    // The message was sent today, so we'll just say the time.
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  } else if (date.getDate() == today.getDate() - 1) {
-    // The date is yesterday.
-    return 'Yesterday';
-  } else {
-    // The message was before yesterday, so just say the day.
-    return date.toLocaleDateString();
-  }
-}
-
-// Ensure that the chatbox scroll doesn't jerk around because its size changes.
-function handleUnpinInCurrentGroup() {
-  let beforeHideScrollOffset = $('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight();
-
-  $('#pinned-message-container').hide();
-
-  // Ensure that, despite the chatbox changing dimensions, we keep the same scroll position relative to the bottom.
-  $('#chatbox').scrollTop(
-    $('#chatbox').scrollTop() - ($('#chatbox')[0].scrollHeight - $('#chatbox').scrollTop() - $('#chatbox').innerHeight() >= $('#pinned-message-container').height() ? $('#pinned-message-container').outerHeight() : beforeHideScrollOffset)
-  );
-
-  $('#pinned-message-label').text();
-  $('#pinned-message-text').text();
-}
-
-// We show more detail for this message, since it must be more important that other messages!
-function getPinnedMessageTimestamp(timestamp) {
-  // A more contextualised timestamp function for the pinned message box.
-
-  let date = new Date(eval(timestamp));
-  let today = new Date();
-
-  let atTimeString = ' at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  if (date.getDate() == today.getDate()) {
-    // The message was sent today, so we'll just say the time.
-    return 'today' + atTimeString;
-  } else if (date.getDate() == today.getDate() - 1) {
-    // The date is yesterday.
-    return 'yesterday' + atTimeString;
-  } else {
-    // The message was before yesterday, so just say the day.
-    return 'on ' + date.toLocaleDateString() + atTimeString;
-  }
-}
-
-// Stay at the bottom of the chat box with the most recent messages unless we really wanted to scroll up.
-function stickScroll(scrollOffset) {
-  const pixelsStickScrollThreshold = 150;
-
-  if (scrollOffset <= pixelsStickScrollThreshold) {
-    $('#chatbox').scrollTop($('#chatbox')[0].scrollHeight); // View the most recent message, but only if we haven't already scrolled up to view something older (outside of a certain threshold).
-  }
-}
-
-function setGroupOptionButtonVisibility() {
-  if (role > 0) {
-    $('#pinned-message-delete-button').css('display', 'block');
-    $('#group-info-admin-button-item').css('display', 'list-item');
-    $('#group-info-admin-button-item').addClass('round-bottom');
-    $('#show-invite-code').closest('li').removeClass('round-bottom');
-  } else {
-    $('#pinned-message-delete-button').css('display', 'none');
-    $('#group-info-admin-button-item').css('display', 'none');
-    $('#group-info-admin-button-item').removeClass('round-bottom');
-    $('#show-invite-code').closest('li').addClass('round-bottom');
-  }
-}
+};

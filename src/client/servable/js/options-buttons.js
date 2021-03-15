@@ -75,7 +75,7 @@ $(window).on('load', () => {
       type: 'POST',
       url: '/api/GetInviteCode',
       data: {
-        GroupID: activeServerID,
+        GroupID: chatInstance.activeServerID,
       },
       success: (data) => {
         $('#invite-code').text($.parseJSON(data)[0].InviteCode);
