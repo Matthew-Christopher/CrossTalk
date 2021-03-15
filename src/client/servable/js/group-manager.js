@@ -117,7 +117,7 @@ $(window).on('load', () => {
 
   // We have opened a new group. Let's change the styling of the buttons and load up the group data and messages.
   $(document).on('click', '.server-button', (event) => {
-    if ($(event.target).closest('.server-button').attr('id') != activeServerID && !$(event.target).hasClass('group-leave-button')) {
+    if ($(event.target).closest('.server-button').attr('id') != chatInstance.activeServerID && !$(event.target).hasClass('group-leave-button')) {
       // Only do something if we are not clicking the currently active button.
       // If the event target is the text in the button, we actually want the parent button.
       // Match by just the GroupID property.
@@ -133,7 +133,7 @@ $(window).on('load', () => {
         }
       });
 
-      setActiveServerID(JSONData[targetIndex].GroupID);
+      chatInstance.setActiveServerID(JSONData[targetIndex].GroupID);
 
       $('#server-name-display').text(JSONData[targetIndex].GroupName);
       $('#group-options-label').text(JSONData[targetIndex].GroupName);
@@ -148,7 +148,7 @@ $(window).on('load', () => {
     $.ajax({
       type: 'POST',
       url: '/api/SetTag',
-      data: $('#tag-set-form').serialize() + '&GroupID=' + activeServerID,
+      data: $('#tag-set-form').serialize() + '&GroupID=' + chatInstance.activeServerID,
       dataType: 'json',
       success: (data) => {
         $('#tag-set-form').trigger('reset'); // Clear data.
@@ -164,7 +164,7 @@ $(window).on('load', () => {
           addCustomButtonBackground(tagInfo.GroupID, tagInfo.Colour.replace('#', ''));
         }
 
-        closeTagSetList();
+        chatInstance.closeTagSetList();
       },
       error: () => {
         console.error('Something went wrong. Try again later.');
@@ -335,6 +335,6 @@ $(window).on('load', () => {
   function closeLeaveForm() {
     $('#leave-container').fadeOut(200); // Take 200ms to fade.
 
-    unhidePopup();
+    chatInstance.unhidePopup();
   }
 });

@@ -36,17 +36,17 @@ $(window).on('load', () => {
 
       // We have clicked on a private message. Change button styling and load up the messages.
       $(document).on('click', '.friend-button', (event) => {
-        if (($(event.target).closest('.friend-button').attr('id') != activeServerID || !$(event.target).closest('.friend-button').hasClass('active-button')) && !$(event.target).hasClass('unfriend-button')) {
+        if (($(event.target).closest('.friend-button').attr('id') != chatInstance.activeServerID || !$(event.target).closest('.friend-button').hasClass('active-button')) && !$(event.target).hasClass('unfriend-button')) {
           // Only do something if we are not clicking the currently active button.
           // If the event target is the text in the button, we actually want the parent button.
 
           let friendshipID = $(event.target).closest('.friend-button').attr('id');
 
-          groupIsPrivate = true;
+          chatInstance.groupIsPrivate = true;
 
-          setActiveFriendID(friendshipID);
+          chatInstance.setActiveFriendID(friendshipID);
 
-          refreshAdminContentDisplay();
+          chatInstance.refreshAdminContentDisplay();
 
           $('#server-name-display').text(
             'Private Message: ' +
@@ -105,7 +105,7 @@ $(window).on('load', () => {
   function closeUnfriendForm() {
     $('#unfriend-container').fadeOut(200); // Take 200ms to fade.
 
-    unhidePopup();
+    chatInstance.unhidePopup();
   }
 
   socket.on('removed', (friendshipID) => {

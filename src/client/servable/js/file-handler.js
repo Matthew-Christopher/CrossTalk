@@ -52,10 +52,10 @@ function HandleUpload(bindID, existingMessage, file) {
 
   // Send the server all of the information that it needs through the stream. We create a new message if the message box was blank.
   ss(socket).emit('file stream', {
-    group: activeServerID,
+    group: chatInstance.activeServerID,
     bind: bindID,
     bytes: stream,
-    message: existingMessage ? existingMessage : new Message(null, !groupIsPrivate ? activeServerID : null, groupIsPrivate ? activeServerID : null, null, null, 'A file.', Date.now(), true, null)
+    message: existingMessage ? existingMessage : new Message(null, !chatInstance.groupIsPrivate ? chatInstance.activeServerID : null, chatInstance.groupIsPrivate ? chatInstance.activeServerID : null, null, null, 'A file.', Date.now(), true, null)
   });
 
   // Start piping the file to the server. This shouldn't take more than about 5 seconds.
@@ -66,7 +66,7 @@ function HandleUpload(bindID, existingMessage, file) {
 
   monitor.on('data', (chunk) => {
     progress += chunk.length;
-    
+
     console.log('Uploaded ' + ((progress / file.size) * 100).toFixed(1) + '%');
   });
 
