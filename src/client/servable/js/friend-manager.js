@@ -23,7 +23,7 @@ $(window).on('load', () => {
 
       $('#pinned-message-container').hide(); // Don't show old pinned messages.
 
-      setFriends();
+      friendManagerInstance.setFriends();
 
       // Send the server some information because we have acted on a friend request.
       $(document).on('click', '.accept-button', function (event) {
@@ -122,128 +122,128 @@ $(window).on('load', () => {
   });
 });
 
-// Get and display our friends in the right areas.
-function setFriends() {
-  if ($('#chat-type-toggle')[0].checked) {
-    // Don't do anything unless we have toggled to friends.
-    // Call the server's API to get our friends and requests.
-    $.ajax({
-      type: 'POST',
-      url: '/api/GetMyFriends',
-      success: (data) => {
-        let friends = $.parseJSON(data);
+let friendManagerInstance = {
+  setFriends: function() {
+    // Get and display our friends in the right areas.
+    if ($('#chat-type-toggle')[0].checked) {
+      // Don't do anything unless we have toggled to friends.
+      // Call the server's API to get our friends and requests.
+      $.ajax({
+        type: 'POST',
+        url: '/api/GetMyFriends',
+        success: (data) => {
+          let friends = $.parseJSON(data);
 
-        $('#friend-requests').empty(); // Clear out any old data.
-        $('#server-selector').empty(); // Clear out any old data.
+          $('#friend-requests').empty(); // Clear out any old data.
+          $('#server-selector').empty(); // Clear out any old data.
 
-        if (friends.sentPending.length == 0 && friends.notSentPending.length == 0) {
-          $('#friend-requests').append($('<p id="no-requests-prompt" style="width: 100%; text-align: center; padding: 10px 5px;">').text("Nothing to display."));
-        } else {
-          $('#no-requests-prompt').remove();
-        }
+          if (friends.sentPending.length == 0 && friends.notSentPending.length == 0) {
+            $('#friend-requests').append($('<p id="no-requests-prompt" style="width: 100%; text-align: center; padding: 10px 5px;">').text("Nothing to display."));
+          } else {
+            $('#no-requests-prompt').remove();
+          }
 
-        if (friends.notSentPending.length > 0) {
-          $('#alert').css('display', 'inline');
-        } else {
-          $('#alert').css('display', 'none');
-        }
+          if (friends.notSentPending.length > 0) {
+            $('#alert').css('display', 'inline');
+          } else {
+            $('#alert').css('display', 'none');
+          }
 
-        if (friends.active.length > 0) {
-          $('#group-prompt-container').css('display', 'none');
-        } else {
-          $('#group-prompt-container').css('display', 'block');
-        }
+          if (friends.active.length > 0) {
+            $('#group-prompt-container').css('display', 'none');
+          } else {
+            $('#group-prompt-container').css('display', 'block');
+          }
 
-        // We can click a button to do something to these requests, so add those buttons into each element that we need to.
-        friends.notSentPending.forEach((request) => {
-          $('#friend-requests').append(
-            $("<div class='friend-request-display'>")
-              .attr('id', request.FriendshipID)
-              .append($('<p>').text(request.DisplayName))
-              .append(
-                $('<div class="friend-button-container">')
-                  .append($('<button class="accept-button">').append($('<img src="img/TickLo.png">')))
-                  .append($('<button class="reject-button">').append($('<img src="img/CrossLo.png">')))
-              )
-          );
-        });
-
-        friends.sentPending.forEach((request) => {
-          $('#friend-requests').append(
-            $('<div>')
-              .attr('id', request.FriendshipID)
-              .append($('<p class="no-buttons">').text(request.DisplayName + ' - awaiting their response'))
-          );
-        });
-
-        friends.active.forEach((item) => {
-          // Construct HTML from the parsed JSON data. Using .text() escapes any malformed or malicious strings.
-          let newGroup = $('<button class="friend-button" type="button">')
-            .attr('id', item.FriendshipID)
-            .append('<button class="unfriend-button">')
-            .append(
-              $('<span class="friend-info-container">')
-                .append($('<h1>').text(item.DisplayName))
-                .append($('<i></i>').text(item.LatestMessageString ? item.LatestMessageString : 'No messages yet.'))
+          // We can click a button to do something to these requests, so add those buttons into each element that we need to.
+          friends.notSentPending.forEach((request) => {
+            $('#friend-requests').append(
+              $("<div class='friend-request-display'>")
+                .attr('id', request.FriendshipID)
+                .append($('<p>').text(request.DisplayName))
+                .append(
+                  $('<div class="friend-button-container">')
+                    .append($('<button class="accept-button">').append($('<img src="img/TickLo.png">')))
+                    .append($('<button class="reject-button">').append($('<img src="img/CrossLo.png">')))
+                )
             );
+          });
 
-          $('#server-selector').append(newGroup);
+          friends.sentPending.forEach((request) => {
+            $('#friend-requests').append(
+              $('<div>')
+                .attr('id', request.FriendshipID)
+                .append($('<p class="no-buttons">').text(request.DisplayName + ' - awaiting their response'))
+            );
+          });
 
-          socket.emit('join private', item.FriendshipID);
-        });
-      },
-      failure: () => {
-        console.error('Could not retreive friends. Try again later.');
-      },
-    });
-  }
-}
+          friends.active.forEach((item) => {
+            // Construct HTML from the parsed JSON data. Using .text() escapes any malformed or malicious strings.
+            let newGroup = $('<button class="friend-button" type="button">')
+              .attr('id', item.FriendshipID)
+              .append('<button class="unfriend-button">')
+              .append(
+                $('<span class="friend-info-container">')
+                  .append($('<h1>').text(item.DisplayName))
+                  .append($('<i></i>').text(item.LatestMessageString ? item.LatestMessageString : 'No messages yet.'))
+              );
 
-// The server has told us that another client did something to a request we sent them. We should update its appearance on our end, too.
-function oneOfMyFriendsUpdated(data) {
-  if (data.Status == 1) {
-    $('#' + data.FriendshipID).remove().ready(() => {
-      // After current request dealt with, set visiblity of prompts.
+            $('#server-selector').append(newGroup);
 
-      setFriendPromptVisibilities();
-    });
-  } else if (data.Status == 2) {
-    $('#group-prompt-container').hide(); // Now there are friends to select.
-
-    let name = $('#' + data.FriendshipID).find('p').text();
-
-    socket.emit('join private', data.FriendshipID);
-
-    $('#server-selector').append(
-      $('<button class="friend-button" type="button">')
-        .attr('id', data.FriendshipID)
-        .append('<button class="unfriend-button">')
-        .append(
-          $('<span class="friend-info-container">')
-            .append(
-              $('<h1>').text(
-                name
-              )
-            )
-            .append($('<i>').text('No messages yet.'))
-        )
-    ).ready(() => {
+            socket.emit('join private', item.FriendshipID);
+          });
+        },
+        failure: () => {
+          console.error('Could not retreive friends. Try again later.');
+        },
+      });
+    }
+  },
+  oneOfMyFriendsUpdated: function(data) {
+    // The server has told us that another client did something to a request we sent them. We should update its appearance on our end, too.
+    if (data.Status == 1) {
       $('#' + data.FriendshipID).remove().ready(() => {
         // After current request dealt with, set visiblity of prompts.
 
         setFriendPromptVisibilities();
       });
-    });
-  }
-}
+    } else if (data.Status == 2) {
+      $('#group-prompt-container').hide(); // Now there are friends to select.
 
-function setFriendPromptVisibilities() {
-  if ($('#friend-requests *').length == 0) {
-    $('#friend-requests').append($('<p id="no-requests-prompt" style="width: 100%; text-align: center; padding: 10px 5px;">').text('Nothing to display.'));
-  }
+      let name = $('#' + data.FriendshipID).find('p').text();
 
-  if ($('#friend-requests .friend-request-display').length == 0) {
-    $('#alert').css('display', 'none');
-    $('.toggle-box p:last-child').removeClass('bounce');
+      socket.emit('join private', data.FriendshipID);
+
+      $('#server-selector').append(
+        $('<button class="friend-button" type="button">')
+          .attr('id', data.FriendshipID)
+          .append('<button class="unfriend-button">')
+          .append(
+            $('<span class="friend-info-container">')
+              .append(
+                $('<h1>').text(
+                  name
+                )
+              )
+              .append($('<i>').text('No messages yet.'))
+          )
+      ).ready(() => {
+        $('#' + data.FriendshipID).remove().ready(() => {
+          // After current request dealt with, set visiblity of prompts.
+
+          setFriendPromptVisibilities();
+        });
+      });
+    }
+  },
+  setFriendPromptVisibilities: function() {
+    if ($('#friend-requests *').length == 0) {
+      $('#friend-requests').append($('<p id="no-requests-prompt" style="width: 100%; text-align: center; padding: 10px 5px;">').text('Nothing to display.'));
+    }
+
+    if ($('#friend-requests .friend-request-display').length == 0) {
+      $('#alert').css('display', 'none');
+      $('.toggle-box p:last-child').removeClass('bounce');
+    }
   }
-}
+};
