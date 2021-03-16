@@ -583,6 +583,12 @@ app.post('/api/GetGroupData', (request, response) => {
             },
             (error, results) => {
               if (error) throw error;
+              
+              let clients = chat.getClients(
+                              results.members.map((element) => element.UserID),
+                              request.body.GroupID,
+                              request.session.UserID
+                            );
 
               response.json(
                 JSON.stringify({
@@ -590,11 +596,7 @@ app.post('/api/GetGroupData', (request, response) => {
                   members: results.members.map((obj, index) => ({
                     ...obj, // Don't affect the database return.
                     // Add the online data from the sockets
-                    Online: chat.getClients(
-                      results.members.map((element) => element.UserID),
-                      request.body.GroupID,
-                      request.session.UserID
-                    )[index], // Reuse the same index because we preserved the order of elements.
+                    Online: clients[index], // Reuse the same index because we preserved the order of elements.
                   })), // Result of the second function.
                   messages: results.messages, // Result of the third function.
                   currentServerDate: new Date().setHours(0, 0, 0, 0), // Ignore the time to compare by day.
