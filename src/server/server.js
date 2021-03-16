@@ -583,7 +583,7 @@ app.post('/api/GetGroupData', (request, response) => {
             },
             (error, results) => {
               if (error) throw error;
-              
+
               let clients = chat.getClients(
                               results.members.map((element) => element.UserID),
                               request.body.GroupID,
@@ -600,7 +600,7 @@ app.post('/api/GetGroupData', (request, response) => {
                   })), // Result of the second function.
                   messages: results.messages, // Result of the third function.
                   currentServerDate: new Date().setHours(0, 0, 0, 0), // Ignore the time to compare by day.
-                });
+                })
               );
 
               connection.release();
