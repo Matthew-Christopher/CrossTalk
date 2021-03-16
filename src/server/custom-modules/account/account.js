@@ -195,7 +195,7 @@ module.exports.LogIn = async (request, response) => {
 
           response.status(201).send('success');
         });
-      } else if (res[0] && !res[0].Verified) {
+      } else if (response[0] && !response[0].Verified) {
         response.send('unverified');
       } else {
         // Incorrect credentials.
