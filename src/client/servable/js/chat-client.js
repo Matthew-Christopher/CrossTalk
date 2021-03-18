@@ -5,6 +5,16 @@ const socket = io.connect('/');
 $(window).on('load', () => {
   document.addEventListener("visibilitychange", visiblityChanged); // Allow us to check if a notification should be displayed.
 
+  $.ajax({
+    type: 'POST',
+    url: '/api/GetMyFriends',
+    success: (data) => {
+      $.parseJSON(data).active.forEach((item) => {
+        socket.emit('join private', item.FriendshipID);
+      });
+    }
+  });
+
   function visiblityChanged() {
     chatInstance.showNotifications = (document.visibilityState == "hidden");
   }
@@ -147,7 +157,7 @@ $(window).on('load', () => {
 
   socket.on('message return', (message) => {
     if (message.AuthorID != chatInstance.id && chatInstance.showNotifications) {
-      let messageNotification = new Notification('New chat message in ' + $('#' + message.GroupID).find('h1').text() + ' from ' + message.AuthorDisplayName, {
+      let messageNotification = new Notification('New chat message' + (message.GroupID ? (' in ' + $('#' + message.GroupID).find('h1').text()) : '') + ' from ' + message.AuthorDisplayName, {
         icon: '/img/LogoShaded.png',
         body: message.MessageString,
         image: message.HasFile && message.FilePath.split('.').pop().toLowerCase() != 'pdf' ? '/user-file?fileName=' + message.FilePath : ''
@@ -160,7 +170,7 @@ $(window).on('load', () => {
     }
 
     // Only render the message if we are on its group.
-    if ((message.GroupID == chatInstance.activeServerID && !chatInstance.groupIsPrivate) || (message.FriendshipID == chatInstance.activeServerID && chatInstance.groupIsPrivate)) {
+    if ((chatInstance.activeServerID && message.GroupID == chatInstance.activeServerID && !chatInstance.groupIsPrivate) || (chatInstance.activeServerID && message.FriendshipID == chatInstance.activeServerID && chatInstance.groupIsPrivate)) {
       $('#chatbox-reminder').hide();
       $('#invite-prompt').hide();
 
