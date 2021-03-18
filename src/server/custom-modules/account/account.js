@@ -28,9 +28,9 @@ module.exports.Register = async (request, response) => {
     emailCheckRegex.exec(request.body.email) === null ||
     !request.body.password.trim() ||
     request.body.email != request.body['confirm-email'] ||
-    !(await cryptography.CompareHashes(hash, request.body['confirm-password'])
-    || request.body['display-name'].length > 70
-    || request.body.email.length > 70)
+    !(await cryptography.CompareHashes(hash, request.body['confirm-password']) ||
+      request.body['display-name'].length > 70 ||
+      request.body.email.length > 70)
   ) {
     response.send('fail');
   } else {
@@ -132,10 +132,9 @@ module.exports.ChangePassword = async (request, response) => {
         if (result[0].NumberOfMatches != 1) {
           response.status(422).sendFile(path.join(__dirname + '/../client/hidden/invalid-recovery-key.html'));
         } else {
-          async.parallel(
-            {
+          async.parallel({
               // Get the display name and email to send the user a nicely-formatted email to notify them that their password was changed.
-              nameAndEmail: function (callback) {
+              nameAndEmail: function(callback) {
                 let getDisplayNameAndEmailQuery = 'SELECT DisplayName, EmailAddress FROM User WHERE RecoveryKey = ? OR UserID = ?';
 
                 db.query(connection, getDisplayNameAndEmailQuery, [request.body.recoveryKey, request.session.UserID], (result, fields) => {
@@ -143,7 +142,7 @@ module.exports.ChangePassword = async (request, response) => {
                 });
               },
               // Change the password hash so the user can log in with their new one.
-              updatePassword: function (callback) {
+              updatePassword: function(callback) {
                 let updatePasswordQuery = 'UPDATE User SET PasswordHash = ?, RecoveryKey = NULL, RecoveryKeyExpires = NULL WHERE RecoveryKey = ? OR UserID = ?;';
 
                 db.query(connection, updatePasswordQuery, [newHash, request.body.recoveryKey, request.session.UserID], (result, fields) => {

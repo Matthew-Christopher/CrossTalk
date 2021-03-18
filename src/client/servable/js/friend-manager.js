@@ -5,13 +5,13 @@ $(window).on('load', () => {
   const chatboxReminder = 'Select or add a friend first.';
 
   // Toggle expansion of the box that has our pending requests in it.
-  $('#friend-requests-toggle').click(function (event) {
+  $('#friend-requests-toggle').click(function(event) {
     $(event.target).closest('#friend-requests-toggle').toggleClass('active-button');
     $(event.target).closest('#friend-requests-toggle').find('img').toggleClass('expanded');
     $('#server-container #friend-requests-container .slide-back').toggleClass('expanded');
   });
 
-  $('#chat-type-toggle').change(function (event) {
+  $('#chat-type-toggle').change(function(event) {
     $('#chatbox-reminder').css('display', 'block');
 
     $('#invite-prompt').hide(); // Users cannot invite to a private message and so we should hide this prompt.
@@ -28,11 +28,11 @@ $(window).on('load', () => {
       friendManagerInstance.setFriends();
 
       // Send the server some information because we have acted on a friend request.
-      $(document).on('click', '.accept-button', function (event) {
+      $(document).on('click', '.accept-button', function(event) {
         alterFriendState($(event.target).closest('.friend-request-display').attr('id'), true);
       });
 
-      $(document).on('click', '.reject-button', function (event) {
+      $(document).on('click', '.reject-button', function(event) {
         alterFriendState($(event.target).closest('.friend-request-display').attr('id'), false);
       });
 
@@ -52,17 +52,17 @@ $(window).on('load', () => {
 
           $('#server-name-display').text(
             'Private Message: ' +
-              $('#' + friendshipID)
-                .find('h1')
-                .text()
+            $('#' + friendshipID)
+            .find('h1')
+            .text()
           ); // Set the title.
           $('#group-options-label').text(
             $('#' + friendshipID)
-              .find('h1')
-              .text()
+            .find('h1')
+            .text()
           ); // Set group options title.
 
-          $('#server-selector .friend-button').each(function () {
+          $('#server-selector .friend-button').each(function() {
             $(this).removeClass('active-button');
           });
 
@@ -161,21 +161,21 @@ let friendManagerInstance = {
           friends.notSentPending.forEach((request) => {
             $('#friend-requests').append(
               $("<div class='friend-request-display'>")
-                .attr('id', request.FriendshipID)
-                .append($('<p>').text(request.DisplayName))
-                .append(
-                  $('<div class="friend-button-container">')
-                    .append($('<button class="accept-button">').append($('<img src="img/TickLo.png">')))
-                    .append($('<button class="reject-button">').append($('<img src="img/CrossLo.png">')))
-                )
+              .attr('id', request.FriendshipID)
+              .append($('<p>').text(request.DisplayName))
+              .append(
+                $('<div class="friend-button-container">')
+                .append($('<button class="accept-button">').append($('<img src="img/TickLo.png">')))
+                .append($('<button class="reject-button">').append($('<img src="img/CrossLo.png">')))
+              )
             );
           });
 
           friends.sentPending.forEach((request) => {
             $('#friend-requests').append(
               $('<div>')
-                .attr('id', request.FriendshipID)
-                .append($('<p class="no-buttons">').text(request.DisplayName + ' - awaiting their response'))
+              .attr('id', request.FriendshipID)
+              .append($('<p class="no-buttons">').text(request.DisplayName + ' - awaiting their response'))
             );
           });
 
@@ -186,8 +186,8 @@ let friendManagerInstance = {
               .append('<button class="unfriend-button">')
               .append(
                 $('<span class="friend-info-container">')
-                  .append($('<h1>').text(item.DisplayName))
-                  .append($('<i></i>').text(item.LatestMessageString ? item.LatestMessageString : 'No messages yet.'))
+                .append($('<h1>').text(item.DisplayName))
+                .append($('<i></i>').text(item.LatestMessageString ? item.LatestMessageString : 'No messages yet.'))
               );
 
             $('#server-selector').append(newGroup);
@@ -218,17 +218,17 @@ let friendManagerInstance = {
 
       $('#server-selector').append(
         $('<button class="friend-button" type="button">')
-          .attr('id', data.FriendshipID)
-          .append('<button class="unfriend-button">')
+        .attr('id', data.FriendshipID)
+        .append('<button class="unfriend-button">')
+        .append(
+          $('<span class="friend-info-container">')
           .append(
-            $('<span class="friend-info-container">')
-              .append(
-                $('<h1>').text(
-                  name
-                )
-              )
-              .append($('<i>').text('No messages yet.'))
+            $('<h1>').text(
+              name
+            )
           )
+          .append($('<i>').text('No messages yet.'))
+        )
       ).ready(() => {
         $('#' + data.FriendshipID).remove().ready(() => {
           // After current request dealt with, set visiblity of prompts.

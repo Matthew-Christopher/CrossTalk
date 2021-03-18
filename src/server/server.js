@@ -21,8 +21,7 @@ const pool = mysql.createPool({
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session); // Persist user sessions between restarts if the cookie hasn't expired.
 
-const sessionStore = new MySQLStore(
-  {
+const sessionStore = new MySQLStore({
     clearExpired: true,
     createDatabaseTable: true,
     expiration: 172800000, // Expire after 48 hours.
@@ -129,7 +128,9 @@ app.get('/logout', async (request, response) => {
 
 app.post('/JoinGroup', (request, response) => {
   if (!request.session.LoggedIn || !request.body.code || !(request.body.code.length == 12)) {
-    response.json(JSON.stringify({ status: 'invalid' }));
+    response.json(JSON.stringify({
+      status: 'invalid'
+    }));
   } else {
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
@@ -168,7 +169,9 @@ app.post('/JoinGroup', (request, response) => {
             })
           );
         } else {
-          response.json(JSON.stringify({ status: 'invalid' }));
+          response.json(JSON.stringify({
+            status: 'invalid'
+          }));
         }
       });
 
@@ -246,11 +249,9 @@ app.post('/CreateGroup', (request, response) => {
         ],
         (error, inviteCode, firstResult, secondResult) => {
           response.status(200).json(
-            JSON.stringify([
-              {
-                GroupID: firstResult.insertId,
-              },
-            ])
+            JSON.stringify([{
+              GroupID: firstResult.insertId,
+            }, ])
           );
 
           connection.release();
@@ -336,11 +337,9 @@ app.post('/api/GetMyDisplayName', (request, response, next) => {
 app.post('/api/GetMyUserID', (request, response, next) => {
   if (request.session.LoggedIn) {
     response.json(
-      JSON.stringify([
-        {
-          UserID: request.session.UserID, // Return the user's ID.
-        },
-      ])
+      JSON.stringify([{
+        UserID: request.session.UserID, // Return the user's ID.
+      }, ])
     );
   } else {
     next(); // Continue along routes, will serve a 404.
@@ -352,8 +351,7 @@ app.post('/api/GetMessages', (request, response, next) => {
     pool.getConnection(async (err, connection) => {
       if (err) throw err; // Connection failed.
 
-      async.parallel(
-        {
+      async.parallel({
           adminStatus: function DetermineRole(callback) {
             let determineRoleQuery = 'SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
 
@@ -559,8 +557,7 @@ app.post('/api/GetGroupData', (request, response) => {
 
       db.query(connection, checkMemberQuery, [request.session.UserID, request.body.GroupID], (result, fields) => {
         if (result[0].Matches == 1) {
-          async.parallel(
-            {
+          async.parallel({
               groupName: function GetGroupName(callback) {
                 let getGroupNameQuery = 'SELECT GroupName FROM `Group` WHERE GroupID = ?;';
                 db.query(connection, getGroupNameQuery, request.body.GroupID, (result, fields) => {
@@ -585,10 +582,10 @@ app.post('/api/GetGroupData', (request, response) => {
               if (error) throw error;
 
               let clients = chat.getClients(
-                              results.members.map((element) => element.UserID),
-                              request.body.GroupID,
-                              request.session.UserID
-                            );
+                results.members.map((element) => element.UserID),
+                request.body.GroupID,
+                request.session.UserID
+              );
 
               response.json(
                 JSON.stringify({
@@ -607,12 +604,16 @@ app.post('/api/GetGroupData', (request, response) => {
             }
           );
         } else {
-          response.json(JSON.stringify({ status: 'invalid' }));
+          response.json(JSON.stringify({
+            status: 'invalid'
+          }));
         }
       });
     });
   } else {
-    response.json(JSON.stringify({ status: 'invalid' }));
+    response.json(JSON.stringify({
+      status: 'invalid'
+    }));
   }
 });
 

@@ -10,31 +10,31 @@ $(window).on('load', () => {
       url: '/register-account',
       data: $('#register-form').serialize(),
       success: (data) => {
-        switch(data) {
+        switch (data) {
           case 'success':
             $('#result').text('A link has been sent to your email. Click it to verify your account.');
 
             $('#register-form')[0].reset();
             $('#register-form :focus').blur();
             $('#register-form input.non-empty').removeClass('non-empty');
-            
+
             break;
           case 'display':
             $('#result').text('An account already exists with that display name.');
             $('input[name="display-name"]').val('').focus();
-            
+
             break;
           case 'email':
             $('#result').text('An account already exists under that email address.');
             $('input[name="email"]').val('').focus();
             $('input[name="confirm-email"]').removeClass('non-empty').val('');
-            
+
             break;
           case 'password':
             $('#result').text('Password does not meet the security requirements. It needs to be at least 8 characters long and contain an upper case letter, digit and a symbol. It must also not contain more than 2 repeated characters next to each other, like in "passwooord".');
             $('input[name="password"]').val('').focus();
             $('input[name="confirm-password"]').removeClass('non-empty').val('');
-            
+
             break;
           default:
             $('#result').text('Data entered was not valid. Check that the confirmation fields match the normal fields.');
