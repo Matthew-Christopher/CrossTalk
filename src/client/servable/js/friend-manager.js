@@ -90,7 +90,7 @@ $(window).on('load', () => {
   });
 
   $('#unfriend-close-button').click(() => {
-    closeUnFriendForm();
+    friendManagerInstance.closeUnFriendForm();
   });
 
   $('#unfriend-form').submit((event) => {
@@ -101,7 +101,7 @@ $(window).on('load', () => {
       type: $('#unfriend-type-select').val()
     });
 
-    closeUnfriendForm();
+    friendManagerInstance.closeUnfriendForm();
   });
 
   function closeUnfriendForm() {
