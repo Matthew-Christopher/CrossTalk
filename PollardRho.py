@@ -13,7 +13,7 @@ def euclidgcd(a, b):
     return a
 
 
-n = 42457395283988284062221892490694383667  # Try to factor this value. n can be changed, but this value will take about 2 hours on a fast processor.
+n = 42457395283988284062221892490694383667  # Try to factor this value. n can be changed, but this value will take about 3 hours on a fast processor.
 
 print(len(bin(n)) - 2, 'bit n')
 print('About 10^' + str(round(math.log10(n))))
