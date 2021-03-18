@@ -73,9 +73,9 @@ $(window).on('load', () => {
           fileHandlerInstance.HandleUpload(data.bindTo, data.existingMessage, $('#file-input')[0].files[0]);
         });
       } else if ($('#file-input')[0].files.length > 0) {
-         // This message will just be a file.
+        // This message will just be a file.
 
-         fileHandlerInstance.HandleUpload(null, null, $('#file-input')[0].files[0]);
+        fileHandlerInstance.HandleUpload(null, null, $('#file-input')[0].files[0]);
       }
     }
   });
@@ -197,18 +197,18 @@ $(window).on('load', () => {
       // Add the message to the chatbox.
       $('#chatbox').append(
         $('<li ' + (message.AuthorID == chatInstance.id ? 'class="owned" ' : "") + 'style="position: relative;">')
-          .attr('id', message.MessageID)
-          .attr('has-file', message.HasFile)
-          .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
-          .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(chatInstance.getMessageTimestamp(message.Timestamp)))
-          .append(
-            $('<div class="message-options-container' + (!(chatInstance.role > 0 || message.AuthorID == chatInstance.id) || (chatInstance.groupIsPrivate && message.AuthorID != chatInstance.id) ? " empty" : "") + '">')
-              .append($('<button class="message-pin-button" style="display: ' + (chatInstance.role > 0 && !chatInstance.groupIsPrivate ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
-              .append($('<button class="message-bin-button" style="display: ' + ((chatInstance.role > 0 && !chatInstance.groupIsPrivate) || message.AuthorID == chatInstance.id ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
-          )
-          .append('<br />')
-          .append($('<p class="message-content" style="display: block;">').text(message.MessageString))
-          .append(message.HasFile ? fileElement : null)
+        .attr('id', message.MessageID)
+        .attr('has-file', message.HasFile)
+        .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
+        .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(chatInstance.getMessageTimestamp(message.Timestamp)))
+        .append(
+          $('<div class="message-options-container' + (!(chatInstance.role > 0 || message.AuthorID == chatInstance.id) || (chatInstance.groupIsPrivate && message.AuthorID != chatInstance.id) ? " empty" : "") + '">')
+          .append($('<button class="message-pin-button" style="display: ' + (chatInstance.role > 0 && !chatInstance.groupIsPrivate ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
+          .append($('<button class="message-bin-button" style="display: ' + ((chatInstance.role > 0 && !chatInstance.groupIsPrivate) || message.AuthorID == chatInstance.id ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
+        )
+        .append('<br />')
+        .append($('<p class="message-content" style="display: block;">').text(message.MessageString))
+        .append(message.HasFile ? fileElement : null)
       );
 
       // Wait for images to load as we may, otherwise, not have correct scroll behaviour.
@@ -308,8 +308,8 @@ $(window).on('load', () => {
 
         if (
           $('#' + data.AffectsUser)
-            .find('.friend-add-button')
-            .css('display') == 'none'
+          .find('.friend-add-button')
+          .css('display') == 'none'
         ) {
           $('#' + data.AffectsUser)
             .find('.member-options-container')
@@ -322,8 +322,8 @@ $(window).on('load', () => {
 
         if (
           $('#' + data.AffectsUser)
-            .find('.friend-add-button')
-            .css('display') == 'none'
+          .find('.friend-add-button')
+          .css('display') == 'none'
         ) {
           $('#' + data.AffectsUser)
             .find('.member-options-container')
@@ -390,8 +390,8 @@ $(window).on('load', () => {
         // May now need to set member options to empty, check for that.
         if (
           $('#' + toUser)
-            .find('.role-button')
-            .css('display') == 'none'
+          .find('.role-button')
+          .css('display') == 'none'
         ) {
           $('#' + toUser)
             .find('.member-options-container')
@@ -406,7 +406,7 @@ $(window).on('load', () => {
   });
 
   // We are swapping between groups and friends.
-  $('#chat-type-toggle').change(function (event) {
+  $('#chat-type-toggle').change(function(event) {
     chatInstance.activeServerID = '';
 
     $('#options-button').hide(); // Hide the cog button until a group or friend is selected.
@@ -493,8 +493,8 @@ $(window).on('load', () => {
             .append($('<p class="user-name" style="margin: 0;">').text(memberList[i].DisplayName))
             .append(
               $('<div class="member-options-container' + optionsContainerClass + '">')
-                .append($('<button class="role-button" style="display: ' + (chatInstance.role > memberList[i].Role && roleButtonAction ? "inline-block" : "none") + ';" value="' + roleButtonAction + '">').text("Make " + roleButtonAction))
-                .append($('<button class="friend-add-button" style="display: ' + (!memberList[i].IsAFriend ? "inline-block" : "none") + ';">').text("Add friend "))
+              .append($('<button class="role-button" style="display: ' + (chatInstance.role > memberList[i].Role && roleButtonAction ? "inline-block" : "none") + ';" value="' + roleButtonAction + '">').text("Make " + roleButtonAction))
+              .append($('<button class="friend-add-button" style="display: ' + (!memberList[i].IsAFriend ? "inline-block" : "none") + ';">').text("Add friend "))
             );
 
           switch (memberList[i].Role) {
@@ -544,7 +544,7 @@ $(window).on('load', () => {
   });
 
   // We are swapping between groups and friends.
-  $('#message-type-toggle').change(function (event) {
+  $('#message-type-toggle').change(function(event) {
     messageSearch($('#search').val().toLowerCase(), event.target.checked);
   });
 
@@ -644,7 +644,7 @@ let chatInstance = {
   refreshAdminContentDisplay: function() {
     // Alter button and content visibility to match permissions.
 
-    $('#chatbox li:not(.owned)').each(function () {
+    $('#chatbox li:not(.owned)').each(function() {
       let toAlter = $(this).find('.message-options-container button');
       if (chatInstance.role > 0) {
         toAlter.css('display', 'inline-block');
@@ -655,7 +655,7 @@ let chatInstance = {
       }
     });
 
-    $('#chatbox li.owned').each(function () {
+    $('#chatbox li.owned').each(function() {
       $(this)
         .find('.message-options-container .message-pin-button')
         .css('display', chatInstance.role > 0 ? 'inline-block' : 'none');
@@ -728,18 +728,18 @@ let chatInstance = {
 
       $('#chatbox').append(
         $('<li ' + (message.Owned ? 'class="owned" ' : '') + 'style="position: relative;">')
-          .attr('id', message.MessageID)
-          .attr('has-file', message.FileName != null)
-          .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
-          .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(chatInstance.getMessageTimestamp(message.Timestamp)))
-          .append(
-            $('<div class="message-options-container' + (!(chatInstance.role > 0 || message.Owned) ? " empty" : "") + '">')
-              .append($('<button class="message-pin-button" style="display: ' + (chatInstance.role > 0 ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
-              .append($('<button class="message-bin-button" style="display: ' + (chatInstance.role > 0 ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
-          )
-          .append('<br />')
-          .append($('<p class="message-content" style="display: block;">').text(message.MessageString))
-          .append(message.FileName ? fileElement : null)
+        .attr('id', message.MessageID)
+        .attr('has-file', message.FileName != null)
+        .append($('<i class="message-author" style="display: inline; color: #888;">').text(message.AuthorDisplayName))
+        .append($('<i class="message-timestamp" style="color: #888; float: right;">').text(chatInstance.getMessageTimestamp(message.Timestamp)))
+        .append(
+          $('<div class="message-options-container' + (!(chatInstance.role > 0 || message.Owned) ? " empty" : "") + '">')
+          .append($('<button class="message-pin-button" style="display: ' + (chatInstance.role > 0 ? "inline-block" : "none") + ';" value="Pin">').prepend($('<img src="img/PinLo.png" alt="Pin">')))
+          .append($('<button class="message-bin-button" style="display: ' + (chatInstance.role > 0 ? "inline-block" : "none") + ';" value="Bin">').prepend($('<img src="img/BinLo.png" alt="Bin">')))
+        )
+        .append('<br />')
+        .append($('<p class="message-content" style="display: block;">').text(message.MessageString))
+        .append(message.FileName ? fileElement : null)
       );
 
       $('#chatbox img').on('load', () => {
@@ -804,7 +804,10 @@ let chatInstance = {
 
     if (date.getDate() == today.getDate()) {
       // The message was sent today, so we'll just say the time.
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     } else if (date.getDate() == today.getDate() - 1) {
       // The date is yesterday.
       return 'Yesterday';
@@ -820,7 +823,10 @@ let chatInstance = {
     let date = new Date(eval(timestamp));
     let today = new Date();
 
-    let atTimeString = ' at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    let atTimeString = ' at ' + date.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
     if (date.getDate() == today.getDate()) {
       // The message was sent today, so we'll just say the time.
       return 'today' + atTimeString;

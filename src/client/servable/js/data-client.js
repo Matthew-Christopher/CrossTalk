@@ -33,16 +33,14 @@ $(window).on('load', () => {
           type: 'line',
           data: {
             labels: sevenDayActivity.map((element) => element.date), // Extract just the dates.
-            datasets: [
-              {
-                label: 'Number of Messages',
-                data: sevenDayActivity.map((element) => element.messagesToday), // Extract just the number of messages on each day.
-                backgroundColor: '#ff6384',
-                borderColor: '#ff6384',
-                borderWidth: 1,
-                fill: false,
-              },
-            ],
+            datasets: [{
+              label: 'Number of Messages',
+              data: sevenDayActivity.map((element) => element.messagesToday), // Extract just the number of messages on each day.
+              backgroundColor: '#ff6384',
+              borderColor: '#ff6384',
+              borderWidth: 1,
+              fill: false,
+            }, ],
           },
           options: {
             responsive: true,
@@ -63,34 +61,30 @@ $(window).on('load', () => {
               intersect: true,
             },
             scales: {
-              xAxes: [
-                {
-                  display: true,
-                  ticks: {
-                    fontSize: 14,
-                  },
-                  scaleLabel: {
-                    display: true,
-                    labelString: 'Date',
-                    fontSize: 14,
-                  },
+              xAxes: [{
+                display: true,
+                ticks: {
+                  fontSize: 14,
                 },
-              ],
-              yAxes: [
-                {
+                scaleLabel: {
                   display: true,
-                  ticks: {
-                    beginAtZero: true,
-                    fontSize: 14,
-                    precision: 0, // Don't show any decimal points on the y-axis.
-                  },
-                  scaleLabel: {
-                    display: true,
-                    labelString: 'Number of Messages',
-                    fontSize: 14,
-                  },
+                  labelString: 'Date',
+                  fontSize: 14,
                 },
-              ],
+              }, ],
+              yAxes: [{
+                display: true,
+                ticks: {
+                  beginAtZero: true,
+                  fontSize: 14,
+                  precision: 0, // Don't show any decimal points on the y-axis.
+                },
+                scaleLabel: {
+                  display: true,
+                  labelString: 'Number of Messages',
+                  fontSize: 14,
+                },
+              }, ],
             },
             legend: {
               display: false,

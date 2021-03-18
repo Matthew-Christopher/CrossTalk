@@ -63,10 +63,9 @@ module.exports.initialise = (instance) => {
         pool.getConnection(async (err, connection) => {
           if (err) throw err; // Connection failed.
 
-          async.parallel(
-            {
+          async.parallel({
               // Get the display name of the author to display along with the message text and timestamp.
-              getDisplayName: function (callback) {
+              getDisplayName: function(callback) {
                 let getDisplayNameQuery = 'SELECT DisplayName FROM User WHERE UserID = ?;';
 
                 db.query(connection, getDisplayNameQuery, socket.request.session.UserID, (result, fields) => {
@@ -74,7 +73,7 @@ module.exports.initialise = (instance) => {
                 });
               },
               // Add the message to the database so offline users in the group or friendship can read it later.
-              insertMessage: function (callback) {
+              insertMessage: function(callback) {
                 let insertGroupMessageQuery = 'INSERT INTO Message (GroupID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
                 let insertPrivateMessageQuery = 'INSERT INTO Message (FriendshipID, AuthorID, MessageString, Timestamp) VALUES (?, ?, ?, ?);';
 
@@ -123,7 +122,7 @@ module.exports.initialise = (instance) => {
         acceptableMimes = ['image/png', 'image/x-png', 'image/jpeg', 'application/pdf'];
 
       const fileTypeStream = await fileType.stream(stream.bytes), // A slightly adapted file stream where we can extract file extensions/MIMEs directly from the magic bytes.
-      maxFileSize = 15; // In MB.
+        maxFileSize = 15; // In MB.
 
       extension = fileTypeStream.fileType.ext.toLowerCase();
 
@@ -134,7 +133,7 @@ module.exports.initialise = (instance) => {
         // Highly unlikely to be any collisions, but we will recalculate a new name if so.
 
         // Start writing the file as the blocks come in. This is a very efficient process.
-        fileTypeStream.pipe(fs.createWriteStream(path.join(__dirname, '../../../../user_files',  name + '.' + extension)));
+        fileTypeStream.pipe(fs.createWriteStream(path.join(__dirname, '../../../../user_files', name + '.' + extension)));
 
         // A block has arrived. Add its size onto the total and terminate everything if the size goes over our limit.
         fileTypeStream.on('data', (data) => {
@@ -144,7 +143,7 @@ module.exports.initialise = (instance) => {
             fileTypeStream.end((error) => {
               if (error) throw error;
 
-              fs.unlink(path.join(__dirname, '../../../../user_files',  name + '.' + extension), (error) => {
+              fs.unlink(path.join(__dirname, '../../../../user_files', name + '.' + extension), (error) => {
                 if (error) throw error;
 
                 log.info('File and stream destroyed as it was too large.');
@@ -159,7 +158,7 @@ module.exports.initialise = (instance) => {
             pool.getConnection((err, connection) => {
               async.waterfall(
                 [
-                  function (callback) {
+                  function(callback) {
                     let referencesMessage;
 
                     if (!stream.bind) {
@@ -174,7 +173,7 @@ module.exports.initialise = (instance) => {
                       callback(null, stream.bind);
                     }
                   },
-                  function (referencesMessage, callback) {
+                  function(referencesMessage, callback) {
                     // Link the file to its message.
                     let insertMediaQuery = 'INSERT INTO Media (ReferencesMessageID, FileName) VALUES (?, ?);';
 
@@ -214,10 +213,9 @@ module.exports.initialise = (instance) => {
       pool.getConnection(async (err, connection) => {
         if (err) throw err; // Connection failed.
 
-        async.parallel(
-          {
+        async.parallel({
             // Ensure the requesting user is actually in the group and no nefarious request has been constructed.
-            checkInGroup: function (callback) {
+            checkInGroup: function(callback) {
               let checkInGroupQuery = 'SELECT COUNT(*) AS Matches, Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
 
               db.query(connection, checkInGroupQuery, [socket.request.session.UserID, requestData.GroupID], (result, fields) => {
@@ -225,7 +223,7 @@ module.exports.initialise = (instance) => {
               });
             },
             // Get the current role of the user to be edited. The requesting user can only edit roles below their current one.
-            actingOnRole: function (callback) {
+            actingOnRole: function(callback) {
               let confirmAuthorityQuery = 'SELECT Role FROM GroupMembership WHERE UserID = ? AND GroupID = ?;';
 
               db.query(connection, confirmAuthorityQuery, [requestData.UserToChange, requestData.GroupID], (result, fields) => {
@@ -289,9 +287,8 @@ module.exports.initialise = (instance) => {
 
           db.query(connection, checkValidQuery, [messageID, socket.request.session.UserID, socket.request.session.UserID, socket.request.session.UserID, messageID], (firstResult, fields) => {
             if (firstResult[0].Matches == 1) {
-              async.parallel(
-                {
-                  secondResult: function (callback) {
+              async.parallel({
+                  secondResult: function(callback) {
                     // Wipe the message from the database.
                     let deleteQuery = 'DELETE FROM Message WHERE MessageID = ?;';
 
@@ -299,7 +296,7 @@ module.exports.initialise = (instance) => {
                       callback(null, result);
                     });
                   },
-                  thirdResult: function (callback) {
+                  thirdResult: function(callback) {
                     // Get the latest message in the group at the moment.
                     let getRecentMessageQuery = 'SELECT Message.MessageString AS LatestMessageString FROM Message WHERE Message.GroupID = ? OR Message.FriendshipID = ? ORDER BY Timestamp DESC LIMIT 1;'; // Get the message that is now the most recent in the group.
 
@@ -360,7 +357,7 @@ module.exports.initialise = (instance) => {
             if (result[0].Matches == 1) {
               async.waterfall(
                 [
-                  function (callback) {
+                  function(callback) {
                     // Which group are we working in?
                     let getGroupQuery = 'SELECT GroupID FROM Message WHERE MessageID = ?;';
 
@@ -368,7 +365,7 @@ module.exports.initialise = (instance) => {
                       callback(null, result[0].GroupID);
                     });
                   },
-                  function (groupIDToUpdate, callback) {
+                  function(groupIDToUpdate, callback) {
                     // Update the group so offline user's can display the correct pinned message when they log in again.
                     let updateGroupQuery = 'UPDATE `Group` SET PinnedMessageID = ? WHERE GroupID = ?;';
 
@@ -407,7 +404,10 @@ module.exports.initialise = (instance) => {
               let updateQuery = 'UPDATE `Group` SET PinnedMessageID = NULL WHERE GroupID = ?;';
 
               db.query(connection, updateQuery, groupIDToUpdate, (result, fields) => {
-                io.sockets.in(groupIDToUpdate.toString()).emit('unpinned', { group: groupIDToUpdate, message: unpinnedMessageID });
+                io.sockets.in(groupIDToUpdate.toString()).emit('unpinned', {
+                  group: groupIDToUpdate,
+                  message: unpinnedMessageID
+                });
               });
             }
 
@@ -463,10 +463,9 @@ module.exports.initialise = (instance) => {
                     });
                   },
                   function AddUsersToFriendship(name, friendshipID, callback) {
-                    async.parallel(
-                      {
+                    async.parallel({
                         // The user that requested to add.
-                        insertRequestingUser: function (callback) {
+                        insertRequestingUser: function(callback) {
                           let insertRequestingUserQuery = 'INSERT INTO UserFriend VALUES (?, ?, True)';
 
                           db.query(connection, insertRequestingUserQuery, [friendshipID, socket.request.session.UserID], (fields, result) => {
@@ -474,7 +473,7 @@ module.exports.initialise = (instance) => {
                           });
                         },
                         // The user that the request went to.
-                        insertRequestedUser: function (callback) {
+                        insertRequestedUser: function(callback) {
                           let insertRequestedUserQuery = 'INSERT INTO UserFriend (FriendshipID, UserInFriendship) VALUES (?, ?)';
 
                           db.query(connection, insertRequestedUserQuery, [friendshipID, data.NewFriend], (fields, result) => {
@@ -667,9 +666,10 @@ module.exports.initialise = (instance) => {
       let currentIDToCheck = allUserIDs[i];
 
       result.push(
-        currentIDToCheck == requestingUserID
-          ? true // Ensure the user that is making the request is always marked as online, as they may not have the chat window open in the background.
-          : connectedClientIDs.includes(currentIDToCheck)
+        currentIDToCheck == requestingUserID ?
+        true // Ensure the user that is making the request is always marked as online, as they may not have the chat window open in the background.
+        :
+        connectedClientIDs.includes(currentIDToCheck)
       );
     }
 

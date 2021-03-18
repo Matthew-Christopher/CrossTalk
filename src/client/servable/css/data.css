@@ -23,14 +23,17 @@ button {
   width: 100%;
   z-index: 1;
   height: 100%;
-  background: #2193b0; /* fallback for old browsers */ /* Chrome 10-25, Safari 5.1-6 */
+  background: #2193b0;
+  /* fallback for old browsers */
+  /* Chrome 10-25, Safari 5.1-6 */
   background: -o-linear-gradient(left, #6dd5ed, #2193b0);
   background: -webkit-gradient(linear, left top, right top, from(#6dd5ed), to(#2193b0));
-  background: linear-gradient(to right, #6dd5ed, #2193b0); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to right, #6dd5ed, #2193b0);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
 /* Correct particles.js Canvas Positioning */
-#landing-container > canvas {
+#landing-container>canvas {
   position: absolute;
   top: 0;
   height: 100%;
@@ -52,7 +55,7 @@ button {
   box-shadow: 10px 10px 32px 0px rgba(0, 0, 0, 0.75);
 }
 
-#data-container > .title {
+#data-container>.title {
   position: relative;
   font-weight: 200;
   font-size: 2.5em;
@@ -61,7 +64,7 @@ button {
   height: 50px;
 }
 
-#data-container > .title::before {
+#data-container>.title::before {
   content: "Group Info for ";
 }
 
@@ -117,6 +120,6 @@ button {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   overflow: hidden;
 }

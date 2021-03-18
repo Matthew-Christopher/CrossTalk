@@ -10,7 +10,7 @@ $(window).on('load', () => {
 
   FetchGroups(); // Initially loaded on groups view, so get the groups.
 
-  $('#chat-type-toggle').change(function (event) {
+  $('#chat-type-toggle').change(function(event) {
     if (!event.target.checked) {
       // Groups view.
       $('#options').removeClass('friends'); // Return display of group options to default.
@@ -229,8 +229,8 @@ $(window).on('load', () => {
             .append('<button class="group-leave-button">')
             .append(
               $('<span class="server-info-container">')
-                .append($('<h1>').text(item.GroupName))
-                .append($('<i>').text(item.LatestMessageString ? item.LatestMessageString : 'No messages yet.'))
+              .append($('<h1>').text(item.GroupName))
+              .append($('<i>').text(item.LatestMessageString ? item.LatestMessageString : 'No messages yet.'))
             );
 
           socket.emit('join', item.GroupID);
@@ -273,7 +273,7 @@ $(window).on('load', () => {
   function addCustomButtonBackground(group, colour) {
     if (colour.length == 6) {
       // Add a new style element to the DOM for the button so we can show its custom background colour.
-      $('<style type="text/css"> [id="' + group + '"].active-button { background: #' +  colour + ' !important; } </style>').appendTo('head');
+      $('<style type="text/css"> [id="' + group + '"].active-button { background: #' + colour + ' !important; } </style>').appendTo('head');
 
       // Extract background components and convert to decimal. Can handle either case for a/A-f/F.
       let red = parseInt(colour.substring(0, 2), 16);

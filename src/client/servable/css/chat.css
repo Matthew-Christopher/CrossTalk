@@ -138,7 +138,6 @@ button {
   -o-transition: all 0.15s ease-in-out;
   transition: all 0.15s ease-in-out;
   background: #6dd5ed;
-
   /* Correct text display bug with scaling */
   -webkit-font-smoothing: antialiased;
   -webkit-transform: translate3d(0, 0, 0);
@@ -201,7 +200,8 @@ button {
 .popup-container .popup-close-button:after,
 #chat-container #pinned-message-container #pinned-message-delete-button:after,
 .group-leave-button:after, .unfriend-button:after {
-  content: "\00d7"; /* Cross */
+  content: "\00d7";
+  /* Cross */
 }
 
 .popup-container .popup-close-button:hover,
@@ -260,7 +260,8 @@ button {
   display: inline-block;
   width: 100%;
   max-height: 100%;
-  overflow-y: auto; /* Only show the scroll bar when necessary */
+  overflow-y: auto;
+  /* Only show the scroll bar when necessary */
 }
 
 #server-container #chat-type-toggle-container, #options #message-type-toggle-container {
@@ -301,7 +302,8 @@ button {
   cursor: pointer;
   width: 30%;
   height: 36px;
-  border-radius: 18px; /* Half the height, so the ends are semi-circular. */
+  border-radius: 18px;
+  /* Half the height, so the ends are semi-circular. */
 }
 
 /* The white circle that we will slide. */
@@ -315,20 +317,24 @@ button {
   display: block;
   height: 24px;
   width: 24px;
-  top: 6px; /* To center: half of the difference between my height and the container's. */
+  top: 6px;
+  /* To center: half of the difference between my height and the container's. */
   left: 6px;
-  border-radius: 50%; /* Half of the width and height, to get a circle. */
+  border-radius: 50%;
+  /* Half of the width and height, to get a circle. */
 }
 
-#chat-type-toggle:checked + #chat-type-toggle-slider-visual {
-  background: #62f577 !important; /* Override the unchecked colour. */
+#chat-type-toggle:checked+#chat-type-toggle-slider-visual {
+  background: #62f577 !important;
+  /* Override the unchecked colour. */
 }
 
-#chat-type-toggle:checked + #chat-type-toggle-slider-visual::after, #message-type-toggle:checked + #message-type-toggle-slider-visual::after {
-  left: calc(100% - (24px + 6px)) !important; /* 24px is our width, 6px is the desired right so that it matches the initial left. */
+#chat-type-toggle:checked+#chat-type-toggle-slider-visual::after, #message-type-toggle:checked+#message-type-toggle-slider-visual::after {
+  left: calc(100% - (24px + 6px)) !important;
+  /* 24px is our width, 6px is the desired right so that it matches the initial left. */
 }
+
 /* END SOURCE */
-
 #server-container #friend-requests-container #friend-requests-toggle {
   background: none;
   outline: none;
@@ -361,7 +367,8 @@ button {
 #server-container #friend-requests-container #friend-requests-toggle img.expanded:first-child {
   -webkit-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
-  transform: rotate(90deg); /* Rotate so the arrow is pointing down. */
+  transform: rotate(90deg);
+  /* Rotate so the arrow is pointing down. */
 }
 
 #server-container #friend-requests-container .slide-back {
@@ -429,7 +436,8 @@ button {
 }
 
 #server-container #friend-requests-container #friend-requests div button:hover {
-  background: rgba(0, 0, 0, 0.07); /* We set the hover with opacity so as not to affect the drop shadow in the "inset" effect from the slide-back. */
+  background: rgba(0, 0, 0, 0.07);
+  /* We set the hover with opacity so as not to affect the drop shadow in the "inset" effect from the slide-back. */
 }
 
 #server-container #friend-requests-container #friend-requests div button img {
@@ -593,7 +601,7 @@ button {
   padding: 10px;
   height: 51px;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 #tag-set-container #tag-set-title::before {
@@ -722,13 +730,16 @@ button {
   box-sizing: border-box;
   padding: 10px;
   padding-bottom: 0;
-  overflow-y: auto; /* Only show the scroll bar when necessary */
+  overflow-y: auto;
+  /* Only show the scroll bar when necessary */
   list-style-type: none;
-  margin-bottom: 50px; /* Prevent overflow into the message box field */
+  margin-bottom: 50px;
+  /* Prevent overflow into the message box field */
 }
 
 #chat-container #chatbox li {
-  margin-bottom: 20px; /* Space long, wrapped message lines differently to brand new messages */
+  margin-bottom: 20px;
+  /* Space long, wrapped message lines differently to brand new messages */
   padding: 5px;
   border-radius: 5px;
 }
@@ -746,7 +757,8 @@ button {
 }
 
 #chat-container #chatbox li:first-child {
-  margin-top: 10px; /* Ensure the contextual message option buttons are fully displayed and not chopped because of this being the first message. */
+  margin-top: 10px;
+  /* Ensure the contextual message option buttons are fully displayed and not chopped because of this being the first message. */
 }
 
 #chat-container #chatbox li:hover {
@@ -829,8 +841,8 @@ button {
   outline: none;
   border: none;
   -webkit-box-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
+  -ms-flex: 1;
+  flex: 1;
   height: 100%;
   padding: 5px 15px;
 }
@@ -842,7 +854,7 @@ button {
 #chat-container label[for="file-input"] {
   float: right;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   height: 50px;
   padding: 0;
   margin-right: 55px;
@@ -856,17 +868,16 @@ button {
   -webkit-transition: color 0.2s ease-in-out;
   -o-transition: color 0.2s ease-in-out;
   transition: color 0.2s ease-in-out;
-
   /* Correct text display bug with scaling */
   -webkit-font-smoothing: antialiased;
   -webkit-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
 }
 
-#chat-container label[for="file-input"] ~ #file-info {
+#chat-container label[for="file-input"]~#file-info {
   float: right;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   height: 50px;
   width: auto;
   top: 0;
@@ -875,7 +886,7 @@ button {
   font-size: 40px;
 }
 
-#chat-container label[for="file-input"] ~ #file-info > #file-chosen {
+#chat-container label[for="file-input"]~#file-info>#file-chosen {
   font-size: 15px;
   display: inline-block;
   line-height: 50px;
@@ -885,21 +896,22 @@ button {
   top: -9px;
 }
 
-#chat-container label[for="file-input"] ~ #file-info > #file-chosen span {
+#chat-container label[for="file-input"]~#file-info>#file-chosen span {
   display: inline-block;
   white-space: nowrap;
 }
 
-#chat-container label[for="file-input"] ~ #file-info > #file-chosen span.name {
+#chat-container label[for="file-input"]~#file-info>#file-chosen span.name {
   margin-right: -5px;
-  max-width: 16vw; /* 20% of the message box width. */
+  max-width: 16vw;
+  /* 20% of the message box width. */
   overflow: hidden;
   vertical-align: bottom;
   -o-text-overflow: ellipsis;
-     text-overflow: ellipsis;
+  text-overflow: ellipsis;
 }
 
-#chat-container label[for="file-input"] ~ #file-info > #remove-file-button {
+#chat-container label[for="file-input"]~#file-info>#remove-file-button {
   height: 100%;
   display: none;
   background: none;
@@ -909,11 +921,11 @@ button {
   color: #777;
 }
 
-#chat-container label[for="file-input"] ~ #file-info > #remove-file-button:hover {
+#chat-container label[for="file-input"]~#file-info>#remove-file-button:hover {
   color: #333;
 }
 
-#chat-container label[for="file-input"] ~ #file-info > #remove-file-button::before {
+#chat-container label[for="file-input"]~#file-info>#remove-file-button::before {
   content: "\00d7";
 }
 
@@ -923,7 +935,7 @@ button {
   transform: translate3d(0, 0, 0) scale(1.03);
 }
 
-#chat-container #file-input.has-file ~ label[for="file-input"] {
+#chat-container #file-input.has-file~label[for="file-input"] {
   color: #8ffd9f !important;
 }
 
@@ -933,7 +945,8 @@ button {
   top: 50%;
   -webkit-transform: translate(-50%, calc(-50% - 25px));
   -ms-transform: translate(-50%, calc(-50% - 25px));
-  transform: translate(-50%, calc(-50% - 25px)); /* Manually adjust to fit in the center of the visible window, some of which is blocked by the message input field. */
+  transform: translate(-50%, calc(-50% - 25px));
+  /* Manually adjust to fit in the center of the visible window, some of which is blocked by the message input field. */
   font-size: 2.3em;
   font-weight: lighter;
   text-align: center;
@@ -994,8 +1007,8 @@ button {
 }
 
 /* SOURCE: https://codepen.io/Takumari85/pen/RaYwpJ [Accessed 27/10/2020] */
-.effect-20 ~ .focus-border:before,
-.effect-20 ~ .focus-border:after {
+.effect-20~.focus-border:before,
+.effect-20~.focus-border:after {
   content: "";
   position: absolute;
   top: 0;
@@ -1007,14 +1020,16 @@ button {
   -o-transition: 0.3s;
   transition: 0.3s;
 }
-.effect-20 ~ .focus-border:after {
+
+.effect-20~.focus-border:after {
   top: auto;
   bottom: 0;
   left: auto;
   right: 0;
 }
-.effect-20 ~ .focus-border i:before,
-.effect-20 ~ .focus-border i:after {
+
+.effect-20~.focus-border i:before,
+.effect-20~.focus-border i:after {
   content: "";
   position: absolute;
   top: 0;
@@ -1026,31 +1041,35 @@ button {
   -o-transition: 0.4s;
   transition: 0.4s;
 }
-.effect-20 ~ .focus-border i:after {
+
+.effect-20~.focus-border i:after {
   left: auto;
   right: 0;
   top: auto;
   bottom: 0;
 }
-.effect-20:focus ~ .focus-border:before,
-.effect-20:focus ~ .focus-border:after,
-.non-empty.effect-20 ~ .focus-border:before,
-.non-empty.effect-20 ~ .focus-border:after {
+
+.effect-20:focus~.focus-border:before,
+.effect-20:focus~.focus-border:after,
+.non-empty.effect-20~.focus-border:before,
+.non-empty.effect-20~.focus-border:after {
   width: 100%;
   -webkit-transition: 0.3s;
   -o-transition: 0.3s;
   transition: 0.3s;
 }
-.effect-20:focus ~ .focus-border i:before,
-.effect-20:focus ~ .focus-border i:after,
-.non-empty.effect-20 ~ .focus-border i:before,
-.non-empty.effect-20 ~ .focus-border i:after {
+
+.effect-20:focus~.focus-border i:before,
+.effect-20:focus~.focus-border i:after,
+.non-empty.effect-20~.focus-border i:before,
+.non-empty.effect-20~.focus-border i:after {
   height: 100%;
   -webkit-transition: 0.4s;
   -o-transition: 0.4s;
   transition: 0.4s;
 }
-.effect-20 ~ label {
+
+.effect-20~label {
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
@@ -1066,8 +1085,9 @@ button {
   z-index: -1;
   letter-spacing: 0.5px;
 }
-.effect-20:focus ~ label,
-.non-empty.effect-20 ~ label {
+
+.effect-20:focus~label,
+.non-empty.effect-20~label {
   top: -18px;
   left: 0;
   font-size: 12px;
@@ -1076,15 +1096,16 @@ button {
   -o-transition: 0.3s;
   transition: 0.3s;
 }
-/* END SOURCE */
 
+/* END SOURCE */
 #chat-container #message :focus {
   -webkit-box-shadow: 0 0 5px rgba(81, 203, 238, 1);
   box-shadow: 0 0 5px rgba(81, 203, 238, 1);
 }
 
 .requires-group-selection {
-  display: none; /* These elements will only be shown when the user has selected a group. */
+  display: none;
+  /* These elements will only be shown when the user has selected a group. */
 }
 
 #info-container {
@@ -1097,10 +1118,13 @@ button {
   left: 15%;
   border-left: solid 1px black;
   border-bottom: solid 1px black;
-  background: #2193b0; /* fallback for old browsers */ /* Chrome 10-25, Safari 5.1-6 */
+  background: #2193b0;
+  /* fallback for old browsers */
+  /* Chrome 10-25, Safari 5.1-6 */
   background: -o-linear-gradient(left, #6dd5ed, #2193b0);
   background: -webkit-gradient(linear, left top, right top, from(#6dd5ed), to(#2193b0));
-  background: linear-gradient(to right, #6dd5ed, #2193b0); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to right, #6dd5ed, #2193b0);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
 /* Correct particles.js Canvas Positioning */
@@ -1167,7 +1191,8 @@ button {
 #info-container #info-buttons-container * {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  z-index: 1; /* Ensure cursor displays correctly */
+  z-index: 1;
+  /* Ensure cursor displays correctly */
 }
 
 #info-container #info-buttons-container button {
@@ -1223,7 +1248,8 @@ button {
   border-radius: 10px;
   margin-right: 10px;
   z-index: 2;
-  visibility: hidden; /* Hidden by default and visible when the user clicks on the corresponding button. */
+  visibility: hidden;
+  /* Hidden by default and visible when the user clicks on the corresponding button. */
 }
 
 .trim-inputted {
@@ -1236,7 +1262,7 @@ button {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   overflow: hidden;
 }
 
@@ -1257,7 +1283,8 @@ button {
 
 .options-box .arrow-up {
   position: absolute;
-  top: -14px; /* Such as to position the arrow atop the box with no gap. */
+  top: -14px;
+  /* Such as to position the arrow atop the box with no gap. */
   width: 0;
   border-width: 0 8px 14px 8px;
   border-style: solid;
@@ -1487,8 +1514,8 @@ button {
   animation-iteration-count: infinite;
   font-weight: bold;
   -webkit-transform: none;
-      -ms-transform: none;
-          transform: none;
+  -ms-transform: none;
+  transform: none;
 }
 
 @-webkit-keyframes bounce {
@@ -1496,18 +1523,24 @@ button {
     -webkit-transform: translateY(0);
     transform: translateY(0);
   }
+
   30% {
     -webkit-transform: translateY(-8px);
     transform: translateY(-8px);
-  } /* Negative, so moving upwards. */
+  }
+
+  /* Negative, so moving upwards. */
   50% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
   }
+
   100% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
-  } /* Finish early and have some pause at end. */
+  }
+
+  /* Finish early and have some pause at end. */
 }
 
 @keyframes bounce {
@@ -1515,16 +1548,22 @@ button {
     -webkit-transform: translateY(0);
     transform: translateY(0);
   }
+
   30% {
     -webkit-transform: translateY(-8px);
     transform: translateY(-8px);
-  } /* Negative, so moving upwards. */
+  }
+
+  /* Negative, so moving upwards. */
   50% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
   }
+
   100% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
-  } /* Finish early and have some pause at the end. */
+  }
+
+  /* Finish early and have some pause at the end. */
 }
