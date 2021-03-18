@@ -5,7 +5,7 @@ const socket = io.connect('/');
 $(window).on('load', () => {
   document.addEventListener("visibilitychange", visiblityChanged); // Allow us to check if a notification should be displayed.
 
-  $.ajax({
+  $.ajax({ // Allow notification receipt by joining our friend groups before we load them to the screen.
     type: 'POST',
     url: '/api/GetMyFriends',
     success: (data) => {
