@@ -82,7 +82,7 @@ $(window).on('load', () => {
 
     e.preventDefault();
 
-    $('#group-create-button').css('background', '#8ffd9f');
+    $('#group-create-button').css('background', '#8ffd9f').prop('disabled', true);
 
     $.ajax({
       type: 'POST',
@@ -109,7 +109,7 @@ $(window).on('load', () => {
         $('#group-create-form input[name="group"]').val(''); // Clear the name input.
         $('#group-create-form input[name="group"]').removeClass('non-empty'); // Clear the name input.
 
-        $('#group-create-button').css('background', '#6dd5ed');
+        $('#group-create-button').css('background', '#6dd5ed').prop('disabled', false);;
       },
       error: () => {
         console.error('Something went wrong. Try again later.');
@@ -156,7 +156,7 @@ $(window).on('load', () => {
         $('#tag-set-form').trigger('reset'); // Clear data.
         $('#tag-set-form input[name="tag"]').removeClass('non-empty');
 
-        tagInfo = $.parseJSON(data);
+        let tagInfo = $.parseJSON(data);
 
         if (tagInfo.Tag) {
           $('#' + tagInfo.GroupID).find('p.tag-text').text(tagInfo.Tag); // Update the text label.
@@ -301,7 +301,7 @@ $(window).on('load', () => {
 
   $(document).on('click', '.group-leave-button', (event) => {
     // Tell the user which group they might be about to leave.
-    $('#leave-name').text($(event.target).closest('.server-button').find('h1').text());
+    $('#leave-name').text('You are about to leave the group: ' + $(event.target).closest('.server-button').find('h1').text());
 
     $('#leave-group-button').attr('group', $(event.target).closest('.server-button').attr('id'));
 
