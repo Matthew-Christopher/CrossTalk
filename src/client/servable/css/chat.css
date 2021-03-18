@@ -63,14 +63,6 @@ button {
   width: 100%;
 }
 
-#leave-container #leave-name::before {
-  content: 'Do you definitely want to leave the group ' open-quote;
-}
-
-#leave-container #leave-name::after {
-  content: close-quote '?';
-}
-
 #unfriend-container #unfriend-info-container {
   width: 100%;
 }
@@ -1224,6 +1216,7 @@ button {
 .options-box {
   border: 1px solid black;
   position: absolute;
+  max-width: 30%;
   display: inline-block;
   margin-top: 63px;
   right: 0;
@@ -1231,6 +1224,34 @@ button {
   margin-right: 10px;
   z-index: 2;
   visibility: hidden; /* Hidden by default and visible when the user clicks on the corresponding button. */
+}
+
+.trim-inputted {
+  max-width: 100%;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: initial;
+  word-break: break-all;
+  -webkit-line-clamp: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.options-box #profile-options-name-label, .options-box #group-options-label {
+  text-align: center;
+}
+
+.options-box #group-options-label {
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: initial;
+  word-break: break-all;
+  -webkit-line-clamp: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .options-box .arrow-up {

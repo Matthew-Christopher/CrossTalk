@@ -106,3 +106,16 @@ button {
   width: 80%;
   height: calc(100vh - 510px);
 }
+
+.trim-inputted {
+  max-width: 100%;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: initial;
+  word-break: break-all;
+  -webkit-line-clamp: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  box-sizing: border-box;
+  overflow: hidden;
+}
