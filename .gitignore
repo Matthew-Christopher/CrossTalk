@@ -7,6 +7,21 @@ yarn-error.log*
 lerna-debug.log*
 
 user_files
+Documentation/Images/AdminAccountRecord1.png
+Documentation/Images/AdminAccountRecord2.png
+Documentation/Images/chat.html.demo.png
+Documentation/Images/chat.html.initial.png
+Documentation/Images/chat.html.png
+Documentation/Images/DatabaseLimits.png
+Documentation/Images/envfile.png
+Documentation/Images/ImageRequiresFullscreen.png
+Documentation/Images/MemberList.png
+Documentation/Images/PasswordChangeNotification.png
+Documentation/Images/Recovery.png
+Documentation/Images/TeamsPrimaryInterface.jpg
+Documentation/Images/Unfriend.png
+Documentation/Images/UploadExpansionExample.png
+Documentation/Images/Verification.png
 Documentation/Cover\ Pages
 Documentation/*.pdf
 Documentation/*.tex
