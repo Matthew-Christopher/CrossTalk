@@ -54,7 +54,7 @@ module.exports.Register = async (request, response) => {
           response.send('display');
         } else if (result[0].EmailDuplicates > 0) {
           response.send('email');
-        } else if (!validPassword(request.body.password)) {
+        } else if (!isValidPassword(request.body.password)) {
           response.send('password');
         } else {
           // The registration can proceed because the data are all valid.
@@ -115,7 +115,7 @@ module.exports.ChangePassword = async (request, response) => {
         outcome: 'mismatch', // The password and confirmation field did not match.
       })
     );
-  } else if (!request.body.formData.newPassword.trim() || !validPassword(request.body.formData.newPassword)) {
+  } else if (!request.body.formData.newPassword.trim() || !isValidPassword(request.body.formData.newPassword)) {
     response.json(
       JSON.stringify({
         outcome: 'password', // The password isn't valid.
@@ -214,7 +214,7 @@ module.exports.LogOut = async (request, response) => {
   });
 };
 
-function validPassword(password) {
+function isValidPassword(password) {
   let lengthCondition = password.length >= 8;
   let capsCondition = password.match(/^(?=.*[A-Z])/g); // Contains an upper case character.
   let lowerCondition = password.match(/^(?=.*[a-z])/g); // Contains a lower case character.
